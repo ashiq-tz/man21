@@ -427,6 +427,8 @@ button {
   .back-button:focus {
     background-color: #333;
   }
+
+  
   
   /* Responsive Styles */
   @media (max-width: 1024px) {

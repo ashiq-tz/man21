@@ -13,7 +13,7 @@ const loadHomePage = async (req,res) =>{
 
 const pageNotFound = async (req,res) =>{
     try {
-        res.render("page-404")
+        res.render("home")
     } catch (error) {
         res.redirect("/pageNotFound")
     }
