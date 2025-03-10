@@ -138,8 +138,9 @@ button {
   padding: 30px 115px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-start; /* Align form to the left */
+  
 }
 
 .signup-form-container h1 {
@@ -147,6 +148,7 @@ button {
   font-size: 40px;
   font-weight: 700;
   margin-bottom: 0px;
+  margin-top: -50px;
 }
 
 .subtitle {
@@ -196,7 +198,7 @@ button {
 .google-signin {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 .google-button {
@@ -220,26 +222,6 @@ button {
 .google-button img {
   width: 20px;
   margin-right: 10px;
-}
-
-
-.terms-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0;
-  width: 100%;
-}
-
-.terms-checkbox input {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.terms-checkbox label {
-  color: #828282;
-  font-size: 16px;
 }
 
 .register-button {

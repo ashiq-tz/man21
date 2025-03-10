@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MAN 21 - Sign Up</title>
     <meta name="description" content="Create your account at MAN 21" />
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/styles.css">
 
     <link
@@ -17,6 +19,42 @@
     />
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+
+    <style>
+      .dropdown{
+        position: relative;
+        display: inline-block;
+      }
+      .dropdown-content{
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        right: 0;
+      }
+      .dropdown-content a{
+        text-decoration: none;
+        color: black;
+        padding: 12px 16px;
+        display: block;
+        width: 100%;
+      }
+      .dropdown-content a:hover{
+        background-color: #e7e6e6;
+      }
+      .dropdown:hover .dropdown-content{
+        display: block;
+      }
+      .header{
+        position: relative;
+        z-index: 500;
+
+      }
+
+    </style>
+
   </head>
 
   <body>
@@ -39,7 +77,22 @@
           <a href="/" class="active">Home</a>
           <a href="/about">About</a>
           <a href="/contact">Contact Us</a>
-          <a href="/blog">Blog</a>
+          <!-- <a href="/blog">Blog</a> -->
+          <% if (typeof user !== 'undefined' && user) { %>
+            <div class="dropdown">
+              <a href="#" class="sign-in-link"><%= user.name %></a>
+              <div class="dropdown-content">
+                <a href="/userProfile">Profile</a>
+                <a href="/logout">Logout</a>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+          <% } %>
+          
+          
+
         </nav>
         <div class="action-buttons">
           <button aria-label="Favorites">

@@ -12,7 +12,7 @@ const userSchema = new Schema({
         unique : true
     },
     phone: {
-        type : Number,
+        type : String,
         required : false,
         unique : false,
         sparse : true,
@@ -20,7 +20,8 @@ const userSchema = new Schema({
     },
     googleId: {
         type : String,
-        unique : true
+        unique : true,
+        // sparse: true
     },
     password: {
         type : String,

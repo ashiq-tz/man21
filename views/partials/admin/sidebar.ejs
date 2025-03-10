@@ -1,0 +1,97 @@
+<div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="menu-label">MENU</span>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+
+            <li class="<%= activePage === 'dashboard' ? 'active' : '' %>">
+                <a href="/admin">
+                  <i class="fa-solid fa-table-columns"></i>
+                  <span>Dashboard</span>
+                </a>
+              </li>
+              
+              <li class="<%= activePage === 'users' ? 'active' : '' %>">
+                <a href="/admin/users">
+                  <i class="fa-solid fa-users"></i>
+                  <span>Users</span>
+                </a>
+              </li>
+              
+
+              <li class="<%= activePage === 'products' ? 'active' : '' %>">
+                <a href="/admin/products">
+                  <i class="fa-solid fa-box"></i>
+                  <span>Products</span>
+               </a>
+             </li>
+
+
+            <li class="<%= activePage === 'orders' ? 'active' : '' %>">
+                <a href="/admin/orders">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span>Orders</span>
+                </a>
+            </li>
+
+          <li class="<%= activePage === 'coupon' ? 'active' : '' %>">
+            <a href="/admin/coupon">
+              <i class="fa-solid fa-ticket"></i>
+              <span>Coupon</span>
+            </a>
+          </li>
+          
+          <li>
+            <a href="#">
+              <i class="fa-solid fa-image"></i>
+              <span>Banner</span>
+            </a>
+          </li>
+
+          <li class="<%= activePage === 'category' ? 'active' : '' %>">
+            <a href="/admin/category">
+              <i class="fa-solid fa-tags"></i>
+              <span>Category</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="fa-solid fa-gift"></i>
+              <span>Offers</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="sidebar-footer">
+        <span class="others-label">OTHERS</span>
+        <ul>
+          <li>
+            <a href="#">
+              <i class="fa-solid fa-gear"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <i class="fa-solid fa-circle-question"></i>
+              <span>Help</span>
+            </a>
+          </li>
+          <li>
+            <a href="/admin/logout">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Toggle Button (visible on mobile) -->
+    <button id="toggle-sidebar" class="toggle-sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>

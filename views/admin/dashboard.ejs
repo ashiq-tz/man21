@@ -1,0 +1,282 @@
+<%-include("../../views/partials/admin/header")%>
+<%-include("../../views/partials/admin/sidebar", { activePage: 'dashboard' } )%>
+
+        <!-- Main Content -->
+        <main class="main-content">
+          <div class="dashboard-header">
+            <h1>Dashboard</h1>
+            <div class="export-button">
+              <i class="fa-solid fa-download"></i>
+              <span>Export</span>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-title">Today's Sales</div>
+                <div class="stat-value">₹100,999</div>
+                <div class="stat-description">We have sold 123 items</div>
+              </div>
+              <div class="stat-circle blue"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-title">Today's Revenue</div>
+                <div class="stat-value">₹30,000</div>
+                <div class="stat-description">Profit made so far today</div>
+              </div>
+              <div class="stat-circle green"></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-content">
+                <div class="stat-title">Users Count</div>
+                <div class="stat-value">20390</div>
+                <div class="stat-description">Total users signed up</div>
+              </div>
+              <div class="stat-circle orange"></div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <!-- Revenue Chart -->
+            <div class="chart-card revenue-chart">
+              <div class="chart-header">
+                <h2>Total Revenue</h2>
+                <div class="chart-legend">
+                  <div class="legend-item">
+                    <div class="legend-color profit"></div>
+                    <span>Profit</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-color loss"></div>
+                    <span>Loss</span>
+                  </div>
+                </div>
+              </div>
+              <div class="revenue-total">
+                <div class="amount">₹50,23780</div>
+                <div class="trend up">
+                  <i class="fa-solid fa-arrow-up"></i>
+                  <span>5% than last month</span>
+                </div>
+              </div>
+              <div class="chart-container">
+                <div class="chart-y-axis">
+                  <div>100k</div>
+                  <div>80k</div>
+                  <div>60k</div>
+                  <div>50k</div>
+                  <div>20k</div>
+                  <div>0</div>
+                </div>
+                <div class="bar-chart">
+                  <div class="month-bars">
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Jan</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Feb</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Mar</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Apr</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">May</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Jun</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Jul</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Aug</div>
+                    </div>
+                    <div class="month-group">
+                      <div class="bar-group">
+                        <div class="bar profit"></div>
+                        <div class="bar loss"></div>
+                      </div>
+                      <div class="month-label">Sep</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Most Sold Items -->
+            <div class="chart-card sold-items">
+              <h2>Most Sold Items</h2>
+              <div class="item-list">
+                <div class="sold-item">
+                  <div class="item-header">
+                    <span class="item-name">Converse</span>
+                    <span class="item-percentage">70%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress" style="width: 70%"></div>
+                  </div>
+                </div>
+                <div class="sold-item">
+                  <div class="item-header">
+                    <span class="item-name">Clogs</span>
+                    <span class="item-percentage">40%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress" style="width: 40%"></div>
+                  </div>
+                </div>
+                <div class="sold-item">
+                  <div class="item-header">
+                    <span class="item-name">Sneakers</span>
+                    <span class="item-percentage">60%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress" style="width: 60%"></div>
+                  </div>
+                </div>
+                <div class="sold-item">
+                  <div class="item-header">
+                    <span class="item-name">NB 1906</span>
+                    <span class="item-percentage">80%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress" style="width: 80%"></div>
+                  </div>
+                </div>
+                <div class="sold-item">
+                  <div class="item-header">
+                    <span class="item-name">Other</span>
+                    <span class="item-percentage">20%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress" style="width: 20%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products Table -->
+          <div class="products-table-card">
+            <div class="table-header">
+              <div class="table-title">
+                <h2>Selling Products</h2>
+              </div>
+              <div class="table-actions">
+                <div class="date-filter">
+                  <span>8 Jul - 24 Jul</span>
+                  <i class="fa-solid fa-calendar"></i>
+                </div>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table class="products-table">
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Sold</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="product-cell">
+                      <img
+                        src="https://cdn.builder.io/api/v1/image/assets/0593f66d07c74a84bf13f5be0bead038/0269c764785505275c2bf9f5a64a372702ec6c2b4b95cc772556c6e262ba41ad?placeholderIfAbsent=true"
+                        alt="Converse"
+                      />
+                      <span>Converse</span>
+                    </td>
+                    <td>₹2333</td>
+                    <td>53 pcs</td>
+                    <td class="status-cell">
+                      <span class="status in-stock">
+                        <i class="status-dot"></i>
+                        In Stock
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="product-cell">
+                      <img
+                        src="https://cdn.builder.io/api/v1/image/assets/0593f66d07c74a84bf13f5be0bead038/ce20a601c72852fac460daf2e7ff459630819681e8e7fd88a867259540f3d775?placeholderIfAbsent=true"
+                        alt="NB 1906"
+                      />
+                      <span>NB 1906</span>
+                    </td>
+                    <td>₹2333</td>
+                    <td>53 pcs</td>
+                    <td class="status-cell">
+                      <span class="status out-of-stock">
+                        <i class="status-dot"></i>
+                        Out of Stock
+                      </span>  
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="product-cell">
+                      <img
+                        src="https://cdn.builder.io/api/v1/image/assets/0593f66d07c74a84bf13f5be0bead038/ef65591e5ca45c100982437798957538719fe3afeb2d927a580e0a051c528496?placeholderIfAbsent=true"
+                        alt="Adidas neo"
+                      />
+                      <span>Adidas neo</span>
+                    </td>
+                    <td>₹2322</td>
+                    <td>53 pcs</td>
+                    <td class="status-cell">
+                      <span class="status in-stock">
+                        <i class="status-dot"></i>
+                        In Stock
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      
+        <%-include("../../views/partials/admin/footer")%>
+    
+
+   

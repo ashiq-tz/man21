@@ -1,0 +1,64 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const sidebar = document.getElementById("sidebar");
+      const toggleButton = document.getElementById("toggle-sidebar");
+
+      // Toggle sidebar open/close on mobile
+      toggleButton.addEventListener("click", function () {
+        sidebar.classList.toggle("open");
+        toggleButton.innerHTML = sidebar.classList.contains("open")
+          ? '<i class="fa-solid fa-times"></i>'
+          : '<i class="fa-solid fa-bars"></i>';
+      });
+
+      // Close sidebar when a menu item is clicked (mobile)
+      const sidebarItems = document.querySelectorAll(
+        ".sidebar-nav a, .sidebar-footer a"
+      );
+      sidebarItems.forEach(item => {
+
+        if (item.getAttribute("href") === "/admin/logout") return;
+
+        item.addEventListener("click", function(e) {
+          
+          document.querySelectorAll(".sidebar-nav li").forEach(li => {
+            li.classList.remove("active");
+          });
+          this.parentElement.classList.add("active");
+          if (window.innerWidth <= 992) {
+            sidebar.classList.remove("open");
+            toggleButton.innerHTML = '<i class="fa-solid fa-bars"></i>';
+          }
+        });
+      });
+
+      // Sample chart data & update chart bars
+      const chartData = [
+        { month: "Jan", profit: 90, loss: 60 },
+        { month: "Feb", profit: 70, loss: 50 },
+        { month: "Mar", profit: 75, loss: 25 },
+        { month: "Apr", profit: 60, loss: 45 },
+        { month: "May", profit: 70, loss: 55 },
+        { month: "Jun", profit: 50, loss: 25 },
+        { month: "Jul", profit: 65, loss: 30 },
+        { month: "Aug", profit: 80, loss: 55 },
+        { month: "Sep", profit: 75, loss: 50 }
+      ];
+
+      function updateChart() {
+        const barGroups = document.querySelectorAll(".bar-group");
+        barGroups.forEach((group, index) => {
+          if (chartData[index]) {
+            const profitBar = group.querySelector(".bar.profit");
+            const lossBar = group.querySelector(".bar.loss");
+            profitBar.style.height = chartData[index].profit + "%";
+            lossBar.style.height = chartData[index].loss + "%";
+          }
+        });
+      }
+      updateChart();
+    });
+  </script>
+</div>
+</body>
+</html>
