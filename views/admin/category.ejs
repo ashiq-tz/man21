@@ -253,15 +253,21 @@
                     <td class="text-center"><%= index + 1 %></td>
                     <td><%= category.name %></td>
                     <td><%= category.description %></td>
-                    <td><%= category.offerPrice ? category.offerPrice : 'N/A' %></td>
+
+                    <td><%= category.categoryOffer && category.categoryOffer > 0 ? category.categoryOffer + "%" : "0%" %></td>
+             
                     <td>
                       <div class="d-flex flex-column">
-                        <button class="btn btn-info" style="width: 100px" role="button">
-                          <a href="/admin/category/<%= category._id %>/addOffer">Add Offer</a>
+                        <% if (!category.categoryOffer || category.categoryOffer === 0) { %>  
+                        <button class="btn btn-info" style="width: 100px" onclick="addOffer('<%= category._id %>')">
+                          Add Offer
                         </button>
-                        <button class="btn btn-info" style="width: 100px" role="button">
-                          <a href="/admin/category/<%= category._id %>/removeOffer">Remove</a>
+
+                        <%}else{%>
+                        <button class="btn btn-info" style="width: 100px" onclick="removeOffer('<%= category._id %>')">
+                          Remove
                         </button>
+                        <%}%>
                       </div>
                     </td>
                     <td>
@@ -413,30 +419,91 @@
       });
     }
 
-                        // // Client-side validation for add category form
-                        // $("#addCategoryForm").submit(function (event) {
-                        //   let name = $("#product_name").val().trim();
-                        //   let description = $("#descriptionId").val().trim();
-                        //   let valid = true;
+     async function addOffer(categoryId){
+      const {value:amount} = await Swal.fire({
+        title:"Offer in Percentage",
+        input:"number",
+        inputLabel:"Percentage",
+        inputPlaceholder:"%",
+      });
 
-                        //   if (name === "") {
-                        //     $("#name-error").text("Category name is required.");
-                        //     valid = false;
-                        //   } else {
-                        //     $("#name-error").text("");
-                        //   }
+      if(amount){
 
-                        //   if (description === "") {
-                        //     $("#description-error").text("Description is required.");
-                        //     valid = false;
-                        //   } else {
-                        //     $("#description-error").text("");
-                        //   }
+        try {
+          const response = await fetch("/admin/addCategoryOffer" , {
+            method:"POST",
+            headers:{
+              'content-type':"application/json",
+            },
+            body:JSON.stringify({
+              percentage:amount,
+              categoryId:categoryId,
+            }),
+          });
 
-                        //   if (!valid) {
-                        //     event.preventDefault();
-                        //   }
-                        // });
+          const data = await response.json();
+          if(response.ok && data.status === true){
+            Swal.fire(
+              "Offer added",
+              "Offer has been Added",
+              "Success"
+            ).then(()=>{
+              location.reload();
+            })
+          }else{
+            swa.fire("Failed", data.message || "Adding Offer Failed","error");
+          }
+
+        } catch (error) {
+          Swal.fire(
+            "Error",
+            "Error Occured while adding Offer",
+            "error"
+          );
+          console.log("Error adding offer",error);          
+        }
+
+      }
+
+     }
+    
+     
+    async function removeOffer(categoryId){
+      try {
+        const response = await fetch("/admin/removeCategoryOffer" , {
+          method:"POST",
+          headers:{
+            'content-type': "application/json"
+          },
+          body:JSON.stringify({
+            categoryId:categoryId,
+          })
+        })
+
+        const data = await response.json();
+
+        if(response.ok && data.status === true){
+          Swal.fire(
+            "Offer Removed",
+            "Offer has been removed",
+            "success"
+          ).then(()=>{
+            location.reload();
+          });
+
+        }else{
+          Swal.fire("Failed", data.message || "Removing Offer Failed", "error");
+        }
+
+      } catch (error) {
+        Swal.fire(
+          "Error",
+          "error occured while removing the offer",
+          "error"
+        );
+        console.error("Error in removing offer",error);
+      }
+    } 
 
 
 
