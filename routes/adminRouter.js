@@ -40,5 +40,8 @@ router.post("/editCategory/:id",adminAuth,categoryController.editCategory)
 //Brand management
 router.get("/brands",adminAuth,brandController.getBrandPage);
 router.post("/addBrand",adminAuth,uploads.single("image"),brandController.addBrand)
+router.get("/blockBrand",adminAuth,brandController.blockBrand)
+router.get("/unBlockBrand",adminAuth,brandController.unBlockBrand)
+router.get("/deleteBrand",adminAuth,brandController.deleteBrand)
 
 module.exports = router 
