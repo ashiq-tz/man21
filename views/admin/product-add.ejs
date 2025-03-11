@@ -1,0 +1,277 @@
+<%-include("../../views/partials/admin/header")%>
+<%-include("../../views/partials/admin/sidebar", { activePage: 'add-products' } )%>
+
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+</head>
+
+<style>
+  /* Body background and typography */
+  body {
+    background-color: #f5f5f5;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Main content area with 50px left margin */
+  .content-main {
+    margin-left: 50px;
+    margin-top: 20px;
+    margin-right: 20px;
+  }
+
+  /* Card styling for a clean modern look */
+  .card {
+    border: none;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  /* Card header styling */
+  .card-header {
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #e3e3e3;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 10px 15px;
+    font-weight: 600;
+  }
+
+  /* Card body padding */
+  .card-body {
+    padding: 20px;
+  }
+
+  /* Section header */
+  .content-header h2 {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 20px;
+  }
+
+  /* Labels */
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #555;
+  }
+
+  /* Inputs & selects with a light-gray background */
+  .form-control,
+  .form-select {
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 1px #3498db;
+  }
+
+  /* Error messages */
+  .error-message {
+    color: #e74c3c;
+    font-size: 0.9em;
+    margin-top: 5px;
+  }
+
+  /* Thumbnails container with gap */
+  .thumbnails-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+  }
+
+  .thumbnail {
+    margin-right: 10px;
+  }
+
+  /* Button styling */
+  .btn {
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+
+  /* "Publish" button */
+  .btn.btn-md.rounded.font-sm.hover-up {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+  .btn.btn-md.rounded.font-sm.hover-up:hover {
+    background-color: #2980b9;
+  }
+
+  /* "Save" buttons for image cropper */
+  #saveButton1,
+  #saveButton2,
+  #saveButton3,
+  #saveButton4 {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    margin-left: 10px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  #saveButton1:hover,
+  #saveButton2:hover,
+  #saveButton3:hover,
+  #saveButton4:hover {
+    background-color: #43a047;
+  }
+
+  /* Spacing between form groups */
+  .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Adjust spacing within the rows */
+  .row > .col-lg-4,
+  .row > .col-sm-6 {
+    margin-bottom: 1rem;
+  }
+
+  /* Slightly reduce the margin for the image preview sections */
+  .card-body.align-items-center {
+    margin-bottom: 15px;
+  }
+</style>
+
+<section class="content-main">
+  <div class="row">
+    <div class="col-9">
+      <div class="content-header">
+        <h2 class="content-title">Add New Product</h2>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <form method="" action="" enctype="" onsubmit="return validateForm()">
+            <div class="mb-4">
+              <label for="product_name" class="form-label">Product Name</label>
+              <input type="text" placeholder="Type here" name="productName" class="form-control border" id="product_name">
+              <div id="productName-error" class="error-message"></div>
+            </div>
+            <div class="col-lg-4 mb-4">
+              <label class="form-label">Brand</label>
+              <select class="form-select border" name="brand">
+                <option value=""></option>
+              </select>
+              <div id="brand-error" class="error-message"></div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Full description</label>
+              <textarea placeholder="Type here" id="descriptionid" name="description" class="form-control border" rows="4"></textarea>
+              <div id="description-error" class="error-message"></div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Regular price</label>
+                  <input placeholder="₹" name="regularPrice" type="text" class="form-control border">
+                  <div id="regularPrice-error" class="error-message"></div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Sale price</label>
+                  <input placeholder="₹" name="salePrice" type="text" class="form-control border">
+                </div>
+                <div id="salePrice-error" class="error-message"></div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Quantity</label>
+                  <input placeholder="" name="quantity" type="text" class="form-control border">
+                  <div id="quantity-error" class="error-message"></div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Color</label>
+                  <input name="color" type="text" class="form-control border">
+                </div>
+                <div id="color-error" class="error-message"></div>
+              </div>
+            </div>
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row gx-2">
+                  <div class="col-sm-6 mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select border" style="width: 150px;" name="category">
+                      <option value=""></option>
+                    </select>
+                    <div id="category-error" class="error-message"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card mb-2">
+              <div class="card-header">
+                <h4>Choose images</h4>
+              </div>
+              <div class="border row">
+                <div id="addedImagesContainer" class="thumbnails-container"></div>
+              </div>
+              <div class="row">
+                <div class="card-body align-items-center">
+                  <img src="" alt="" id="imgView1">
+                  <input class="form-control" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg" 
+                    onchange="viewImage1(event), viewImage(event, 1)">
+                  <div id="images-error" class="error-message"></div>
+                </div>
+                <div class="image-cropper d-flex align-items-center" 
+                     style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                  <img src="" id="croppedImg1" alt="">
+                  <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="card-body align-items-center">
+                  <img src="" alt="" id="imgView2">
+                  <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg" 
+                    onchange="viewImage2(event), viewImage(event, 2)">
+                </div>
+                <div class="image-cropper d-flex align-items-center" 
+                     style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                  <img src="" id="croppedImg2" alt="">
+                  <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="card-body align-items-center">
+                  <img src="" alt="" id="imgView3">
+                  <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg" 
+                    onchange="viewImage3(event), viewImage(event, 3)">
+                </div>
+                <div class="image-cropper d-flex align-items-center" 
+                     style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
+                  <img src="" id="croppedImg3" alt="">
+                  <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="card-body align-items-center">
+                  <img src="" alt="" id="imgView4">
+                  <input class="form-control" type="file" name="images" id="input4" accept="image/png, image/jpeg, image/jpg" 
+                    onchange="viewImage4

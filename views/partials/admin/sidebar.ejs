@@ -29,6 +29,13 @@
                </a>
              </li>
 
+             <li class="<%= activePage === 'add-products' ? 'active' : '' %>">
+              <a href="/admin/addProducts">
+              <i class="fa-solid fa-bag-shopping"></i>
+              <span>Add Products</span>
+              </a>
+          </li>
+
              <li class="<%= activePage === 'brands' ? 'active' : '' %>">
               <a href="/admin/brands">
                 <i class="fa-solid fa-building"></i>
@@ -37,27 +44,6 @@
             </li>
             
 
-            <li class="<%= activePage === 'orders' ? 'active' : '' %>">
-                <a href="/admin/orders">
-                <i class="fa-solid fa-bag-shopping"></i>
-                <span>Orders</span>
-                </a>
-            </li>
-
-          <li class="<%= activePage === 'coupon' ? 'active' : '' %>">
-            <a href="/admin/coupon">
-              <i class="fa-solid fa-ticket"></i>
-              <span>Coupon</span>
-            </a>
-          </li>
-          
-          <li>
-            <a href="#">
-              <i class="fa-solid fa-image"></i>
-              <span>Banner</span>
-            </a>
-          </li>
-
           <li class="<%= activePage === 'category' ? 'active' : '' %>">
             <a href="/admin/category">
               <i class="fa-solid fa-tags"></i>
@@ -65,10 +51,24 @@
             </a>
           </li>
 
+          <li class="<%= activePage === 'coupon' ? 'active' : '' %>">
+            <a href="/admin/coupon">
+              <i class="fa-solid fa-ticket"></i>
+              <span>Coupon</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="fa-solid fa-image"></i>
+              <span>Banner</span>
+            </a>
+          </li>
+
           <li>
             <a href="#">
               <i class="fa-solid fa-gift"></i>
-              <span>Offers</span>
+              <span>Orders</span>
             </a>
           </li>
         </ul>
