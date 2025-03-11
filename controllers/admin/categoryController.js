@@ -34,8 +34,11 @@ const categoryInfo = async (req,res)=>{
 const addCategory = async (req,res)=>{
     const {name,description} = req.body;
     try {
-        
-        const existingCategory = await Category.findOne({name});
+
+      const existingCategory = await Category.findOne({ 
+        name: { $regex: new RegExp('^' + name + '$', 'i') }
+      });
+          
         if(existingCategory){
             return res.status(400).json({error:"Category already exist"})
         }
@@ -113,11 +116,36 @@ const removeCategoryOffer = async (req,res)=>{
     }
 }
 
+const getListCategory = async (req,res)=>{
+    try {
+        let id = req.query.id;
+        await Category.updateOne({_id:id},{$set:{isListed:false}});
+        res.redirect("/admin/category");
+
+    } catch (error) {
+        res.redirect("admin/pageerror")
+    }
+}
+
+const getUnlistCategory = async (req,res)=>{
+    try {
+        let id = req.query.id;
+        await Category.updateOne({_id:id},{$set:{isListed:true}});
+        res.redirect("/admin/category");
+
+    } catch (error) {
+        res.redirect("admin/pageerror")
+    }
+}
+
 
 module.exports = {
     categoryInfo,
     addCategory,
     addCategoryOffer,
-    removeCategoryOffer
+    removeCategoryOffer,
+    getListCategory,
+    getUnlistCategory
+
 
 }
