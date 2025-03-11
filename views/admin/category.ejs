@@ -107,17 +107,17 @@
       vertical-align: middle;
     }
     /* Buttons inside the table */
-    .btn-info, .btn-danger, .btn-success {
+    .btn-warning, .btn-danger, .btn-success {
       border-radius: 30px;
       font-size: 0.85rem;
       border: none;
       margin-bottom: 5px;
     }
-    .btn-info a, .btn-danger a, .btn-success a {
+    .btn-warning a, .btn-danger a, .btn-success a {
       color: #fff;
       text-decoration: none;
     }
-    .btn-info:hover {
+    .btn-warning:hover {
       background-color: #138496 !important;
     }
     .btn-danger:hover {
@@ -181,12 +181,14 @@
     <div class="search-container">
       <form action="/admin/category/" method="get" class="input-group">
         <input 
+          id="searchInput"
           type="text" 
           class="form-control" 
           placeholder="Search categories..." 
           name="search"
           aria-label="Search categories"
         />
+
         <button class="btn" type="submit">Search</button>
       </form>
     </div>
@@ -246,7 +248,7 @@
                 <th class="text-center" style="width: 5%;">Edit</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="categoryTableBody">
               <% if (categories && categories.length > 0) { %>
                 <% categories.forEach(function(category, index) { %>
                   <tr>
@@ -259,12 +261,12 @@
                     <td>
                       <div class="d-flex flex-column">
                         <% if (!category.categoryOffer || category.categoryOffer === 0) { %>  
-                        <button class="btn btn-info" style="width: 100px" onclick="addOffer('<%= category._id %>')">
+                        <button class="btn btn-warning" style="width: 100px" onclick="addOffer('<%= category._id %>')">
                           Add Offer
                         </button>
 
                         <%}else{%>
-                        <button class="btn btn-info" style="width: 100px" onclick="removeOffer('<%= category._id %>')">
+                        <button class="btn btn-warning" style="width: 100px" onclick="removeOffer('<%= category._id %>')">
                           Remove
                         </button>
                         <%}%>
@@ -292,7 +294,7 @@
                       </div>
                     </td>
                     <td class="text-center">
-                      <a href="/admin/category/<%= category._id %>/edit" class="btn btn-info" style="width: 60px;">
+                      <a href="/admin/editCategory?id=<%=category._id%>" class="btn btn-info" style="width: 60px;">
                         Edit
                       </a>
                     </td>
@@ -512,6 +514,69 @@
 
 
   </script>
+  <script>
+    $(document).ready(function() {
+      // Listen for keyup events on the search input
+      $("#searchInput").on("keyup", function() {
+        var searchTerm = $(this).val();  // Get the current search term
+        
+        $.ajax({
+          url: "/admin/category",  // same endpoint as before
+          method: "GET",
+          data: { search: searchTerm },
+          dataType: "json",  // expect a JSON response
+          success: function(data) {
+            var rows = "";
+            // Loop through each category in the returned JSON data
+            data.categories.forEach(function(category, index) {
+              rows += "<tr>";
+              rows += "<td class='text-center'>" + (index + 1) + "</td>";
+              rows += "<td>" + category.name + "</td>";
+              rows += "<td>" + category.description + "</td>";
+              rows += "<td>" + (category.categoryOffer && category.categoryOffer > 0 ? category.categoryOffer + "%" : "0%") + "</td>";
+              
+              // Offer button column
+              rows += "<td><div class='d-flex flex-column'>";
+              if (!category.categoryOffer || category.categoryOffer === 0) {
+                rows += "<button class='btn btn-info' style='width: 100px' onclick=\"addOffer('" + category._id + "')\">Add Offer</button>";
+              } else {
+                rows += "<button class='btn btn-info' style='width: 100px' onclick=\"removeOffer('" + category._id + "')\">Remove</button>";
+              }
+              rows += "</div></td>";
+              
+              // Status column
+              rows += "<td>";
+              if (category.isListed) {
+                rows += "<span class='badge alert-success'>Listed</span>";
+              } else {
+                rows += "<span class='badge alert-danger'>Unlisted</span>";
+              }
+              rows += "</td>";
+              
+              // List/Unlist column
+              rows += "<td><div class='d-flex flex-column'>";
+              if (category.isListed) {
+                rows += "<button class='btn btn-danger' style='width: 80px' role='button'><a href='/admin/listCategory?id=" + category._id + "'>Unlist</a></button>";
+              } else {
+                rows += "<button class='btn btn-success' style='width: 80px' role='button'><a href='/admin/unlistCategory?id=" + category._id + "'>List</a></button>";
+              }
+              rows += "</div></td>";
+              
+              // Edit column
+              rows += "<td class='text-center'><a href='/admin/category/" + category._id + "/edit' class='btn btn-info' style='width: 60px;'>Edit</a></td>";
+              rows += "</tr>";
+            });
+            // Update the table body with the new rows
+            $("#categoryTableBody").html(rows);
+          },
+          error: function(err) {
+            console.error("Error fetching categories", err);
+          }
+        });
+      });
+    });
+  </script>
+  
 
 <%- include("../../views/partials/admin/footer") %>
 </body>

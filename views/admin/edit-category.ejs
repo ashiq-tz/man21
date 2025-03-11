@@ -1,0 +1,25 @@
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'category' } ) %>
+
+<!-- Use align-items-start and add top padding -->
+<div class="container d-flex justify-content-center align-items-start min-vh-100 pt-5">
+  <div class="row w-100">
+    <div class="col-md-6 mx-auto">
+      <form method="post" action="/admin/editCategory/<%= category._id %>">
+        <div class="mb-4">
+          <label for="product_name" class="form-label">Name</label>
+          <input type="text" name="categoryName" value="<%= category.name %>" class="form-control border" />
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control border"><%= category.description %></textarea>
+        </div>
+        <div class="d-grid text-end mt-3">
+          <button class="btn btn-primary" type="submit">Update category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>

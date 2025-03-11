@@ -3,33 +3,52 @@ const Product = require("../../models/productSchema");
 
 
 
-const categoryInfo = async (req,res)=>{
+const categoryInfo = async (req, res) => {
     try {
-        
-        const page = parseInt(req.query.page) || 1;
-        const limit = 4;
-        const skip = (page-1)*limit;
-
-        const categoryData = await Category.find({})
-        .sort({createdAt:-1})
+      const page = parseInt(req.query.page) || 1;
+      const limit = 4;
+      const skip = (page - 1) * limit;
+  
+      // Build query: if a search term is provided, filter by name (case‑insensitive)
+      const query = {};
+      if (req.query.search) {
+        query.name = { $regex: new RegExp(req.query.search, 'i') };
+      }
+  
+      // Get the filtered, paginated data
+      const categoryData = await Category.find(query)
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
-
-        const totalCategories = await Category.countDocuments();
-        const totalPages = Math.ceil(totalCategories / limit);
-
-        res.render("category",{
-            categories:categoryData,
-            currentPage:page,
-            totalPages : totalPages,
-            totalCategories:totalCategories
-        })
-
+  
+      const totalCategories = await Category.countDocuments(query);
+      const totalPages = Math.ceil(totalCategories / limit);
+  
+      // Check if the request is an AJAX call (live search)
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({
+          categories: categoryData,
+          currentPage: page,
+          totalPages: totalPages,
+          totalCategories: totalCategories
+        });
+      }
+  
+      // For regular requests, render the EJS page
+      res.render("category", {
+        categories: categoryData,
+        currentPage: page,
+        totalPages: totalPages,
+        totalCategories: totalCategories,
+        search: req.query.search || ""
+      });
     } catch (error) {
-        console.error(error);
-        res.redirect("/admin/pageerror")
+      console.error(error);
+      res.redirect("/admin/pageerror");
     }
-}
+  };
+  
+  
 
 const addCategory = async (req,res)=>{
     const {name,description} = req.body;
@@ -138,6 +157,45 @@ const getUnlistCategory = async (req,res)=>{
     }
 }
 
+const getEditCategory = async (req,res)=>{
+    try {
+        
+        const id = req.query.id;
+        const category = await Category.findOne({_id:id});
+        res.render("edit-category",{category:category});
+
+    } catch (error) {
+        res.redirect("/admin/pageerror")
+    }
+}
+
+const editCategory = async (req,res)=>{
+    try {
+        
+    const id = req.params.id;
+    const {categoryName,description} = req.body;
+    const existingCategory = await Category.findOne({name:categoryName})
+
+    if(existingCategory){
+        return res.status(400).json({error:"Category exists, choose another name"})
+    }
+
+    const updateCategory = await Category.findByIdAndUpdate(id,{
+        name:categoryName,
+        description:description,
+    },{new:true});
+
+    if(updateCategory){
+        res.redirect("/admin/category");
+    }else{
+        res.status(404).json({error:"Category not found"})
+    }
+
+    } catch (error) {
+        res.status(500).json({error:"Internal Server Error"})
+    }
+}
+
 
 module.exports = {
     categoryInfo,
@@ -145,7 +203,8 @@ module.exports = {
     addCategoryOffer,
     removeCategoryOffer,
     getListCategory,
-    getUnlistCategory
-
+    getUnlistCategory,
+    getEditCategory,
+    editCategory
 
 }
