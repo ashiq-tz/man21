@@ -1,0 +1,260 @@
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'brands' } ) %>
+
+<style>
+  /* Page background for a subtle contrast */
+  body {
+    background-color: #f8f9fa; /* Light gray background */
+  }
+
+  .content-header {
+    margin-bottom: 20px;
+  }
+  .content-header h2 {
+    font-weight: 600;
+    font-size: 28px;
+  }
+
+  /* Card styling */
+  .card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+  .card-body {
+    padding: 20px;
+  }
+  .card-header {
+    background-color: transparent;
+    border-bottom: none;
+  }
+
+  /* Form styling */
+  .brand-form .form-label {
+    font-weight: 600;
+  }
+  .brand-form input[type="text"],
+  .brand-form input[type="file"],
+  .brand-form textarea {
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  .brand-form button[type="submit"] {
+    background-color: #20c997; /* Teal color */
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-weight: 600;
+  }
+  .brand-form button[type="submit"]:hover {
+    background-color: #17a589; /* Darker teal */
+  }
+
+  /* Table styling */
+  .table-container {
+    margin-top: 20px;
+  }
+  table.table {
+    width: 100%;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+  }
+  table.table thead th {
+    background-color: #f1f1f1;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+  }
+  table.table td, table.table th {
+    vertical-align: middle !important;
+    padding: 16px;
+  }
+
+  /* Status badges */
+  .badge {
+    padding: 0.5em 0.75em;
+    font-size: 0.7rem;
+    border-radius: 10px;
+    display: inline-block;
+    text-align: center;
+  }
+  .badge.alert-success {
+    background-color: #28a745;
+    color: #fff;
+  }
+  .badge.alert-danger {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  /* Action buttons in the table */
+  .btn-danger,
+  .btn-success {
+    border-radius: 30px;
+    border: none;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    width: 90px;
+  }
+  .btn-danger a,
+  .btn-success a {
+    color: #fff;
+    text-decoration: none;
+  }
+  .btn-danger:hover {
+    background-color: #c82333 !important;
+  }
+  .btn-success:hover {
+    background-color: #218838 !important;
+  }
+
+  /* Pagination */
+  .pagination-container {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .pagination {
+    display: inline-block;
+  }
+  .pagination a,
+  .pagination .current-page {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 2px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+  }
+  .pagination a:hover {
+    background-color: #f5f5f5;
+  }
+  .error-message {
+    color: red;
+    font-size: 0.9em;
+  }
+</style>
+
+<section class="content-main container-fluid px-4 py-4">
+  <!-- Page Header -->
+  <div class="content-header ">
+    <h2 class="content-title">Brands</h2>
+  </div>
+
+  <!-- Main Row -->
+  <div class="row g-4">
+    <!-- Left Column: Add Brand Form -->
+    <div class="col-md-4">
+      <div class="card brand-form">
+        <div class="card-body">
+          <h4 class="mb-4">Add Brand</h4>
+          <form method="post" action="" enctype="">
+            <div class="mb-3">
+              <label for="brandName" class="form-label">Brand Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Type here"
+                class="form-control"
+                id="brandName"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="brandImage" class="form-label">Brand Image</label>
+              <input
+                class="form-control"
+                name="image"
+                type="file"
+                id="brandImage"
+              />
+            </div>
+            <div class="d-grid mt-3">
+              <button class="btn text-white" type="submit">
+                Add Brand
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Brand List Table -->
+    <div class="col-md-8">
+      <div class="card table-container">
+        <div class="card-body">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Brand</th>
+                <th>Logo</th>
+                <th>Status</th>
+                <th>Block/Unblock/Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Example row -->
+              <tr>
+                <!-- Brand Name -->
+                <td class="text-start"></td>
+
+                <!-- Brand Logo -->
+                <td class="text-start">
+                  <div
+                    class="d-flex align-items-center justify-content-center"
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 50%;
+                      overflow: hidden;
+                    "
+                  >
+                    <img
+                      src=""
+                      alt=""
+                      class="img-fluid rounded-circle"
+                      style="width: 100%; height: auto"
+                    />
+                  </div>
+                </td>
+
+                <!-- Status -->
+                <td class="text-start">
+                  <span
+                    class="badge rounded-pill alert-danger"
+                    style="width: 60px"
+                    >Blocked</span
+                  >
+                  <span
+                    class="badge rounded-pill alert-success"
+                    style="width: 60px"
+                    >Active</span
+                  >
+                </td>
+
+                <!-- Actions -->
+                <td class="text-start">
+                  <button class="btn btn-danger">
+                    <a href="">Block</a>
+                  </button>
+                  <button class="btn btn-success">
+                    <a href="">Unblock</a>
+                  </button>
+                  <button class="btn btn-danger">
+                    <a href="">Delete</a>
+                  </button>
+                </td>
+              </tr>
+              <!-- More rows here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination Section (if needed) -->
+      <div class="pagination-container">
+        <!-- pagination links here -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("../../views/partials/admin/footer") %>
