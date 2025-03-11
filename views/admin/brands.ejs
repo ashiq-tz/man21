@@ -147,7 +147,7 @@
       <div class="card brand-form">
         <div class="card-body">
           <h4 class="mb-4">Add Brand</h4>
-          <form method="post" action="" enctype="">
+          <form method="post" action="/admin/addBrand" enctype="multipart/form-data">
             <div class="mb-3">
               <label for="brandName" class="form-label">Brand Name</label>
               <input
@@ -191,10 +191,11 @@
               </tr>
             </thead>
             <tbody>
+              <%data.reverse().forEach((brand,index)=>{%>
               <!-- Example row -->
               <tr>
                 <!-- Brand Name -->
-                <td class="text-start"></td>
+                <td class="text-start"><%=brand.brandName%></td>
 
                 <!-- Brand Logo -->
                 <td class="text-start">
@@ -208,8 +209,8 @@
                     "
                   >
                     <img
-                      src=""
-                      alt=""
+                      src="/uploads/re-image/<%=brand.brandImage[0]%>"
+                      alt="<%=brand.brandName%>"
                       class="img-fluid rounded-circle"
                       style="width: 100%; height: auto"
                     />
@@ -244,6 +245,7 @@
                 </td>
               </tr>
               <!-- More rows here -->
+               <%})%>
             </tbody>
           </table>
         </div>
