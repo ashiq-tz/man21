@@ -91,7 +91,13 @@ const getAllProducts = async (req,res)=>{
                 {brand:{$regex:new RegExp(".*"+search+".*","i")}},
 
             ],
-        }).limit(limit*1).skip((page-1)*limit).populate('category').exec();
+        })
+        .sort({ productName: 1 })
+        .collation({ locale: "en", strength: 2 }) // Case-insensitive sort
+        .limit(limit*1)
+        .skip((page-1)*limit)
+        .populate('category')
+        .exec();
 
         const count = await Product.find({
             $or:[
@@ -120,11 +126,57 @@ const getAllProducts = async (req,res)=>{
     }
 }
 
+const addProductOffer = async (req,res)=>{
+    try {
+        
+        const {productId,percentage} = req.body;
+        const findProduct = await Product.findOne({_id:productId});
+        const findCategory = await Category.findOne({_id:findProduct.category})
+
+        // If the category already has an offer, reset it.
+    if (findCategory.categoryOffer && findCategory.categoryOffer > 0) {
+        findCategory.categoryOffer = 0;
+        await findCategory.save();
+      }
+
+       
+        findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+
+        findProduct.productOffer = parseInt(percentage);
+        await findProduct.save();
+        findCategory.categoryOffer = 0;
+        await findCategory.save();
+        res.json({status:true});
+
+    } catch (error) {
+        res.redirect("/admin/pageerror");
+        res.status(500).json({status:false,message:"Inernal server error"});
+        
+    }
+}
+
+const removeProductOffer = async (req,res)=>{
+    try {
+        
+        const {productId} = req.body;
+        const findProduct = await Product.findOne({_id:productId});
+        const percentage = findProduct.productOffer;
+        findProduct.salePrice = findProduct.regularPrice;
+        findProduct.productOffer = 0;
+        await findProduct.save();
+        res.json({status:true})
+
+    } catch (error) {
+        res.redirect("/admin/pageerror");
+    }
+}
 
 
 module.exports = {
     getProductAddPage,
     addProducts,
-    getAllProducts
-    
+    getAllProducts,
+    addProductOffer,
+    removeProductOffer
+
 }
