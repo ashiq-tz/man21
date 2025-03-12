@@ -66,7 +66,7 @@ const addProducts = async(req,res)=>{
             });
 
             await newProduct.save();
-            return res.redirect("/admin/addProducts");
+            return res.redirect("/admin/addProducts?success=true");
 
         }else{
             return res.status(400).json("Product already exist.Try with another name")
