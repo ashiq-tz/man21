@@ -55,5 +55,16 @@ router.post("/removeProductOffer",adminAuth,productController.removeProductOffer
 
 router.get("/blockProduct",adminAuth,productController.blockProduct);
 router.get("/unblockProduct",adminAuth,productController.unblockProduct);
+router.get("/editProduct",adminAuth,productController.getEditProduct);
+
+router.post("/editProduct/:id", adminAuth, uploads.fields([
+    { name: 'image1' },
+    { name: 'image2' },
+    { name: 'image3' },
+    { name: 'image4' }
+  ]), productController.editProduct);
+  
+router.post("/deleteImage",adminAuth,productController.deleteSingleImage);
+
 
 module.exports = router 

@@ -160,6 +160,18 @@
   cursor: pointer;
   z-index: 9999;        /* Ensure the icon is on top and clickable */
 }
+.image-cropper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+#imgView1, #imgView2, #imgView3, #imgView4 {
+  max-width: 300px;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+
 
 </style>
 
@@ -369,7 +381,7 @@
           }
           const cropper = new Cropper(image, {
             aspectRatio: 1,
-            viewMode: 1,
+            viewMode: 2, // Restricts the image within the container
             guides: true,
             background: false,
             autoCropArea: 1,
