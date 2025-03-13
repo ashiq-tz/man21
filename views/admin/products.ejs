@@ -187,7 +187,7 @@ th, td {
               </td>
               <td>
                 <% if (data[i].productOffer === 0) { %>
-                  <button class="btn btn-info" onclick="addOffer('<%= data[i]._id %>')" style="width: 100px;">
+                  <button class="btn btn-info" onclick="addOffer('<%= data[i]._id %>')" style="width: 100px; font-size: 11px; ">
                     Add Offers
                   </button>
                 <% } else { %>
@@ -198,8 +198,16 @@ th, td {
               </td>
               <td><%= data[i].quantity %></td>
               <td>
-                <button class="btn btn-danger" style="width: 80px;">Block</button>
-                <button class="btn btn-success" style="width: 80px;">Unblock</button>
+
+                <%if(data[i].isBlocked===false){%>
+                  <button class="btn btn-danger" style="width: 80px;">
+                    <a href="/admin/blockProduct?id=<%= data[i]._id %>" style="color: white; text-decoration: none;">Block</a>
+                </button>
+                <%}else{%>
+                  <button class="btn btn-success" style="width: 80px;">
+                    <a href="/admin/unblockProduct?id=<%= data[i]._id %>" style="color: white; text-decoration: none;">Unblock</a>
+                </button>
+                <%}%>
               </td>
               <td>
                 <button class="btn btn-info" style="width: 80px;">Edit</button>
