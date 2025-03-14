@@ -240,6 +240,20 @@
                 <div id="color-error" class="error-message"></div>
               </div>
             </div>
+            <div class="mb-4">
+              <label class="form-label">Sizes</label>
+              <div>
+                <label><input type="checkbox" name="size" value="5"> 5</label>
+                <label><input type="checkbox" name="size" value="6"> 6</label>
+                <label><input type="checkbox" name="size" value="7"> 7</label>
+                <label><input type="checkbox" name="size" value="8"> 8</label>
+                <label><input type="checkbox" name="size" value="9"> 9</label>
+                <label><input type="checkbox" name="size" value="10"> 10</label>
+                <!-- Add more sizes as needed -->
+              </div>
+              <div id="size-error" class="error-message"></div>
+            </div>
+            
             <div class="card mb-4">
               <div class="card-body">
                 <div class="row gx-2">
@@ -494,7 +508,7 @@
       if (description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
-      } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
+      } else if (!/^.*$/.test(description.trim())) {
         displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
         isValid = false;
       }

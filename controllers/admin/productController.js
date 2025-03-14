@@ -28,6 +28,15 @@ const addProducts = async (req, res) => {
     });
 
     if (!productExists) {
+
+      let sizes = req.body.size;
+    if (!sizes) {
+      sizes = []; // if no sizes are selected
+    } else if (!Array.isArray(sizes)) {
+      sizes = [sizes];
+    }
+    sizes = sizes.map(Number);
+
       const images = [];
       if (req.files && req.files.length > 0) {
         for (let i = 0; i < req.files.length; i++) {
@@ -52,6 +61,7 @@ const addProducts = async (req, res) => {
         salePrice: products.salePrice,
         createdAt: new Date(),
         quantity: products.quantity,
+        size: sizes,
         size: products.size,
         color: products.color,
         productImage: images,

@@ -1,30 +1,23 @@
-
-<%-include("../../views/partials/user/header")%>
-
-    <style>
-        * {
+<%- include("../../views/partials/user/header") %>
+<style>
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Work Sans', 'SF Pro Display', 'Roboto', sans-serif;
 }
-
 body {
   background-color: #fff;
   color: #000;
 }
-
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-
-/* Header Styles */
 .header {
   width: 100%;
 }
-
 .header-main {
   display: flex;
   align-items: center;
@@ -32,13 +25,11 @@ body {
   background-color: white;
   padding: 0 40px;
 }
-
 .logo {
   width: 210px;
   height: 56px;
   margin-right: 96px;
 }
-
 .search-bar {
   display: flex;
   align-items: center;
@@ -48,7 +39,6 @@ body {
   padding: 16px;
   border-radius: 8px;
 }
-
 .search-input {
   background-color: transparent;
   outline: none;
@@ -57,13 +47,11 @@ body {
   font-size: 14px;
   color: #656565;
 }
-
 .nav-menu {
   display: flex;
   gap: 52px;
   margin-left: 28px;
 }
-
 .nav-item {
   background: none;
   border: none;
@@ -72,32 +60,26 @@ body {
   cursor: pointer;
   transition: color 0.3s;
 }
-
 .nav-item:hover {
   color: #666;
 }
-
 .nav-item.active {
   font-weight: 600;
 }
-
 .header-icons {
   display: flex;
   gap: 24px;
   margin-left: auto;
 }
-
 .icon-button {
   background: none;
   border: none;
   cursor: pointer;
   transition: color 0.3s;
 }
-
 .icon-button:hover {
   color: #666;
 }
-
 .category-menu {
   display: flex;
   align-items: center;
@@ -106,7 +88,6 @@ body {
   height: 48px;
   background-color: #8B8E99;
 }
-
 .category-item {
   background: none;
   border: none;
@@ -117,77 +98,61 @@ body {
   cursor: pointer;
   transition: opacity 0.3s;
 }
-
 .category-item:hover {
   opacity: 1;
 }
-
 .category-divider {
   width: 2px;
   height: 24px;
   opacity: 0.2;
   background-color: black;
 }
-
-/* Hero Section */
 .hero-section {
   width: 100%;
 }
-
 .hero-section img {
   width: 100%;
   height: 525px;
   object-fit: cover;
 }
-
-/* Section Styles */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 87px;
 }
-
 .section-header h2 {
   color: #0F0F0F;
   font-size: 31px;
   letter-spacing: 0.75px;
 }
-
 .view-all {
   color: black;
   font-size: 18px;
   text-transform: uppercase;
   text-decoration: none;
 }
-
 .view-all:hover {
   text-decoration: underline;
 }
-
-/* Product Grid */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 37px;
 }
-
 .product-card {
   display: flex;
   flex-direction: column;
   gap: 13px;
 }
-
 .product-image-container {
   position: relative;
 }
-
 .product-image {
   width: 100%;
   height: 314px;
   object-fit: cover;
 }
-
 .favorite-button {
   position: absolute;
   width: 50px;
@@ -202,170 +167,133 @@ body {
   transition: background-color 0.3s;
   cursor: pointer;
 }
-
 .favorite-button:hover {
   background-color: rgba(255, 255, 255, 0.6);
 }
-
 .favorite-button.active i {
   color: #e53e3e;
 }
-
 .product-details {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-
 .product-brand {
   color: #7E7F7F;
   font-size: 15px;
 }
-
 .product-name {
   color: black;
   font-size: 16px;
 }
-
 .product-color {
   color: #9A9A9A;
   font-size: 10px;
   letter-spacing: 0.75px;
 }
-
 .product-price {
   color: #0F0F0F;
   font-size: 17px;
 }
-
-/* New Arrivals Section */
 .new-arrivals {
   margin-bottom: 100px;
   padding: 0 36px;
 }
-
-/* Trending Sneakers Section */
 .trending-sneakers {
   margin-bottom: 100px;
   padding: 0 36px;
 }
-
-/* Featured Section */
 .featured-section {
   margin-bottom: 100px;
   padding: 0 40px;
 }
-
 .featured-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 660px;
+  grid-template-columns: 1fr 1fr 660px;
+  grid-template-rows: repeat(2, auto);
   gap: 37px;
   margin-bottom: 37px;
 }
-
+.featured-image {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
 .featured-image img {
   width: 100%;
-  height: 887px;
+  height: 100%;
   object-fit: cover;
 }
-
-.featured-grid-bottom {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 37px;
-  margin-bottom: 37px;
-}
-
-/* Banner Section */
 .banner-section {
   margin-bottom: 168px;
   padding: 0 45px;
 }
-
 .banner-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 38px;
 }
-
 .banner-image {
   width: 100%;
   height: 660px;
   object-fit: cover;
 }
-
-/* Stores Section */
 .stores-section {
   padding: 0 35px;
 }
-
 .stores-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 35px;
 }
-
 .store-image {
   width: 100%;
   height: 433px;
   object-fit: cover;
 }
-
-/* Footer */
 .footer {
   background-color: #171717;
   color: white;
   padding: 64px 40px;
   margin-top: auto;
 }
-
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 32px;
 }
-
 .footer-column h3 {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 24px;
 }
-
 .footer-column ul {
   list-style: none;
 }
-
 .footer-column ul li {
   margin-bottom: 12px;
   cursor: pointer;
 }
-
 .social-icons {
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
 }
-
 .social-icons i {
   font-size: 24px;
   cursor: pointer;
 }
-
 .newsletter h4 {
   font-size: 18px;
   font-weight: 500;
   margin-bottom: 16px;
 }
-
 .newsletter-form {
   display: flex;
 }
-
 .newsletter-form input {
   background-color: #333;
   padding: 8px 16px;
@@ -375,7 +303,6 @@ body {
   color: white;
   width: 100%;
 }
-
 .newsletter-form button {
   background-color: white;
   color: black;
@@ -386,11 +313,9 @@ body {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
 .newsletter-form button:hover {
   background-color: #e5e5e5;
 }
-
 .subscription-message {
   margin-top: 8px;
   padding: 8px 16px;
@@ -398,11 +323,9 @@ body {
   color: #2f9e44;
   border-radius: 4px;
 }
-
 .hidden {
   display: none;
 }
-
 .footer-bottom {
   margin-top: 64px;
   padding-top: 32px;
@@ -411,534 +334,326 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
 .copyright {
   font-size: 14px;
   color: #999;
 }
-
 .footer-links {
   display: flex;
   gap: 24px;
   font-size: 14px;
   color: #999;
 }
-
 .footer-links span {
   cursor: pointer;
 }
-
-/* Responsive Styles */
 @media (max-width: 1200px) {
   .logo {
     margin-right: 48px;
   }
-  
   .featured-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
   .featured-image {
     grid-column: span 2;
+    grid-row: 1;
   }
 }
-
 @media (max-width: 992px) {
   .header-main {
     padding: 0 20px;
   }
-  
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
   .stores-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
   .footer-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
 @media (max-width: 768px) {
   .logo {
     width: 150px;
     margin-right: 20px;
   }
-  
   .nav-menu {
     display: none;
   }
-  
   .category-menu {
     justify-content: flex-start;
     overflow-x: auto;
     gap: 30px;
     padding: 0 20px;
   }
-  
   .banner-grid {
     grid-template-columns: 1fr;
   }
-  
-  .featured-grid-bottom {
+  .featured-grid {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .featured-image {
+    grid-column: 1;
+    grid-row: 2;
   }
 }
-
 @media (max-width: 576px) {
   .header-main {
     padding: 0 10px;
   }
-  
   .search-bar {
     flex: 1;
     width: auto;
   }
-  
-  .product-grid, .stores-grid, .footer-grid {
+  .product-grid,
+  .stores-grid,
+  .footer-grid {
     grid-template-columns: 1fr;
   }
-  
   .footer-bottom {
     flex-direction: column;
     gap: 16px;
   }
 }
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="category-menu">
+    <button class="category-item">New Arrivals</button>
+    <div class="category-divider"></div>
+    <button class="category-item">Trending</button>
+    <div class="category-divider"></div>
+    <button class="category-item">Superkicks</button>
+    <div class="category-divider"></div>
 
-    </style>
+    <button class="category-item">
+      <a href="/products?category=Men" class="category-item" style="text-decoration: none;">Men</a>
+    </button>
+   
 
-  </head>
+    <div class="category-divider"></div>
+    
+    <button class="category-item">Women</button>
+    <div class="category-divider"></div>
+    <button class="category-item">Kids</button>
+  </div>
+  <main>
+    <a href="/products" class="hero-section">
+      <section>
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/1a3e276f947cce2ab81fb274dfed5e114a277095" alt="Adidas Samba" />
+      </section>
+    </a>
+    
+    <section class="new-arrivals">
+      <div class="section-header">
+        <h2>NEW ARRIVALS</h2>
+       
+        <a href="/products" class="view-all">VIEW ALL</a>
 
-  <body>
-    <div class="app-container">
-        
-        <div class="category-menu">
-          <button class="category-item">New Arrivals</button>
-          <div class="category-divider"></div>
-          <button class="category-item">Trending</button>
-          <div class="category-divider"></div>
-          <button class="category-item">Superkicks</button>
-          <div class="category-divider"></div>
-          <button class="category-item">Men</button>
-          <div class="category-divider"></div>
-          <button class="category-item">Women</button>
-          <div class="category-divider"></div>
-          <button class="category-item">Kids</button>
+      </div>
+      <div class="product-grid">
+        <% if (newArrivals && newArrivals.length > 0) { %>
+          <% newArrivals.forEach(product => { %>
+            <div class="product-card">
+              <div class="product-image-container">
+                <img src="/uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : 'placeholder.jpg' %>" alt="<%= product.productName %>" class="product-image" />
+                <button class="favorite-button" data-favorite="false">
+                  <i class="ti ti-heart"></i>
+                </button>
+              </div>
+              <div class="product-details">
+                <div class="product-brand"><%= product.brand %></div>
+                <div class="product-name"><%= product.productName %></div>
+                <div class="product-color"><%= product.color %></div>
+                <div class="product-price">₹<%= product.salePrice.toLocaleString('en-IN') %></div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p>No new arrivals found.</p>
+        <% } %>
+      </div>
+    </section>
+    <section class="trending-sneakers">
+      <div class="section-header">
+        <h2>TRENDING SNEAKERS</h2>
+        <a href="#" class="view-all">VIEW ALL</a>
+      </div>
+      <div class="product-grid">
+        <% if (trendingSneakers && trendingSneakers.length > 0) { %>
+          <% trendingSneakers.forEach(product => { %>
+            <div class="product-card">
+              <div class="product-image-container">
+                <img src="/uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : 'placeholder.jpg' %>" alt="<%= product.productName %>" class="product-image" />
+                <button class="favorite-button" data-favorite="false">
+                  <i class="ti ti-heart"></i>
+                </button>
+              </div>
+              <div class="product-details">
+                <div class="product-brand"><%= product.brand %></div>
+                <div class="product-name"><%= product.productName %></div>
+                <div class="product-color"><%= product.color %></div>
+                <div class="product-price">₹<%= product.salePrice.toLocaleString('en-IN') %></div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p>No trending sneakers found.</p>
+        <% } %>
+      </div>
+    </section>
+    <section class="featured-section">
+      <div class="featured-grid">
+        <% if (featuredProducts && featuredProducts.length > 0) { %>
+          <% for (let i = 0; i < 4; i++) { 
+               if (i < featuredProducts.length) {
+                 const product = featuredProducts[i]; 
+          %>
+            <div class="product-card" style="grid-column: <%= (i % 2) + 1 %>; grid-row: <%= Math.floor(i / 2) + 1 %>;">
+              <div class="product-image-container">
+                <img src="/uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : 'placeholder.jpg' %>" alt="<%= product.productName %>" class="product-image" />
+                <button class="favorite-button" data-favorite="false">
+                  <i class="ti ti-heart"></i>
+                </button>
+              </div>
+              <div class="product-details">
+                <div class="product-brand"><%= product.brand %></div>
+                <div class="product-name"><%= product.productName %></div>
+                <div class="product-color"><%= product.color %></div>
+                <div class="product-price">₹<%= product.salePrice.toLocaleString('en-IN') %></div>
+              </div>
+            </div>
+          <% } } %>
+        <% } %>
+        <div class="featured-image">
+          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/27a23327329fb5834429befe9c6394a12c4302c8" alt="Featured" />
         </div>
-      
-
-      <main>
-        <section class="hero-section">
-          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/1a3e276f947cce2ab81fb274dfed5e114a277095" alt="Adidas Samba" />
-        </section>
-
-        <section class="new-arrivals">
-          <div class="section-header">
-            <h2>NEW ARRIVALS</h2>
-            <a href="#" class="view-all">VIEW ALL</a>
+      </div>
+    </section>
+    <section class="banner-section">
+      <div class="banner-grid">
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/f040db5c0aa8cbf98e8e109dea0db6f423dacfb8" alt="Banner 1" class="banner-image" />
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/98efd962e9192a28a97e42067ad3447e388e3f9c" alt="Banner 2" class="banner-image" />
+      </div>
+    </section>
+    <section class="stores-section">
+      <div class="section-header">
+        <h2>STORES</h2>
+        <a href="#stores" class="view-all">VIEW ALL</a>
+      </div>
+      <div class="stores-grid">
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a9729b8edfb7dfcf34677c5ad857db8f99c91c42" alt="Delhi Store" class="store-image" />
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/5a710961021d7c07bf5cf59881879979926e6969" alt="Hyderabad Store" class="store-image" />
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/d97078d1afd0e60bf8b89dc5f0bddee698b8af67" alt="Mumbai Store" class="store-image" />
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/3d6cc64500ae2eeb1d877fa13876a4a264d273f5" alt="Bangalore Store" class="store-image" />
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <div class="footer-column">
+          <h3>Shop</h3>
+          <ul>
+            <li>New Arrivals</li>
+            <li>Trending</li>
+            <li>Men</li>
+            <li>Women</li>
+            <li>Kids</li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Help</h3>
+          <ul>
+            <li>Customer Service</li>
+            <li>Track Order</li>
+            <li>Returns & Exchanges</li>
+            <li>Shipping</li>
+            <li>Contact Us</li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>About</h3>
+          <ul>
+            <li>Our Story</li>
+            <li>Careers</li>
+            <li>Corporate News</li>
+            <li>Investors</li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h3>Connect</h3>
+          <div class="social-icons">
+            <i class="ti ti-brand-facebook"></i>
+            <i class="ti ti-brand-instagram"></i>
+            <i class="ti ti-brand-twitter"></i>
+            <i class="ti ti-brand-youtube"></i>
           </div>
-          
-          <div class="product-grid">
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/7b7ff5d77cfc08fb1d200987b178e57471bada86" alt="Converse Pro Blaze" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Converse</div>
-                <div class="product-name">PRO BLAZE CLASSIC LEATHER & ...</div>
-                <div class="product-color">COFFEE</div>
-                <div class="product-price">₹6,499</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/b525e79f0d3b31fec7492dde9a8f14e458a13e3c" alt="Converse Chuck Taylor" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Converse</div>
-                <div class="product-name">WMN'S CHUCK TAYLOR ALL STAR...</div>
-                <div class="product-color">FRESH BREW/BLACK</div>
-                <div class="product-price">₹9,999</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/0cbd7eab9996ab05e191963ef59678565a1ccdbc" alt="Converse Chuck 70" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Converse</div>
-                <div class="product-name">CHUCK 70</div>
-                <div class="product-color">GREY</div>
-                <div class="product-price">₹6,399</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/08b3c9f7de081434730c79b46baf90b5c5d07c22" alt="Converse Run Star Hike" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Converse</div>
-                <div class="product-name">WMN'S RUN STAR HIKE PLATFORM...</div>
-                <div class="product-color">BLACK</div>
-                <div class="product-price">₹6,999</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="trending-sneakers">
-          <div class="section-header">
-            <h2>TRENDING SNEAKERS</h2>
-            <a href="#" class="view-all">VIEW ALL</a>
-          </div>
-          
-          <div class="product-grid">
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/212b29a4a76d4e9f895dc0b06c2d653af6d11775" alt="Nike Air Force 1" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Nike</div>
-                <div class="product-name">AIR FORCE 1</div>
-                <div class="product-color">WHITE</div>
-                <div class="product-price">₹7,499</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/42d8b4aec4082796c3c578402ca4dbe7d7fcfdee" alt="New Balance 1906R Grey" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">New Balance</div>
-                <div class="product-name">1906R</div>
-                <div class="product-color">GREY</div>
-                <div class="product-price">₹15,999</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/e049f2ee321b71eed8d7966aa837918ed5f41afb" alt="New Balance 327" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">New Balance</div>
-                <div class="product-name">327</div>
-                <div class="product-color">BROWN</div>
-                <div class="product-price">₹10,399</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/635b68156df1a589ca47b942dc2f20a0842b1868" alt="New Balance 1906R Silver" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">New Balance</div>
-                <div class="product-name">1906R</div>
-                <div class="product-color">SILVER</div>
-                <div class="product-price">₹15,999</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="featured-section">
-          <div class="featured-grid">
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/b00817402ab1154a028a1c7c1712de35439709da" alt="New Balance BB530" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">New Balance</div>
-                <div class="product-name">BB530</div>
-                <div class="product-color">BROWN</div>
-                <div class="product-price">₹12,499</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/6eaac8350f7c61f59e6ee1fd020d3e431d9fc118" alt="Converse Run Star" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Converse</div>
-                <div class="product-name">RUN STAR</div>
-                <div class="product-color">YELLOW</div>
-                <div class="product-price">₹16,799</div>
-              </div>
-            </div>
-            
-            <div class="featured-image">
-              <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/27a23327329fb5834429befe9c6394a12c4302c8" alt="Featured" />
-            </div>
-          </div>
-          
-          <div class="featured-grid-bottom">
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/94e21643db61fd383cc98782f49d6e80c5036453" alt="Converse Chuck 70 Navy" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">Converse</div>
-                <div class="product-name">CHUCK 70</div>
-                <div class="product-color">NAVY</div>
-                <div class="product-price">₹11,999</div>
-              </div>
-            </div>
-            
-            <div class="product-card">
-              <div class="product-image-container">
-                <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/e9cd95617e96bbcecdc1c4bc288193269c81d50f" alt="New Balance 530 Beige" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
-                  <i class="ti ti-heart"></i>
-                </button>
-              </div>
-              <div class="product-details">
-                <div class="product-brand">New Balance</div>
-                <div class="product-name">530</div>
-                <div class="product-color">BEIGE</div>
-                <div class="product-price">₹11,999</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="banner-section">
-          <div class="banner-grid">
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/f040db5c0aa8cbf98e8e109dea0db6f423dacfb8" alt="Banner 1" class="banner-image" />
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/98efd962e9192a28a97e42067ad3447e388e3f9c" alt="Banner 2" class="banner-image" />
-          </div>
-        </section>
-
-        <section class="stores-section">
-          <div class="section-header">
-            <h2>STORES</h2>
-            <a href="#stores" class="view-all">VIEW ALL</a>
-          </div>
-          
-          <div class="stores-grid">
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a9729b8edfb7dfcf34677c5ad857db8f99c91c42" alt="Delhi Store" class="store-image" />
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/5a710961021d7c07bf5cf59881879979926e6969" alt="Hyderabad Store" class="store-image" />
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/d97078d1afd0e60bf8b89dc5f0bddee698b8af67" alt="Mumbai Store" class="store-image" />
-            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/3d6cc64500ae2eeb1d877fa13876a4a264d273f5" alt="Bangalore Store" class="store-image" />
-          </div>
-        </section>
-      </main>
-
-      <footer class="footer">
-        <div class="footer-content">
-          <div class="footer-grid">
-            <div class="footer-column">
-              <h3>Shop</h3>
-              <ul>
-                <li>New Arrivals</li>
-                <li>Trending</li>
-                <li>Men</li>
-                <li>Women</li>
-                <li>Kids</li>
-              </ul>
-            </div>
-            
-            <div class="footer-column">
-              <h3>Help</h3>
-              <ul>
-                <li>Customer Service</li>
-                <li>Track Order</li>
-                <li>Returns & Exchanges</li>
-                <li>Shipping</li>
-                <li>Contact Us</li>
-              </ul>
-            </div>
-            
-            <div class="footer-column">
-              <h3>About</h3>
-              <ul>
-                <li>Our Story</li>
-                <li>Careers</li>
-                <li>Corporate News</li>
-                <li>Investors</li>
-              </ul>
-            </div>
-            
-            <div class="footer-column">
-              <h3>Connect</h3>
-              <div class="social-icons">
-                <i class="ti ti-brand-facebook"></i>
-                <i class="ti ti-brand-instagram"></i>
-                <i class="ti ti-brand-twitter"></i>
-                <i class="ti ti-brand-youtube"></i>
-              </div>
-              
-              <div class="newsletter">
-                <h4>Subscribe to our newsletter</h4>
-                <form id="newsletter-form" class="newsletter-form">
-                  <input type="email" placeholder="Your email" required />
-                  <button type="submit">Subscribe</button>
-                </form>
-                <div id="subscription-message" class="subscription-message hidden">Thanks for subscribing!</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="footer-bottom">
-            <div class="copyright">© 2023 Sneaker Store. All rights reserved.</div>
-            <div class="footer-links">
-              <span>Privacy Policy</span>
-              <span>Terms of Service</span>
-              <span>Cookies Settings</span>
-            </div>
+          <div class="newsletter">
+            <h4>Subscribe to our newsletter</h4>
+            <form id="newsletter-form" class="newsletter-form">
+              <input type="email" placeholder="Your email" required />
+              <button type="submit">Subscribe</button>
+            </form>
+            <div id="subscription-message" class="subscription-message hidden">Thanks for subscribing!</div>
           </div>
         </div>
-      </footer>
+      </div>
+      <div class="footer-bottom">
+        <div class="copyright">
+          © 2023 Sneaker Store. All rights reserved.
+        </div>
+        <div class="footer-links">
+          <span>Privacy Policy</span>
+          <span>Terms of Service</span>
+          <span>Cookies Settings</span>
+        </div>
+      </div>
     </div>
-
-    <script>
-
-        // Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-  // Handle search functionality
-  const searchForm = document.querySelector('.search-bar');
-  searchForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const searchInput = this.querySelector('.search-input');
-    if (searchInput.value.trim()) {
-      console.log('Searching for:', searchInput.value);
-      // In a real app, you would trigger a search here
-    }
-  });
-
-
-  // Handle navigation menu
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => {
-    item.addEventListener('click', function() {
-      // Remove active class from all items
-      navItems.forEach(i => i.classList.remove('active'));
-      // Add active class to clicked item
-      this.classList.add('active');
-    });
-  });
-
-  // Handle favorite buttons
-  const favoriteButtons = document.querySelectorAll('.favorite-button');
-  favoriteButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const isFavorite = this.getAttribute('data-favorite') === 'true';
-      this.setAttribute('data-favorite', !isFavorite);
-      
-      // Update icon
-      const icon = this.querySelector('i');
-      if (!isFavorite) {
+  </footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  const favoriteButtons=document.querySelectorAll('.favorite-button');
+  favoriteButtons.forEach(button=>{
+    button.addEventListener('click',function(){
+      const isFavorite=this.getAttribute('data-favorite')==='true';
+      this.setAttribute('data-favorite',!isFavorite);
+      const icon=this.querySelector('i');
+      if(!isFavorite){
         icon.classList.remove('ti-heart');
         icon.classList.add('ti-heart-filled');
-        icon.style.color = '#e53e3e';
-      } else {
+        icon.style.color='#e53e3e';
+      }else{
         icon.classList.remove('ti-heart-filled');
         icon.classList.add('ti-heart');
-        icon.style.color = '';
+        icon.style.color='';
       }
     });
   });
-
-  // Handle newsletter subscription
-  const newsletterForm = document.getElementById('newsletter-form');
-  const subscriptionMessage = document.getElementById('subscription-message');
-  
-  if (newsletterForm) {
-    newsletterForm.addEventListener('submit', function(e) {
+  const newsletterForm=document.getElementById('newsletter-form');
+  const subscriptionMessage=document.getElementById('subscription-message');
+  if(newsletterForm){
+    newsletterForm.addEventListener('submit',function(e){
       e.preventDefault();
-      const emailInput = this.querySelector('input[type="email"]');
-      if (emailInput.value) {
-        console.log('Subscribing email:', emailInput.value);
-        
-        // Show success message
+      const emailInput=this.querySelector('input[type="email"]');
+      if(emailInput.value){
         subscriptionMessage.classList.remove('hidden');
-        emailInput.value = '';
-        
-        // Hide message after 3 seconds
-        setTimeout(() => {
-          subscriptionMessage.classList.add('hidden');
-        }, 3000);
+        emailInput.value='';
+        setTimeout(()=>{subscriptionMessage.classList.add('hidden');},3000);
       }
     });
   }
-
-  // Handle header icons
-  const wishlistButton = document.querySelector('[aria-label="Wishlist"]');
-  if (wishlistButton) {
-    wishlistButton.addEventListener('click', function() {
-      console.log('Navigate to wishlist');
-      // In a real app: window.location.href = '/wishlist';
-    });
-  }
-  
-  const cartButton = document.querySelector('[aria-label="Shopping Cart"]');
-  if (cartButton) {
-    cartButton.addEventListener('click', function() {
-      console.log('Navigate to cart');
-      // In a real app: window.location.href = '/cart';
-    });
-  }
-  
-  const profileButton = document.querySelector('[aria-label="User Profile"]');
-  if (profileButton) {
-    profileButton.addEventListener('click', function() {
-      console.log('Navigate to profile');
-      // In a real app: window.location.href = '/profile';
-    });
-  }
-
-  // Handle category menu
-  const categoryItems = document.querySelectorAll('.category-item');
-  categoryItems.forEach(item => {
-    item.addEventListener('click', function() {
-      console.log('Category selected:', this.textContent);
-      // In a real app, this would filter products or navigate to category page
+  const categoryItems=document.querySelectorAll('.category-item');
+  categoryItems.forEach(item=>{
+    item.addEventListener('click',function(){
+      console.log('Category selected:',this.textContent);
     });
   });
 });
-
-
-    </script>
-
-  </body>
+</script>
+</body>
 </html>

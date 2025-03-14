@@ -38,6 +38,8 @@ router.post("/resend-forgot-otp",profileController.resendOtp);
 
 router.post("/reset-password",profileController.postNewPassword);
 
+router.get("/products", userController.getProductsPage);
+
 
 
 module.exports = router;
