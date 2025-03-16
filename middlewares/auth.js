@@ -7,7 +7,10 @@ const userAuth = (req,res,next)=>{
             if(data && !data.isBlocked){
                 next();
             }else{
-                res.redirect("/login")
+                req.session.destroy(err => {
+                    if (err) console.error("Error destroying session:", err);
+                    return res.redirect("/login?message=User%20is%20Blocked%20by%20Admin");
+                  });
             }
         })
         .catch(error=>{
@@ -15,7 +18,7 @@ const userAuth = (req,res,next)=>{
             res.status(500).send("Internal Server Error")
         })
     }else{
-        res.redirect("/login")
+        res.redirect("/login");
     }
 }
 

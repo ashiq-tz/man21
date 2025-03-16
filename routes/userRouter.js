@@ -4,6 +4,8 @@ const userController = require("../controllers/user/userController");
 const passport = require("../config/passport");
 const profileController = require("../controllers/user/profileController")
 
+const {userAuth,adminAuth} = require("../middlewares/auth");
+
 
 router.get("/",userController.loadHomePage);
 
@@ -38,7 +40,8 @@ router.post("/resend-forgot-otp",profileController.resendOtp);
 
 router.post("/reset-password",profileController.postNewPassword);
 
-router.get("/products", userController.getProductsPage);
+router.get("/products",userController.getProductsPage);
+router.get("/product/:id", userController.getProductDetails);
 
 
 
