@@ -8,147 +8,31 @@
 </head>
   
 <style>
-  /* Body background and typography */
-  body {
-    background-color: #f5f5f5;
-    font-family: 'Arial', sans-serif;
-    color: #333;
-    margin: 0;
-    padding: 0;
-  }
-  /* Main content area */
-  .content-main {
-    margin-left: 50px;
-    margin-top: 20px;
-    margin-right: 20px;
-  }
-  /* Card styling */
-  .card {
-    border: none;
-    border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-  }
-  .card-header {
-    background-color: #f0f0f0;
-    border-bottom: 1px solid #e3e3e3;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    padding: 10px 15px;
-    font-weight: 600;
-  }
-  .card-body {
-    padding: 20px;
-  }
-  .content-header h2 {
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 20px;
-  }
-  .form-label {
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #555;
-  }
-  .form-control,
-  .form-select {
-    background-color: #f7f7f7;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: #333;
-    transition: border-color 0.3s ease;
-  }
-  .form-control:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 1px #3498db;
-  }
-  .error-message {
-    color: #e74c3c;
-    font-size: 0.9em;
-    margin-top: 5px;
-  }
-  .thumbnails-container {
+  /* Additional styling similar to product-add.ejs for the size cards */
+  #sizesContainer {
     display: flex;
-    overflow-x: auto;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 15px;
   }
-  .thumbnail {
-    position: relative;
-    display: inline-block;
-    margin: 5px;
-  }
-  .remove-icon {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #e74c3c;
-    color: #fff;
-    border-radius: 50%;
-    padding: 2px 6px;
-    cursor: pointer;
-    z-index: 9999;
-  }
-  .btn {
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s ease;
-  }
-  .btn.btn-md.rounded.font-sm.hover-up {
-    background-color: #3498db;
-    color: #fff;
-    padding: 10px 20px;
-    font-size: 0.95rem;
-  }
-  .btn.btn-md.rounded.font-sm.hover-up:hover {
-    background-color: #2980b9;
-  }
-  #saveButton1,
-  #saveButton2,
-  #saveButton3,
-  #saveButton4 {
-    background-color: #4caf50;
-    color: #fff;
-    border: none;
-    margin-left: 10px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
-  #saveButton1:hover,
-  #saveButton2:hover,
-  #saveButton3:hover,
-  #saveButton4:hover {
-    background-color: #43a047;
-  }
-  .mb-4 {
-    margin-bottom: 1.5rem !important;
-  }
-  .row > .col-lg-4,
-  .row > .col-sm-6 {
-    margin-bottom: 1rem;
-  }
-  .card-body.align-items-center {
-    margin-bottom: 15px;
-  }
-  .final-cropped {
-    display: none;
-    margin-left: 10px;
-    max-width: 120px;
+  .size-card {
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 6px;
+    width: 120px;
+    padding: 10px;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
   }
-  #imgView1, #imgView2, #imgView3, #imgView4 {
-  max-width: 300px;
-  max-height: 300px;
-  object-fit: contain;
-}
-
+  .size-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .size-card.active {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.4);
+  }
+  .size-card input[type="number"] {
+    width: 100%;
+    margin-top: 10px;
+  }
 </style>
   
 <section class="content-main">
@@ -161,9 +45,8 @@
     <div class="col-lg-6">
       <div class="card mb-4">
         <div class="card-body">
-          <!-- Note: the form action uses POST and the enctype is multipart/form-data -->
           <form method="post" action="/admin/EditProduct/<%= product._id %>" enctype="multipart/form-data" onsubmit="return validateAndSubmit()">
-            <!-- Product fields -->
+            <!-- Product Name, Brand, Description, Price, and Color -->
             <div class="mb-4">
               <label for="product_name" class="form-label">Product Name</label>
               <input type="text" placeholder="Type here" name="productName" value="<%= product.productName %>" class="form-control border" id="product_name">
@@ -200,13 +83,7 @@
                   <div id="salePrice-error" class="error-message"></div>
                 </div>
               </div>
-              <div class="col-lg-4">
-                <div class="mb-4">
-                  <label class="form-label">Quantity</label>
-                  <input placeholder="" name="quantity" type="text" value="<%= product.quantity %>" class="form-control border">
-                  <div id="quantity-error" class="error-message"></div>
-                </div>
-              </div>
+              <!-- Removed overall Quantity input -->
             </div>
             <div class="row">
               <div class="col-lg-4">
@@ -235,7 +112,29 @@
                 </div>
               </div>
             </div>
-            <!-- Images Section (Fixed 4 Slots with Unique Names) -->
+            <!-- New Sizes & Stock Section -->
+            <div class="mb-4">
+              <label class="form-label">Sizes &amp; Stock</label>
+              <div id="sizesContainer">
+                <% [5,6,7,8,9,10].forEach(function(sz) { 
+                     // Check if this size exists in product.variants
+                     let variant = null;
+                     if(product.variants){
+                       variant = product.variants.find(v => v.size == sz);
+                     }
+                %>
+                  <div class="size-card <%= variant ? 'active' : '' %>" id="card_<%= sz %>">
+                    <div>
+                      <input type="checkbox" name="size" id="size_<%= sz %>" value="<%= sz %>" onchange="toggleStockInput(this, '<%= sz %>')" <%= variant ? 'checked' : '' %>>
+                      <label for="size_<%= sz %>">Size <%= sz %></label>
+                    </div>
+                    <input type="number" name="stock_<%= sz %>" placeholder="Enter stock" min="0" <%= variant ? '' : 'disabled' %> value="<%= variant ? variant.stock : '' %>">
+                  </div>
+                <% }); %>
+              </div>
+              <div id="size-error" class="error-message"></div>
+            </div>
+            <!-- Images Section -->
             <div class="card mb-2">
               <div class="card-header">
                 <h4>Choose images</h4>
@@ -247,9 +146,7 @@
               <% for (let i = 0; i < maxImages; i++) { %>
                 <div class="row">
                   <div class="card-body align-items-center" style="position: relative;">
-                    <!-- Preview image for cropping -->
                     <img src="" alt="Preview" id="imgView<%= i+1 %>">
-                    <!-- File input with unique name (image1, image2, etc.) -->
                     <input class="form-control"
                            type="file"
                            name="image<%= i+1 %>"
@@ -257,12 +154,9 @@
                            accept="image/png, image/jpeg, image/jpg"
                            onchange="viewImage(event, <%= i+1 %>)">
                     <% if (product.productImage[i]) { %>
-                      <!-- Display existing image -->
                       <img src="/uploads/product-images/<%= product.productImage[i] %>" alt="Product Image" id="finalCropped<%= i+1 %>" class="final-cropped" style="display: inline;">
-                      <!-- Delete icon (if you want to immediately delete, or adapt for deferred deletion) -->
                       <i onclick="deleteSingleImage('<%= product.productImage[i] %>', '<%= product._id %>')" style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: red; font-size: 20px;" class="fas fa-times"></i>
                     <% } else { %>
-                      <!-- No image for this slot; preview remains hidden -->
                       <img src="" alt="" id="finalCropped<%= i+1 %>" class="final-cropped">
                     <% } %>
                     <div id="images-error" class="error-message"></div>
@@ -289,12 +183,29 @@
 <%- include("../../views/partials/admin/footer") %>
   
 <script>
+  // Toggle stock input and active styling for size cards
+  function toggleStockInput(checkbox, size) {
+    const stockInput = document.querySelector(`input[name="stock_${size}"]`);
+    const card = document.getElementById("card_" + size);
+    if (checkbox.checked) {
+      stockInput.disabled = false;
+      stockInput.required = true;
+      card.classList.add("active");
+    } else {
+      stockInput.disabled = true;
+      stockInput.required = false;
+      stockInput.value = "";
+      card.classList.remove("active");
+    }
+  }
+  
   function validateAndSubmit(){
     if(validateForm()){
       document.forms[0].submit();
     }
   }
   
+  // The same image cropping, preview, and file select functions as in product-add.ejs
   function viewImage(event, index) {
     const input = event.target;
     if (!input.files || input.files.length === 0) return;
@@ -357,6 +268,45 @@
     reader.readAsDataURL(file);
   }
   
+  const selectedImages = [];
+  document.getElementById("input1").addEventListener("change", handleFileSelect);
+  document.getElementById("input2").addEventListener("change", handleFileSelect);
+  document.getElementById("input3").addEventListener("change", handleFileSelect);
+  document.getElementById("input4").addEventListener("change", handleFileSelect);
+  
+  function handleFileSelect(event){
+    const addedImagesContainer = document.getElementById("addedImagesContainer");
+    addedImagesContainer.innerHTML = "";
+    const files = event.target.files;
+  
+    for(let i = 0; i < files.length; i++){
+      const file = files[i];
+      selectedImages.push(file);
+      const thumbnail = document.createElement("div");
+      thumbnail.classList.add("thumbnail");
+  
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.alt = "thumbnail";
+      img.style.width = "50px";
+      img.style.height = "auto";
+      const removeIcon = document.createElement("span");
+      removeIcon.classList.add("remove-icon");
+      removeIcon.innerHTML = "&times;";
+      removeIcon.addEventListener("click", function(){
+        const index = selectedImages.indexOf(file);
+        if(index !== -1){
+          selectedImages.splice(index, 1);
+        }
+        thumbnail.remove();
+      });
+  
+      thumbnail.appendChild(img);
+      thumbnail.appendChild(removeIcon);
+      addedImagesContainer.appendChild(thumbnail);
+    }
+  }
+  
   function validateForm() {
     clearErrorMessages();
     const name = document.getElementsByName('productName')[0].value;
@@ -381,12 +331,6 @@
       isValid = false;
     } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
       displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
-      isValid = false;
-    }
-  
-    const quantity = document.getElementsByName('quantity')[0] ? document.getElementsByName('quantity')[0].value : "";
-    if (parseInt(quantity) < 0) {
-      displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
       isValid = false;
     }
   
@@ -443,12 +387,12 @@
     });
   }
   
-  // SweetAlert popup for product add success
+  // SweetAlert popup for product update success
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('success') === 'true') {
     Swal.fire({
-      title: 'Product added successfully!',
-      text: 'Your product has been saved to the database.',
+      title: 'Product updated successfully!',
+      text: 'Your changes have been saved to the database.',
       icon: 'success',
       confirmButtonText: 'OK'
     });

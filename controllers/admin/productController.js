@@ -28,21 +28,38 @@ const addProducts = async (req, res) => {
     });
 
     if (!productExists) {
-
+      // Get selected sizes (always as an array)
       let sizes = req.body.size;
-    if (!sizes) {
-      sizes = []; // if no sizes are selected
-    } else if (!Array.isArray(sizes)) {
-      sizes = [sizes];
-    }
-    sizes = sizes.map(Number);
+      if (!sizes) {
+        sizes = []; // if no sizes are selected
+      } else if (!Array.isArray(sizes)) {
+        sizes = [sizes];
+      }
+      sizes = sizes.map(Number);
+
+      // Build the variants array by reading the stock value for each selected size.
+      // Expect input names like "stock_8" for size 8, "stock_9" for size 9, etc.
+      let variants = [];
+      sizes.forEach(size => {
+        const stockValue = req.body[`stock_${size}`];
+        if (stockValue !== undefined && stockValue !== "") {
+          variants.push({ size, stock: Number(stockValue) });
+        }
+      });
 
       const images = [];
       if (req.files && req.files.length > 0) {
         for (let i = 0; i < req.files.length; i++) {
           const originalImagePath = req.files[i].path;
-          const resizedImagePath = path.join('public', 'uploads', 'product-images', req.files[i].filename);
-          await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
+          const resizedImagePath = path.join(
+            'public',
+            'uploads',
+            'product-images',
+            req.files[i].filename
+          );
+          await sharp(originalImagePath)
+            .resize({ width: 440, height: 440 })
+            .toFile(resizedImagePath);
           images.push(req.files[i].filename);
         }
       }
@@ -52,6 +69,7 @@ const addProducts = async (req, res) => {
         return res.status(400).send("Invalid category name");
       }
 
+      // Create a new product using the variants array
       const newProduct = new Product({
         productName: products.productName,
         description: products.description,
@@ -59,11 +77,10 @@ const addProducts = async (req, res) => {
         category: categoryId._id,
         regularPrice: products.regularPrice,
         salePrice: products.salePrice,
-        createdAt: new Date(),
-        quantity: products.quantity,
-        size: sizes,
-        size: products.size,
+        // You can remove or repurpose the old quantity field if no longer needed.
         color: products.color,
+        // Save the variants array with each size and its stock
+        variants: variants,
         productImage: images,
         status: 'Available',
       });
@@ -71,13 +88,14 @@ const addProducts = async (req, res) => {
       await newProduct.save();
       return res.redirect("/admin/addProducts?success=true");
     } else {
-      return res.status(400).json("Product already exist. Try with another name");
+      return res.status(400).json("Product already exists. Try with another name");
     }
   } catch (error) {
     console.error("Error saving product", error);
     return res.redirect("/admin/pageerror");
   }
 };
+
 
 const getAllProducts = async (req, res) => {
   try {
@@ -203,7 +221,7 @@ const editProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id });
     const data = req.body;
 
-    // 1. Check if product name is duplicated
+    // 1. Check for duplicate product name
     const existingProduct = await Product.findOne({
       productName: data.productName,
       _id: { $ne: id }
@@ -219,25 +237,44 @@ const editProduct = async (req, res) => {
     product.category = data.category;
     product.regularPrice = data.regularPrice;
     product.salePrice = data.salePrice;
-    product.quantity = data.quantity;
-    product.size = data.size;
     product.color = data.color;
+    // Remove old quantity/size updates:
+    // product.quantity = data.quantity;
+    // product.size = data.size;
 
-    // 3. For each slot (1..4), if a new file is uploaded:
+    // --- Process variants from sizes & stock inputs ---
+    let sizes = req.body.size;
+    if (!sizes) {
+      sizes = []; // No sizes selected
+    } else if (!Array.isArray(sizes)) {
+      sizes = [sizes]; // Convert single value to array
+    }
+    sizes = sizes.map(Number);
+
+    let variants = [];
+    sizes.forEach(size => {
+      const stockValue = req.body[`stock_${size}`];
+      if (stockValue !== undefined && stockValue !== "") {
+        variants.push({ size, stock: Number(stockValue) });
+      }
+    });
+    product.variants = variants;
+    // --- End variants processing ---
+
+    // 3. Process image updates for each slot (1..4)
     for (let i = 1; i <= 4; i++) {
       const fieldName = 'image' + i;
       if (req.files && req.files[fieldName] && req.files[fieldName][0]) {
         const file = req.files[fieldName][0];
         const filename = file.filename;
-
-        // A) Resize from "re-image" to "product-images"
+        // Resize the image using sharp
         const originalImagePath = file.path;
         const resizedImagePath = path.join("public", "uploads", "product-images", filename);
         await sharp(originalImagePath)
           .resize({ width: 440, height: 440 })
           .toFile(resizedImagePath);
 
-        // B) If there's an old file in this slot, remove it from disk
+        // Remove the old image from disk if it exists
         if (product.productImage[i - 1]) {
           const oldFilename = product.productImage[i - 1];
           const oldImagePath = path.join("public", "uploads", "product-images", oldFilename);
@@ -245,13 +282,12 @@ const editProduct = async (req, res) => {
             fs.unlinkSync(oldImagePath);
           }
         }
-
-        // C) Replace the old filename in the array with the new one
+        // Update the product image array
         product.productImage[i - 1] = filename;
       }
     }
 
-    // 4. Save
+    // 4. Save changes
     await product.save();
     res.redirect("/admin/products");
   } catch (error) {
@@ -259,6 +295,7 @@ const editProduct = async (req, res) => {
     res.redirect("/admin/pageerror");
   }
 };
+
 
 
 

@@ -40,6 +40,26 @@ router.post("/resend-forgot-otp",profileController.resendOtp);
 
 router.post("/reset-password",profileController.postNewPassword);
 
+router.get("/userProfile",userAuth,profileController.userProfile)
+
+router.get("/change-email",userAuth,profileController.changeEmail);
+router.post("/change-email",userAuth,profileController.changeEmailValid)
+router.post("/verify-email-otp",userAuth,profileController.verifyEmailOtp);
+router.post("/update-email",userAuth,profileController.updateEmail)
+router.get("/change-password",userAuth,profileController.changePassword)
+router.post("/change-password",userAuth,profileController.changePasswordValid)
+router.post("/verify-changepassword-otp",userAuth,profileController.verifyChangePassOtp)
+
+router.get("/change-password-otp", userAuth, profileController.getChangePasswordOtpPage);
+
+//Address management
+router.get("/addAddress",userAuth,profileController.addAddress)
+
+
+
+
+
+
 router.get("/products",userController.getProductsPage);
 router.get("/product/:id", userController.getProductDetails);
 

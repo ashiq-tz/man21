@@ -4,6 +4,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
+const Banner = require("../../models/bannerSchema");
 
 const env = require('dotenv').config();
 const nodemailer = require('nodemailer');
@@ -11,6 +12,12 @@ const bcrypt = require("bcrypt");
 
 const loadHomePage = async (req, res) => {
   try {
+    const today = new Date().toISOString();
+    const findBanner = await Banner.find({
+      startDate:{$lt:new Date(today)},
+      endDate:{$gt:new Date(today)},
+    })
+
     const userId = req.session.user;
     let userData = null;
     if (userId) {
@@ -34,7 +41,8 @@ const loadHomePage = async (req, res) => {
       newArrivals,
       trendingSneakers,
       featuredProducts,
-      categories
+      categories,
+      banner:findBanner || []
     });
   } catch (error) {
     console.log("home page not found:", error);
@@ -46,7 +54,7 @@ const loadSignup = async (req, res) => {
   try {
     const message = req.session.message || "";
     req.session.message = "";
-    return res.render("signup", { message });
+    return res.render("signup", { message, hideAuthLinks: true });
   } catch (error) {
     console.log("Home page not found");
     res.status(500).send("server error");
@@ -175,7 +183,7 @@ const loadLogin = async (req, res) => {
     if (!req.session.user) {
       const message = req.session.message || "";
       req.session.message = "";
-      return res.render("login", { message });
+      return res.render("login", { message, hideAuthLinks: true });
     } else {
       res.redirect("/");
     }
@@ -223,6 +231,10 @@ const logout = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
+
+
+
 
 const getProductsPage = async (req, res) => {
   try {
@@ -316,8 +328,15 @@ const getProductsPage = async (req, res) => {
     const allBrands = await Brand.find({ isBlocked: false }).lean();
     const categories = await Category.find({ isListed: true }).lean();
 
+    const userId = req.session.user;
+    let userData = null;
+    if (userId) {
+      userData = await User.findOne({ _id: userId });
+    }
+
     // Render
     res.render("product-list", {
+      user: userData,
       products,
       currentPage: page,
       totalPages,
@@ -375,7 +394,15 @@ const getProductDetails = async (req, res) => {
     .limit(4)
     .lean();
 
-    return res.render("product-details", {
+    // Fetch full user details if logged in
+    const userId = req.session.user;
+    let userData = null;
+    if (userId) {
+      userData = await User.findById(userId);
+    }
+
+    return res.render("product-details2", {
+      user: userData,
       product,
       relatedProducts
     });

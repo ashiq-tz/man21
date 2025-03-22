@@ -31,18 +31,16 @@ const productSchema = new Schema({
         type: Number,
         default:0
     },
-    quantity: {
-        type: Number,
-        default: true
-    },
     color: {
         type: String,
         required: true
     },
-    size: {
-        type: [Number],
-        default: []
-    },
+    variants: [
+        {
+          size: { type: Number, required: true },
+          stock: { type: Number, required: true }
+        }
+      ],
     
     productImage: {
         type: [String],

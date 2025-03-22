@@ -457,10 +457,11 @@ body {
       <div class="product-grid">
         <% if (newArrivals && newArrivals.length > 0) { %>
           <% newArrivals.forEach(product => { %>
+            <a href="/product/<%= product._id %>" style="text-decoration: none; color: inherit;">
             <div class="product-card">
               <div class="product-image-container">
                 <img src="/uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : 'placeholder.jpg' %>" alt="<%= product.productName %>" class="product-image" />
-                <button class="favorite-button" data-favorite="false">
+                <button class="favorite-button" data-favorite="false" onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite(this);">
                   <i class="ti ti-heart"></i>
                 </button>
               </div>
@@ -471,6 +472,7 @@ body {
                 <div class="product-price">₹<%= product.salePrice.toLocaleString('en-IN') %></div>
               </div>
             </div>
+          </a>
           <% }) %>
         <% } else { %>
           <p>No new arrivals found.</p>
@@ -485,6 +487,7 @@ body {
       <div class="product-grid">
         <% if (trendingSneakers && trendingSneakers.length > 0) { %>
           <% trendingSneakers.forEach(product => { %>
+            <a href="/product/<%= product._id %>" style="text-decoration: none; color: inherit;">
             <div class="product-card">
               <div class="product-image-container">
                 <img src="/uploads/product-images/<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : 'placeholder.jpg' %>" alt="<%= product.productName %>" class="product-image" />
@@ -499,6 +502,7 @@ body {
                 <div class="product-price">₹<%= product.salePrice.toLocaleString('en-IN') %></div>
               </div>
             </div>
+            </a>
           <% }) %>
         <% } else { %>
           <p>No trending sneakers found.</p>
@@ -654,6 +658,26 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
 });
+//to stop wishlist btn navigate to productDetailspage.. you can avoid this in upcoming days with new wishlist logic
+function toggleFavorite(btn) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const isFavorite = btn.getAttribute('data-favorite') === 'true';
+    btn.setAttribute('data-favorite', !isFavorite);
+    
+    const icon = btn.querySelector('i');
+    if (!isFavorite) {
+      icon.classList.remove('ti-heart');
+      icon.classList.add('ti-heart-filled');
+      icon.style.color = '#e53e3e';
+    } else {
+      icon.classList.remove('ti-heart-filled');
+      icon.classList.add('ti-heart');
+      icon.style.color = '';
+    }
+  }
+
 </script>
 </body>
 </html>

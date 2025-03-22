@@ -6,22 +6,19 @@
     <title>MAN 21</title>
     <meta name="description" content="Create your account at MAN 21" />
     
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Use Bootstrap 4.6 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="/css/styles.css">
-
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
-    />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <!-- Removed Select2 CSS -->
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Inter:wght@400;500;700&family=Work+Sans:wght@400;500&family=SF+Pro+Display:wght@400;500&family=Roboto:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!--IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-
     <style>
       .dropdown{
         position: relative;
@@ -52,60 +49,39 @@
       .header{
         position: relative;
         z-index: 500;
-
       }
-
     </style>
-
   </head>
-
   <body>
     <!-- Header -->
     <header class="header">
       <div class="header-container">
         <a href="/" class="logo">
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/7ddf8ec9dd2f8f977641f573147e231659dfa812"
-            alt="MAN 21 Logo"
-          />
+          <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/7ddf8ec9dd2f8f977641f573147e231659dfa812" alt="MAN 21 Logo" />
         </a>
-        <!-- <div class="search-bar d-flex align-items-center">
-          <i class="ti ti-search me-2"></i>
-          <input type="text" class="form-control search-input" placeholder="Search">
-        </div> -->
-        
-        
-        <nav class="main-nav" >
+        <nav class="main-nav">
           <a href="/" class="active" style="text-decoration: none;">Home</a>
           <a href="/about" style="text-decoration: none;">About</a>
           <a href="/contact" style="text-decoration: none;">Contact Us</a>
-          <!-- <a href="/blog">Blog</a> -->
           <% if (typeof user !== 'undefined' && user) { %>
             <div class="dropdown">
-              <a href="#" class="sign-in-link"><%= user.name %></a>
+              <a href="/userProfile" class="sign-in-link" style="text-decoration: none;"><%= user.name %></a>
               <div class="dropdown-content">
                 <a href="/userProfile" style="text-decoration: none;">Profile</a>
                 <a href="/logout" style="text-decoration: none;">Logout</a>
               </div>
             </div>
           <% } else { %>
-            <a href="/login" style="text-decoration: none;">Login</a>
-            <a href="/signup" style="text-decoration: none;">Signup</a>
+            <% if (typeof hideAuthLinks === 'undefined' || !hideAuthLinks) { %>
+              <a href="/login" style="text-decoration: none;">Login</a>
+              <a href="/signup" style="text-decoration: none;">Signup</a>
+            <% } %>
           <% } %>
-          
-          
-
         </nav>
         <div class="action-buttons">
-          <button aria-label="Favorites">
-            <i class="ti ti-heart"></i>
-          </button>
-          <button aria-label="Shopping Cart">
-            <i class="ti ti-shopping-cart"></i>
-          </button>
-          <button aria-label="User Account">
-            <i class="ti ti-user"></i>
-          </button>
+          <button aria-label="Favorites"><i class="ti ti-heart"></i></button>
+          <button aria-label="Shopping Cart"><i class="ti ti-shopping-cart"></i></button>
+          <a href="/userProfile" class="button" aria-label="User Account" style="text-decoration: none;"><i class="ti ti-user"></i></a>
         </div>
       </div>
     </header>

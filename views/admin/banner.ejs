@@ -1,0 +1,70 @@
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'banner' }) %>
+
+<div class="main-content">
+  <div class="content-header row">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="content-title card-title">Banners</h2>
+    </div>
+  </div>
+  
+  <!-- Your table and other content -->
+  <div class="right mt-5">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Image</th>
+          <th scope="col">Title</th>
+          <th scope="col">Description</th>
+          <th scope="col">Active</th>
+          <th scope="col">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <%if(locals.data){%>
+            <%for(let i=0;i<data.length;i++){%>
+        <tr>
+          <td>
+            <img src="/uploads/re-image/<%=data[i].image%>" style="height: 2rem; width: 3rem;" class="img-xs" alt="Item">
+          </td>
+          <td>
+            <%=data[i].title%>
+          </td>
+          <td>
+            <%=data[i].description%>
+          </td>
+          <td>
+            <%if(data[i].startDate < Date.now() && data[i].endDate > Date.now() ){%>
+                <span class="badge rounded-pill bg-success">Active</span>
+                <%}else{%>
+                <span class="badge rounded-pill bg-danger">Inactive</span>
+                <%}%>
+          </td>
+          <td class="action" data-title="Remove">
+            <a href="/admin/deleteBanner?id=<%=data[i]._id%>">
+              <i class="fa-solid fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+        <%}%>
+        <%}else{%>
+            No Banner Found
+            <%}%>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Banner button -->
+  <div class="container mt-3">
+    <div class="row justify-content-center">
+      <div class="col-md-6 text-center">
+        <a href="/admin/addBanner">
+          <button class="btn btn-primary mt-3 mr-200" type="submit">Add Banner</button>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>
