@@ -1,0 +1,94 @@
+<%- include("../../views/partials/user/header") %>
+
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<main class="main py-5" style="background-color: #f7f7f7;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <!-- Card for Edit Profile -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Edit Profile</h2>
+          </div>
+          <div class="card-body">
+            <!-- Form with id for AJAX submission -->
+            <form id="profileEditForm" action="/profileEdit" method="POST">
+              <div class="form-group">
+                <label for="name" class="font-weight-bold">Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required>
+              </div>
+              <div class="form-group">
+                <label for="phone" class="font-weight-bold">Phone</label>
+                <input type="text" class="form-control" id="phone" name="phone" value="<%= user.phone %>" required>
+                <small class="form-text text-muted">Must be exactly 10 digits.</small>
+              </div>
+              <button type="submit" class="btn btn-success">Save Changes</button>
+              <a href="/userProfile" class="btn btn-secondary ml-2">Cancel</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../../views/partials/user/footer") %>
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Assuming jQuery is already included in your partials -->
+<script>
+  $(document).ready(function() {
+    $("#profileEditForm").submit(function(e) {
+      e.preventDefault();
+      
+      // Validate phone: must be exactly 10 digits
+      const phone = $("#phone").val().trim();
+      if (!/^\d{10}$/.test(phone)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Phone Number',
+          text: 'Phone number must be exactly 10 digits.',
+        });
+        return;
+      }
+      
+      // Serialize form data and send via AJAX
+      const formData = $(this).serialize();
+      $.ajax({
+        url: '/profileEdit',
+        method: 'POST',
+        data: formData,
+        success: function(response) {
+          // Expecting a JSON response with a success flag and message
+          if (response.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: response.message,
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.href = '/userProfile';
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: response.message,
+            });
+          }
+        },
+        error: function() {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while updating your profile.',
+          });
+        }
+      });
+    });
+  });
+</script>

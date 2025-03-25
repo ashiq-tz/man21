@@ -1,0 +1,251 @@
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'coupon' }) %>
+
+<!-- Additional custom styles (optional) -->
+<style>
+  .error-message {
+    color: red;
+    margin-top: 5px;
+  }
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+</style>
+
+<section class="content-main container my-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col text-center">
+      <h2 class="content-title card-title">Edit Coupon</h2>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <!-- Edit Coupon Form -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Update Coupon Details</h5>
+
+          <form id="coupon-form" method="post" action="/admin/updateCoupon">
+            <!-- Hidden ID Field -->
+            <input type="hidden" id="coupon-id" value="<%= findCoupon._id %>" />
+
+            <!-- Coupon Name -->
+            <div class="mb-3">
+              <label for="coupon-name" class="form-label">Coupon Name</label>
+              <input
+                type="text"
+                id="coupon-name"
+                name="couponName"
+                value="<%= findCoupon.name %>"
+                placeholder="Type here"
+                class="form-control"
+              />
+              <div id="error-coupon-name" class="error-message"></div>
+            </div>
+
+            <!-- Start Date -->
+            <div class="mb-3">
+              <label for="startingDate" class="form-label">Start Date</label>
+              <input
+                type="date"
+                name="startDate"
+                class="form-control"
+                id="startingDate"
+                required
+              />
+              <div id="error-start-date" class="error-message"></div>
+            </div>
+
+            <!-- End Date -->
+            <div class="mb-3">
+              <label for="expiringDate" class="form-label">End Date</label>
+              <input
+                type="date"
+                name="endDate"
+                class="form-control"
+                id="expiringDate"
+                required
+              />
+              <div id="error-end-date" class="error-message"></div>
+            </div>
+
+            <!-- Offer Price -->
+            <div class="mb-3">
+              <label for="offer-price" class="form-label">Offer Price</label>
+              <input
+                type="text"
+                id="offer-price"
+                name="offerPrice"
+                value="<%= findCoupon.offerPrice %>"
+                placeholder="Type here"
+                class="form-control"
+              />
+              <div id="error-offer-price" class="error-message"></div>
+            </div>
+
+            <!-- Minimum Price -->
+            <div class="mb-3">
+              <label for="minimum-price" class="form-label">Minimum Price</label>
+              <input
+                type="text"
+                name="minimumPrice"
+                id="minimum-price"
+                value="<%= findCoupon.minimumPrice %>"
+                placeholder="Type here"
+                class="form-control"
+              />
+              <div id="error-minimum-price" class="error-message"></div>
+            </div>
+
+            <!-- Update Button -->
+            <button type="submit" class="btn btn-primary w-100">
+              Update Coupon
+            </button>
+
+            <div id="err-msg" class="error-message mt-2"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include SweetAlert2 if not already included in your header -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Set default start/end dates on DOMContentLoaded
+  document.addEventListener("DOMContentLoaded", function() {
+    setDefaultStartDate();
+    setDefaultEndDate();
+  });
+
+  function setDefaultStartDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    document.getElementById("startingDate").value = `${year}-${month}-${day}`;
+  }
+
+  function setDefaultEndDate() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const day = String(tomorrow.getDate()).padStart(2, "0");
+    document.getElementById("expiringDate").value = `${year}-${month}-${day}`;
+  }
+
+  // Intercept form submission to do client-side validation first
+  document.getElementById("coupon-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    if (validateForm()) {
+      updateCoupon();
+    }
+  });
+
+  function validateForm() {
+    // Clear previous errors
+    document.querySelectorAll(".error-message").forEach((el) => (el.textContent = ""));
+
+    const sDate = document.getElementsByName("startDate")[0].value;
+    const eDate = document.getElementsByName("endDate")[0].value;
+    const sDateObj = new Date(sDate);
+    const eDateObj = new Date(eDate);
+    const todayDateObj = new Date();
+    todayDateObj.setHours(0, 0, 0, 0);
+
+    if (sDateObj > eDateObj) {
+      document.getElementById("error-end-date").textContent = "End date should be after the start date";
+      return false;
+    }
+
+    if (sDateObj <= todayDateObj) {
+      document.getElementById("error-start-date").textContent = "Starting date should be >= today's date";
+      return false;
+    }
+
+    let name = document.getElementsByName("couponName")[0].value.trim();
+    const nameRegex = /^[A-Za-z0-9]{1,50}$/;
+    if (!nameRegex.test(name)) {
+      document.getElementById("error-coupon-name").textContent =
+        "Coupon Name must be 1-50 alphanumeric characters.";
+      return false;
+    }
+
+    const offerPriceInput = document.getElementById("offer-price");
+    const minimumPriceInput = document.getElementById("minimum-price");
+
+    const offerPrice = parseInt(offerPriceInput.value.trim() || "NaN", 10);
+    const minimumPrice = parseInt(minimumPriceInput.value.trim() || "NaN", 10);
+
+    if (isNaN(offerPrice)) {
+      document.getElementById("error-offer-price").textContent = "Please enter a valid numeric Offer Price";
+      return false;
+    }
+
+    if (isNaN(minimumPrice)) {
+      document.getElementById("error-minimum-price").textContent = "Please enter a valid numeric Minimum Price";
+      return false;
+    }
+
+    if (offerPrice < 0) {
+      document.getElementById("error-offer-price").textContent = "Offer Price must be a positive number";
+      return false;
+    }
+
+    if (minimumPrice < 0) {
+      document.getElementById("error-minimum-price").textContent = "Minimum Price must be a positive number";
+      return false;
+    }
+
+    if (offerPrice >= minimumPrice) {
+      document.getElementById("error-offer-price").textContent = "Offer Price must be less than Minimum Price";
+      return false;
+    }
+
+    return true;
+  }
+
+  function updateCoupon() {
+    $.ajax({
+      url: "/admin/updateCoupon",
+      method: "POST",
+      data: {
+        couponId: document.getElementById("coupon-id").value,
+        couponName: document.getElementById("coupon-name").value,
+        startDate: document.getElementById("startingDate").value,
+        endDate: document.getElementById("expiringDate").value,
+        offerPrice: document.getElementById("offer-price").value,
+        minimumPrice: document.getElementById("minimum-price").value,
+      },
+      success: function(response) {
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Coupon updated successfully!",
+          confirmButtonText: "OK",
+        }).then(() => {
+          window.location.href = "/admin/coupon";
+        });
+      },
+      error: function(xhr, status, error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to update the coupon. Please try again!",
+          confirmButtonText: "OK",
+        });
+        console.error("Error updating coupon:", error);
+      },
+    });
+  }
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

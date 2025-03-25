@@ -23,6 +23,7 @@ const customerInfo = async (req,res)=>{
                 {email:{$regex:".*"+search+".*"}}
             ]
         })
+        .sort({createdAt : -1})
         .limit(limit*1)
         .skip((page-1)*limit)
         .exec();

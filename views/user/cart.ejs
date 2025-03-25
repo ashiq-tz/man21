@@ -1,0 +1,228 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+  .cart-container {
+    padding: 30px 0;
+  }
+  .cart-item-table img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  .cart-item-productname {
+    font-weight: 500;
+    font-size: 1rem;
+  }
+  .cart-item-price {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .cart-quantity-btn {
+    border: none;
+    width: 30px;
+    height: 30px;
+    background-color: #f0f0f0;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    margin: 0 5px;
+  }
+  .cart-summary {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 20px;
+    background-color: #fff;
+  }
+  .cart-summary h5 {
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 15px;
+  }
+  .checkout-btn {
+    width: 100%;
+    margin-top: 20px;
+  }
+  .disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+</style>
+
+<main class="main cart-container" style="background-color: #f7f7f7;">
+  <div class="container">
+    <div class="row">
+      <!-- CART ITEMS (Left Column) -->
+      <div class="col-lg-8 mb-4">
+        <h3 class="mb-4">My Cart</h3>
+
+        <% if (cart && cart.items.length > 0) { 
+             // Calculate subtotal here:
+             let subtotal = 0;
+             // Also figure out if any item is out of stock:
+             let totalStockIssues = false;
+        %>
+          <table class="table cart-item-table">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 40%">Product</th>
+                <th scope="col" style="width: 15%">Price</th>
+                <th scope="col" style="width: 20%">Quantity</th>
+                <th scope="col" style="width: 15%">Subtotal</th>
+                <th scope="col" style="width: 10%">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% cart.items.forEach(item => {
+                  const product = item.productId;
+                  const outOfStock = (product.stock === 0);
+                  const itemSubtotal = product.salePrice * item.quantity;
+                  subtotal += itemSubtotal;
+                  if (outOfStock) totalStockIssues = true;
+              %>
+                <tr class="<%= outOfStock ? 'table-danger' : '' %>">
+                  <!-- Product Column -->
+                  <td class="align-middle d-flex align-items-center">
+                    <img 
+                      src="/uploads/product-images/<%= product.productImage && product.productImage.length
+                            ? product.productImage[0] 
+                            : 'placeholder.jpg' %>" 
+                      alt="<%= product.productName %>"
+                      class="img-thumbnail"
+                    />
+                    <span class="cart-item-productname">
+                      <%= product.productName %>
+                    </span>
+                  </td>
+                  <!-- Price Column -->
+                  <td class="align-middle cart-item-price">
+                    ₹<%= product.salePrice.toLocaleString('en-IN') %>
+                  </td>
+                  <!-- Quantity Column -->
+                  <td class="align-middle">
+                    <% if (!outOfStock) { %>
+                      <button 
+                        class="cart-quantity-btn"
+                        onclick="updateQuantity('<%= product._id %>', 'decrement')"
+                      >-</button>
+                      <span><%= item.quantity %></span>
+                      <button 
+                        class="cart-quantity-btn"
+                        onclick="updateQuantity('<%= product._id %>', 'increment')"
+                      >+</button>
+                    <% } else { %>
+                      <span>Out of stock</span>
+                    <% } %>
+                  </td>
+                  <!-- Subtotal Column -->
+                  <td class="align-middle">
+                    ₹<%= itemSubtotal.toLocaleString('en-IN') %>
+                  </td>
+                  <!-- Actions Column -->
+                  <td class="align-middle">
+                    <a 
+                      href="/removeFromCart?productId=<%= product._id %>" 
+                      class="btn btn-sm btn-danger"
+                    >
+                      Remove
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+      </div>
+
+      <!-- ORDER SUMMARY (Right Column) -->
+      <div class="col-lg-4">
+        <% 
+          // Now we can compute other values (youSaved, deliveryFee, total, etc.)
+          let youSaved = 0;  
+          let deliveryFee = 0; 
+          let total = subtotal + deliveryFee;
+        %>
+        <div class="cart-summary">
+          <h5>Order Summary</h5>
+          <div class="summary-line">
+            <span>Subtotal:</span>
+            <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+          </div>
+          <div class="summary-line">
+            <span>You Saved:</span>
+            <span>₹<%= youSaved.toLocaleString('en-IN') %></span>
+          </div>
+          <div class="summary-line">
+            <span>Delivery Fee:</span>
+            <span>₹<%= deliveryFee.toLocaleString('en-IN') %></span>
+          </div>
+          <hr />
+          <div class="summary-total">
+            <span>Total:</span>
+            <span>₹<%= total.toLocaleString('en-IN') %></span>
+          </div>
+          <!-- If any out-of-stock item, disable the checkout button -->
+          <a 
+            href="/checkout" 
+            class="btn btn-success checkout-btn <%= totalStockIssues ? 'disabled' : '' %>"
+          >
+            Go to Checkout
+          </a>
+        </div>
+      <% } else { %>
+        <!-- If cart is empty, you could show some message or recommended products here -->
+        <p>Your cart is empty.</p>
+      <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../../views/partials/user/footer") %>
+
+<!-- If jQuery/SweetAlert2 are not included globally, add them here -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  function updateQuantity(productId, action) {
+    $.ajax({
+      url: '/updateCartItemQuantity',
+      method: 'POST',
+      data: { productId: productId, action: action },
+      success: function(response) {
+        if (response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated',
+            text: response.message,
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => location.reload());
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: response.message,
+          });
+        }
+      },
+      error: function() {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong.',
+        });
+      }
+    });
+  }
+</script>

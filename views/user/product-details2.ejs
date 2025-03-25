@@ -1,7 +1,5 @@
 <%- include("../../views/partials/user/header") %>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-
 <style>
   .product-details-container {
     max-width: 1200px;
@@ -19,15 +17,11 @@
   .breadcrumbs a:hover {
     text-decoration: underline;
   }
-  
-  /* Layout container for images + details */
   .details-content {
     display: flex;
     gap: 30px;
     flex-wrap: wrap;
   }
-  
-  /* LEFT SIDE: Image Section (new design) */
   .image-section {
     flex: 1 1 400px;
     position: relative;
@@ -50,23 +44,17 @@
     cursor: pointer;
     border: 1px solid #ccc;
   }
-
-  /* RIGHT SIDE: Info Section */
   .info-section {
     flex: 1 1 400px;
     display: flex;
     flex-direction: column;
     gap: 15px;
   }
-
-  /* Brand styling */
   .product-brand {
     font-size: 14px;
     text-transform: uppercase;
     color: #555;
   }
-
-  /* Product title and color */
   .product-title {
     font-size: 24px;
     font-weight: 600;
@@ -78,8 +66,6 @@
     color: #666;
     text-transform: uppercase;
   }
-
-  /* Price styling */
   .price-section {
     font-size: 24px;
     font-weight: 600;
@@ -92,8 +78,6 @@
     margin-left: 8px;
     font-weight: normal;
   }
-
-  /* Shoe Size + size boxes */
   .size-label {
     text-transform: uppercase;
     font-weight: 600;
@@ -122,8 +106,6 @@
   .size-button:hover {
     background-color: #f2f2f2;
   }
-
-  /* Out-of-stock overlay */
   .size-button.out-of-stock {
     position: relative;
     color: #ccc;
@@ -146,8 +128,6 @@
   .size-button.out-of-stock::after {
     transform: translateY(-50%) rotate(-45deg);
   }
-
-  /* Add to cart button */
   .add-to-cart-btn {
     background-color: #000;
     color: #fff;
@@ -159,8 +139,6 @@
     cursor: pointer;
     width: 100%;
   }
-
-  /* EMI info block */
   .emi-info {
     background-color: #f8f8f8;
     padding: 10px;
@@ -168,39 +146,12 @@
     margin-top: 10px;
     border: 1px solid #ddd;
   }
-
-  /* Accordion styling */
-  .accordion-item {
-    border: none;
-    border-bottom: 1px solid #ddd;
-    border-radius: 0;
-  }
-  .accordion-button {
-    font-size: 16px;
-    font-weight: 600;
-    text-transform: uppercase;
-    background: #fff;
-    padding: 0.75rem 0;
-    border: none;
-    outline: none;
-  }
-  .accordion-button:focus {
-    box-shadow: none;
-  }
-  .accordion-button:not(.collapsed) {
-    color: #000;
-    background-color: #f9f9f9;
-  }
-  .accordion-body {
-    font-size: 14px;
-    color: #333;
-  }
-
-  /* Reviews Section */
-  .reviews-section {
+  .reviews-section,
+  .related-products {
     margin-top: 40px;
   }
-  .reviews-section h5 {
+  .reviews-section h5,
+  .related-products h5 {
     font-size: 18px;
     margin-bottom: 20px;
     text-transform: uppercase;
@@ -209,16 +160,6 @@
     margin-bottom: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid #ddd;
-  }
-
-  /* Related Products Section */
-  .related-products {
-    margin-top: 40px;
-  }
-  .related-products h5 {
-    font-size: 18px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
   }
   .related-grid {
     display: grid;
@@ -239,23 +180,71 @@
     font-size: 14px;
     color: #333;
   }
+  .accordion {
+    margin-top: 1rem;
+  }
+  .accordion-item {
+    border: none;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+  }
+  .accordion-header {
+    margin: 0;
+  }
+  .accordion-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: #fff;
+    border: none;
+    outline: none;
+    text-align: left;
+    position: relative;
+  }
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+  .accordion-button:not(.collapsed) {
+    background-color: #f9f9f9;
+    color: #000;
+  }
+  .accordion-button::after {
+    content: "\276F";
+    position: absolute;
+    right: 1rem;
+    font-size: 14px;
+    transition: transform 0.2s;
+    color: #000;
+    pointer-events: none;
+  }
+  .accordion-button:not(.collapsed)::after {
+    transform: rotate(90deg);
+  }
+  .accordion-body {
+    padding: 1rem;
+    font-size: 14px;
+    color: #333;
+  }
 </style>
 
 <div class="product-details-container">
-  <!-- Breadcrumbs -->
   <div class="breadcrumbs" style="background-color: #8888883b; padding-left: 20px;">
     <a href="/products">Products</a> >
     <span><%= product.productName %></span>
   </div>
 
   <div class="details-content">
-    <!-- LEFT SIDE: Image Section -->
     <div class="image-section">
       <img 
         id="mainImage"
         src="/uploads/product-images/<%= product.productImage && product.productImage.length ? product.productImage[0] : 'placeholder.jpg' %>" 
         alt="<%= product.productName %>"
         data-zoom-image="/uploads/product-images/<%= product.productImage && product.productImage.length ? product.productImage[0] : 'placeholder.jpg' %>"
+        style="width: 500px;"
       />
       <% if (product.productImage && product.productImage.length > 1) { %>
         <div class="thumbnails">
@@ -270,18 +259,12 @@
       <% } %>
     </div>
 
-    <!-- RIGHT SIDE: Info Section -->
     <div class="info-section">
-      <!-- Brand -->
       <div class="product-brand"><%= product.brand %></div>
-
-      <!-- Product name and color -->
       <div class="product-title"><%= product.productName %></div>
       <% if(product.color) { %>
         <div class="product-color"><%= product.color.toUpperCase() %></div>
       <% } %>
-
-      <!-- Price -->
       <div class="price-section">
         ₹<%= product.salePrice.toLocaleString('en-IN') %>
         <% if (product.regularPrice > product.salePrice) { %>
@@ -289,7 +272,6 @@
         <% } %>
       </div>
 
-      <!-- Shoe Size (UK) + Size Chart + Size Buttons -->
       <% if(product.variants && product.variants.length) { %>
         <div>
           <span class="size-label">Shoe Size (UK)</span>
@@ -310,50 +292,60 @@
         </div>
       <% } %>
 
-      <!-- Calculate total stock from variants -->
-      <%
-        let totalStock = 0;
-        if (product.variants && product.variants.length > 0) {
-          totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
-        }
+      <% let totalStock = 0;
+         if (product.variants && product.variants.length > 0) {
+           totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+         }
       %>
-
-      <!-- Add to Cart button (or "View Similar Products" if sold out) -->
       <% if(totalStock > 0 && product.status === 'Available' && !product.isBlocked) { %>
-        <button class="add-to-cart-btn">Add to cart</button>
+        <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">
+          Add to cart
+        </button>
       <% } else { %>
         <button class="btn btn-secondary" style="margin-top: 15px;" onclick="window.location.href='/products'">View Similar Products</button>
       <% } %>
 
-      <!-- EMI Info -->
       <div class="emi-info">
         <p style="margin:0;">Rs.1453/month | 3/6/9 EMI available at 0% EMI on Flipkart / Snapmint</p>
       </div>
 
-      <!-- Accordion: About Product, Product Details, About Brand -->
-      <div class="accordion" id="productAccordion" style="margin-top: 1rem;">
-        <!-- ABOUT PRODUCT -->
+      <div class="accordion" id="productAccordion">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingAboutProduct">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAboutProduct" aria-expanded="false" aria-controls="collapseAboutProduct">
+            <button class="accordion-button collapsed"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#collapseAboutProduct"
+                    aria-expanded="false"
+                    aria-controls="collapseAboutProduct">
               ABOUT PRODUCT
             </button>
           </h2>
-          <div id="collapseAboutProduct" class="accordion-collapse collapse" aria-labelledby="headingAboutProduct" data-bs-parent="#productAccordion">
+          <div id="collapseAboutProduct"
+               class="collapse"
+               aria-labelledby="headingAboutProduct"
+               data-parent="#productAccordion">
             <div class="accordion-body">
               <%= product.description || 'No information available.' %>
             </div>
           </div>
         </div>
 
-        <!-- PRODUCT DETAILS -->
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingProductDetails">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProductDetails" aria-expanded="false" aria-controls="collapseProductDetails">
+            <button class="accordion-button collapsed"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#collapseProductDetails"
+                    aria-expanded="false"
+                    aria-controls="collapseProductDetails">
               PRODUCT DETAILS
             </button>
           </h2>
-          <div id="collapseProductDetails" class="accordion-collapse collapse" aria-labelledby="headingProductDetails" data-bs-parent="#productAccordion">
+          <div id="collapseProductDetails"
+               class="collapse"
+               aria-labelledby="headingProductDetails"
+               data-parent="#productAccordion">
             <div class="accordion-body">
               <% if (product.details && product.details.length > 0) { %>
                 <ul>
@@ -368,27 +360,35 @@
           </div>
         </div>
 
-        <!-- ABOUT BRAND -->
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingAboutBrand">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAboutBrand" aria-expanded="false" aria-controls="collapseAboutBrand">
+            <button class="accordion-button collapsed"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#collapseAboutBrand"
+                    aria-expanded="false"
+                    aria-controls="collapseAboutBrand">
               ABOUT <%= product.brand %>
             </button>
           </h2>
-          <div id="collapseAboutBrand" class="accordion-collapse collapse" aria-labelledby="headingAboutBrand" data-bs-parent="#productAccordion">
+          <div id="collapseAboutBrand"
+               class="collapse"
+               aria-labelledby="headingAboutBrand"
+               data-parent="#productAccordion">
             <div class="accordion-body">
               <p><%= product.brandDescription || 'Brand description not available.' %></p>
               <% if(product.brandLogo) { %>
-                <img src="/uploads/product-images/<%= product.brandLogo %>" alt="<%= product.brand %>" style="width:100px; margin-top:10px;">
+                <img src="/uploads/product-images/<%= product.brandLogo %>"
+                     alt="<%= product.brand %>"
+                     style="width:100px; margin-top:10px;">
               <% } %>
             </div>
           </div>
         </div>
       </div>
-    </div> <!-- End of info-section -->
-  </div> <!-- End of details-content -->
+    </div>
+  </div>
 
-  <!-- Reviews Section -->
   <div class="reviews-section">
     <h5>Reviews</h5>
     <% if(product.reviews && product.reviews.length > 0) { %>
@@ -403,14 +403,14 @@
     <% } %>
   </div>
 
-  <!-- Related Products Section -->
   <div class="related-products">
     <h5>RELATED PRODUCTS</h5>
     <div class="related-grid">
       <% if(relatedProducts && relatedProducts.length > 0) { %>
         <% relatedProducts.forEach(relProd => { %>
           <div class="related-card" onclick="location.href='/product/<%= relProd._id %>'">
-            <img src="/uploads/product-images/<%= relProd.productImage && relProd.productImage.length ? relProd.productImage[0] : 'placeholder.jpg' %>" alt="<%= relProd.productName %>">
+            <img src="/uploads/product-images/<%= relProd.productImage && relProd.productImage.length ? relProd.productImage[0] : 'placeholder.jpg' %>"
+                 alt="<%= relProd.productName %>" style="width: 300px; height: 200px;" >
             <div class="name"><%= relProd.productName %></div>
           </div>
         <% }) %>
@@ -419,50 +419,37 @@
       <% } %>
     </div>
   </div>
-</div> <!-- End of product-details-container -->
+</div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js"></script>
+<%- include("../../views/partials/user/footer") %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.js"></script>
 
 <script>
   function selectSize(button) {
-    // Remove active styling from all size buttons
     const buttons = document.querySelectorAll('.size-button');
-    buttons.forEach(btn => (btn.style.backgroundColor = '#fff'));
-
-    // Highlight the clicked button
+    buttons.forEach(btn => btn.style.backgroundColor = '#fff');
     button.style.backgroundColor = '#f2f2f2';
-
     const selectedSize = button.getAttribute('data-size');
     const stock = Number(button.getAttribute('data-stock'));
     const stockDisplay = document.getElementById('stockDisplay');
-
-    if (stock > 0) {
-      stockDisplay.innerText = `Size ${selectedSize}: ${stock} in stock`;
-    } else {
-      stockDisplay.innerText = `Size ${selectedSize} is out of stock`;
-    }
+    stockDisplay.innerText = stock > 0
+      ? `Size ${selectedSize}: ${stock} in stock`
+      : `Size ${selectedSize} is out of stock`;
   }
 
-  // Auto-select the first *in-stock* size on page load, if any
   window.addEventListener('DOMContentLoaded', () => {
     const firstInStockButton = document.querySelector('.size-button:not(.out-of-stock)');
-    if (firstInStockButton) {
-      firstInStockButton.click();
-    }
+    if (firstInStockButton) firstInStockButton.click();
   });
 
   function updateMainImage(imgSrc) {
     const mainImg = $("#mainImage");
-    // Remove old zoom data and container
     mainImg.removeData("elevateZoom");
     mainImg.removeData("zoomImage");
     $(".zoomContainer").remove();
-    // Update the image source and data-zoom-image
     mainImg.attr("src", "/uploads/product-images/" + imgSrc);
     mainImg.attr("data-zoom-image", "/uploads/product-images/" + imgSrc);
-    // Re-initialize elevateZoom after the new image loads
     mainImg.off("load").on("load", function () {
       $(this).elevateZoom({
         zoomType: "lens",
@@ -474,7 +461,6 @@
   }
 
   $(document).ready(function() {
-    // Initialize elevateZoom on the main image
     $("#mainImage").elevateZoom({
       zoomType: "lens",
       lensShape: "round",
@@ -487,6 +473,38 @@
   <% if(product.isBlocked || product.status !== 'Available') { %>
     window.location.replace('/products');
   <% } %>
-</script>
 
-<%- include("../../views/partials/user/footer") %>
+  function addToCart(productId) {
+  $.ajax({
+    url: '/addToCart',
+    method: 'POST',
+    data: { productId: productId },
+    success: function(response) {
+      if (response.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Added!',
+          text: response.message,
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => location.reload());
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: response.message,
+        });
+      }
+    },
+    error: function() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Something went wrong. Please try again.',
+      });
+    }
+  });
+}
+
+
+</script>

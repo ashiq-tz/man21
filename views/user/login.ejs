@@ -1,171 +1,134 @@
-
-
-<%-include("../../views/partials/user/header")%>
+<%- include("../../views/partials/user/header") %>
 
 <head>
   <style>
-   
-   .error-msg {
-  color: red;
-  font-size: 0.75rem;
-  display: none;       
-  margin-top: 5px;     
-  text-align: left;    
-  width: 100%;         
-  }
-  .forgot-password {
-  text-align: right;
-  margin-top: 8px;
-  font-size: 0.9rem;
-}
-.forgot-password a {
-  color: #007bff;
-  text-decoration: none;
-}
-.forgot-password a:hover {
-  color: #074a93;
-  text-decoration: underline;
-}
-
-
- 
+    .error-msg {
+      color: red;
+      font-size: 0.75rem;
+      display: none;       
+      margin-top: 5px;     
+      text-align: left;    
+      width: 100%;         
+    }
+    .forgot-password {
+      text-align: right;
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+    .forgot-password a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .forgot-password a:hover {
+      color: #074a93;
+      text-decoration: underline;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  
-
 </head>
 
-    <main class="main-content">
-      <div class="signup-section">
-        <div class="signup-form-container">
-          <h1>Login to your Account</h1>
-          <p class="subtitle">Welcome Back!</p>
+<main class="main-content">
+  <div class="signup-section">
+    <div class="signup-form-container">
+      <h1>Login to your Account</h1>
+      <p class="subtitle">Welcome Back!</p>
 
-          <% if (message) { %>
-            <div class="alert alert-danger text-center" role="alert">
-              <i class="fa fa-exclamation-circle mr-2"></i>
-              <strong><%= message %></strong>
-            </div>
-          <% } %>            
-
-          <form id="loginForm" class="signup-form" method="post" action="/login">
-
-
-            <div class="form-field">
-              <i class="ti ti-mail"></i>
-              <input type="email" id="email" name="email" placeholder="Email" />
-              <div id="error1" class="error-msg"></div>
-            </div>
-
-            <div class="form-field">
-              <i class="ti ti-lock"></i>
-              <input type="password" id="password" name="password" placeholder="Password" required />
-              
-              <span id="toggleIcon" class="toggle-password" onclick="togglePasswordVisibility()">
-                <i class="fa-solid fa-eye"></i>
-              </span>
-              
-              <div id="error2" class="error-msg"></div>
-            </div>
-                         
-              <p class="forgot-password">
-                <a href="/forgot-password">Forgot password?</a>
-              </p>
-
-
-
-            <button type="submit" class="register-button">LOGIN</button>
-
-            <p style="text-align: center;">OR</p>
-
-            <div class="google-signin">
-              <a href="/auth/google" class="google-button">
-                  <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" />
-                  Log in with Google
-              </a>
-          </div>
-          
-
-            
-            
-            <p class="login-link">
-              Don't have account? <a href="/signup">Create now</a>
-            </p>
-          </form>
+      <% if (message) { %>
+        <div class="alert alert-danger text-center" role="alert">
+          <i class="fa fa-exclamation-circle mr-2"></i>
+          <strong><%= message %></strong>
         </div>
-        <div class="product-image">
-          <img
-            src="https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c25lYWtlcnN8ZW58MHx8MHx8fDA%3D"
-            alt="Shoe"
-          />
+      <% } %>            
+
+      <form id="loginForm" class="signup-form" method="post" action="/login">
+        <div class="form-field">
+          <i class="ti ti-mail"></i>
+          <input type="email" id="email" name="email" placeholder="Email" />
+          <div id="error1" class="error-msg"></div>
         </div>
-      </div>
-    </main>
+        <div class="form-field">
+          <i class="ti ti-lock"></i>
+          <input type="password" id="password" name="password" placeholder="Password" required />
+          <span id="toggleIcon" class="toggle-password" onclick="togglePasswordVisibility()">
+            <i class="fa-solid fa-eye"></i>
+          </span>
+          <div id="error2" class="error-msg"></div>
+        </div>
+        <p class="forgot-password">
+          <a href="/forgot-password">Forgot password?</a>
+        </p>
+        <button type="submit" class="register-button">LOGIN</button>
+        <p style="text-align: center;">OR</p>
+        <div class="google-signin">
+          <a href="/auth/google" class="google-button">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" />
+            Log in with Google
+          </a>
+        </div>
+        <p class="login-link">
+          Don't have account? <a href="/signup">Create now</a>
+        </p>
+      </form>
+    </div>
+    <div class="product-image">
+      <img src="https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c25lYWtlcnN8ZW58MHx8MHx8fDA%3D" alt="Shoe" />
+    </div>
+  </div>
+</main>
 
-    
-    <%- include("../partials/user/footer") %>
+<%- include("../partials/user/footer") %>
 
-    <script>
-      const emailid = document.getElementById("email");
-      const passwordid = document.getElementById("password");
-    
-      const error1 = document.getElementById("error1");
-      const error2 = document.getElementById("error2");
-    
-      const loginForm = document.getElementById("loginForm");
-    
-      function emailValidateChecking() {
-        const emailval = emailid.value;
-        const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
-        if(!emailpattern.test(emailval)){
-          error1.style.display = "block";
-          error1.innerHTML = "Invalid Format";
-        } else {
-          error1.style.display = "none";
-          error1.innerHTML = "";
-        }
-      }
-      
-      function passwordValidateChecking() {
-        const passwordval = passwordid.value;
-        if(passwordval.trim() === ""){
-          error2.style.display = "block";
-          error2.innerHTML = "Password cannot be empty";
-        } else {
-          error2.style.display = "none";
-          error2.innerHTML = "";
-        }
-      }
+<script>
+  const emailid = document.getElementById("email");
+  const passwordid = document.getElementById("password");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+  const loginForm = document.getElementById("loginForm");
 
-    
-      document.addEventListener("DOMContentLoaded", function(){
-        loginForm.addEventListener("submit", function(e){
-          emailValidateChecking();
-          passwordValidateChecking();
-    
-          // Prevent form submission if there are any errors
-          if(error1.innerHTML || error2.innerHTML){
-            e.preventDefault();
-          }
-        });
-      });
-
-      function togglePasswordVisibility() {
-  const passwordField = document.getElementById('password');
-  const toggleIcon = document.getElementById('toggleIcon').querySelector('i');
-
-  if (passwordField.type === 'password') {
-    passwordField.type = 'text';
-    toggleIcon.classList.remove('fa-eye');
-    toggleIcon.classList.add('fa-eye-slash');
-  } else {
-    passwordField.type = 'password';
-    toggleIcon.classList.remove('fa-eye-slash');
-    toggleIcon.classList.add('fa-eye');
+  function emailValidateChecking() {
+    const emailval = emailid.value;
+    const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(!emailpattern.test(emailval)){
+      error1.style.display = "block";
+      error1.innerHTML = "Invalid Format";
+    } else {
+      error1.style.display = "none";
+      error1.innerHTML = "";
+    }
   }
-}
+  
+  function passwordValidateChecking() {
+    const passwordval = passwordid.value;
+    if(passwordval.trim() === ""){
+      error2.style.display = "block";
+      error2.innerHTML = "Password cannot be empty";
+    } else {
+      error2.style.display = "none";
+      error2.innerHTML = "";
+    }
+  }
 
-    </script>
-    
+  document.addEventListener("DOMContentLoaded", function(){
+    loginForm.addEventListener("submit", function(e){
+      emailValidateChecking();
+      passwordValidateChecking();
+      if(error1.innerHTML || error2.innerHTML){
+        e.preventDefault();
+      }
+    });
+  });
 
+  function togglePasswordVisibility() {
+    const passwordField = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon').querySelector('i');
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+      toggleIcon.classList.remove('fa-eye');
+      toggleIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordField.type = 'password';
+      toggleIcon.classList.remove('fa-eye-slash');
+      toggleIcon.classList.add('fa-eye');
+    }
+  }
+</script>

@@ -6,6 +6,7 @@ const categoryController = require("../controllers/admin/categoryController");
 const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const bannerController = require("../controllers/admin/bannerController")
+const couponController = require("../controllers/admin/couponController")
 
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
@@ -73,5 +74,11 @@ router.get("/addBanner",adminAuth,bannerController.getAddBannerPage);
 router.post("/addBanner",adminAuth,uploads.single("images"),bannerController.addBanner)
 router.get("/deleteBanner",adminAuth,bannerController.deleteBanner)
 
+//Coupon Management
+router.get("/coupon",adminAuth,couponController.loadCoupon)
+router.post("/createCoupon",adminAuth,couponController.createCoupon)
+router.get("/editCoupon",adminAuth,couponController.editCoupon)
+router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
+router.get("/deleteCoupon",adminAuth,couponController.deleteCoupon)
 
 module.exports = router 
