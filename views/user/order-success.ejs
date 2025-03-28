@@ -1,0 +1,20 @@
+<!-- views/user/order-success.ejs -->
+<%- include("../../views/partials/user/header") %>
+
+<div class="container text-center" style="margin-top: 50px;">
+  <h2>Thank you for your order!</h2>
+  <img src="/images/thankyou-illustration.png" alt="Thank you" style="width: 200px;" />
+  
+  <p>Your order <strong><%= orderId %></strong> has been placed successfully.</p>
+  
+  <!-- Button to view order details (maybe link to /userProfile? or a dedicated /order/:id page) -->
+  <a href="/userProfile#orders" class="btn btn-primary">View My Orders</a>
+  
+  <!-- or if you have a dedicated route: /order/details?orderId=<%= orderId %> -->
+  <!-- <a href="/order/details?orderId=<%= orderId %>" class="btn btn-primary">View My Order</a> -->
+
+  <!-- Button to continue shopping -->
+  <a href="/products" class="btn btn-secondary">Continue Shopping</a>
+</div>
+
+<%- include("../../views/partials/user/footer") %>

@@ -110,6 +110,11 @@
   .remove-btn:hover {
     background-color: #999;
   }
+  .size-box:hover {
+  background-color: #000000;
+  color: #fff;
+}
+
 </style>
 
 <div class="wishlist-container">
@@ -148,9 +153,15 @@
           </div>
           <div class="wishlist-actions">
             <!-- Add to Cart button -->
-            <button class="add-to-cart-btn" onclick="addToCart('<%= item._id %>')">
+            <%const variantsJson = JSON.stringify(item.variants || []);%>
+            <button
+              class="add-to-cart-btn"
+              onclick='promptSizeForWishlist("<%= item._id %>", <%- variantsJson %>)'
+            >
               Add to Cart
             </button>
+            
+            
             <!-- Remove button with confirmation -->
             <button class="remove-btn" onclick="confirmRemove('<%= item._id %>')">
               Remove
@@ -166,8 +177,6 @@
 
 <%- include("../partials/user/footer") %>
 
-<!-- Include SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   // Function to move all wishlist items to the cart
   function moveAllToCart() {
@@ -187,7 +196,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: response.message,
+            text: response.message
           });
         }
       },
@@ -195,13 +204,13 @@
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Something went wrong. Please try again.',
+          text: 'Something went wrong. Please try again.'
         });
       }
     });
   }
 
-  // Function to add a single wishlist item to cart
+  // Function to add a single wishlist item to cart without size prompt (if needed)
   function addToCart(itemId) {
     $.ajax({
       url: '/addToCart',
@@ -220,7 +229,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: response.message,
+            text: response.message
           });
         }
       },
@@ -228,7 +237,7 @@
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Something went wrong. Please try again.',
+          text: 'Something went wrong. Please try again.'
         });
       }
     });
@@ -237,17 +246,143 @@
   // Function to confirm removal of an item from the wishlist
   function confirmRemove(itemId) {
     Swal.fire({
-      title:'Are you sure?',
-      text:"You won't be able to undo this",
-      icon:'warning',
-      showCancelButton:true,
-      confirmButtonColor:'#3085d6',
-      cancelButtonColor:'#d33',
-      confirmButtonText:'Yes, remove it!'
-    }).then((result)=>{
-      if(result.isConfirmed){
+      title: 'Are you sure?',
+      text: "You won't be able to undo this",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+      if(result.isConfirmed) {
         window.location.href = `/removeFromWishlist?productId=${itemId}`;
       }
     });
   }
+
+  // Function to prompt the user to select a size for the wishlist product.
+  // Note: Ensure that each wishlist product has a valid "variants" field.
+  function promptSizeForWishlist(productId, variants) {
+  // Filter to get only variants with stock > 0
+  const inStockVariants = variants.filter(v => v.stock > 0);
+
+  // If no variants are in stock
+  if (inStockVariants.length === 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Out of Stock',
+      text: 'No sizes available for this product.'
+    });
+    return;
+  }
+
+  // Build custom HTML for the row of boxes
+  let htmlContent = `
+    <div style="text-align: center;">
+      <h2 style="font-size: 24px; margin-bottom: 20px;">Select a Size</h2>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 20px;">
+  `;
+  inStockVariants.forEach(variant => {
+    htmlContent += `
+      <div
+        class="size-box"
+        data-size="${variant.size}"
+        data-stock="${variant.stock}"
+        style="
+          width: 60px; 
+          height: 60px; 
+          border: 2px solid #000; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          cursor: pointer;
+        "
+      >
+        ${variant.size}
+      </div>
+    `;
+  });
+  htmlContent += `
+      </div>
+      <button 
+        type="button" 
+        id="cancelSizeSelection"
+        style="
+          background-color: #000; 
+          color: #fff; 
+          border: none; 
+          padding: 8px 16px; 
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 14px;
+        "
+      >
+        Cancel
+      </button>
+    </div>
+  `;
+
+  // Show a SweetAlert2 modal with the custom HTML
+  Swal.fire({
+    html: htmlContent,
+    showConfirmButton: false, // We'll handle "confirm" in JS
+    showCancelButton: false,  // Hiding built-in cancel as well
+    didOpen: () => {
+      // Attach click handlers to each size box
+      const sizeBoxes = Swal.getHtmlContainer().querySelectorAll('.size-box');
+      sizeBoxes.forEach(box => {
+        box.addEventListener('click', () => {
+          const size = box.getAttribute('data-size');
+          addToCartFromWishlist(productId, size);
+          Swal.close();
+        });
+      });
+
+      // Attach click handler to our custom "Cancel" button
+      const cancelBtn = Swal.getHtmlContainer().querySelector('#cancelSizeSelection');
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          Swal.close(); 
+        });
+      }
+    }
+  });
+}
+
+
+
+  // Function that calls the addToCart endpoint with productId and size, then reloads the page
+  function addToCartFromWishlist(productId, size) {
+    $.ajax({
+      url: '/addToCart',
+      method: 'POST',
+      data: { productId: productId, size: size },
+      success: function(response) {
+        if(response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Added to Cart!',
+            text: response.message,
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => location.reload());
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: response.message
+          });
+        }
+      },
+      error: function() {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong. Please try again.'
+        });
+      }
+    });
+  }
 </script>
+
+

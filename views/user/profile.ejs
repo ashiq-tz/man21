@@ -1,87 +1,13 @@
 <%- include("../../views/partials/user/header") %>
 
 <style>
-  /* Keep existing reset and background */
+  /* Global & layout */
   body {
     background-color: #f7f7f7;
   }
   .main {
     padding: 30px 0;
   }
-
-  /* Left Menu (unchanged) */
-  .dashboard-menu {
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  .dashboard-menu .nav-link {
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-  }
-  .dashboard-menu .nav-link.active,
-  .dashboard-menu .nav-link:hover {
-    background-color: #f0f0f0;
-    color: #000;
-  }
-  .dashboard-menu .logout-btn {
-    background-color: #ff4c4c;
-    color: #fff;
-    margin-top: 15px;
-    width: 100%;
-    text-align: center;
-  }
-  .dashboard-menu .logout-btn:hover {
-    background-color: #e43e3e;
-    color: #fff;
-  }
-
-  /* Modern Right Content Card Styling */
-  .card {
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border: none;
-    margin-bottom: 20px;
-  }
-  /* Center each tab's card by limiting width and using auto margins */
-  .card.mx-auto {
-    max-width: 600px; /* Adjust as you like */
-  }
-  .card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #eaeaea;
-    border-radius: 10px 10px 0 0;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .card-header h5 {
-    margin: 0;
-    font-weight: 600;
-  }
-  .card-body {
-    padding: 30px 20px;
-    text-align: center; /* Center the content */
-  }
-  /* Buttons */
-  .btn-success {
-    background-color: #3b74f2;
-    border-color: #3b74f2;
-  }
-  .btn-success:hover {
-    background-color: #345fcb;
-    border-color: #345fcb;
-  }
-  .btn-outline-secondary {
-    border-radius: 6px;
-  }
-  /* Breadcrumb */
   .breadcrumbs {
     background-color: #f5f5f5;
     padding: 10px 20px;
@@ -103,11 +29,194 @@
   .breadcrumbs .separator {
     color: #6c757d;
   }
+  
+  /* Left Menu (Dashboard Sidebar) */
+  .dashboard-menu {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .dashboard-menu .nav-link {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    display: block;
+    text-decoration: none;
+    padding: 8px 12px;
+  }
+  .dashboard-menu .nav-link.active,
+  .dashboard-menu .nav-link:hover {
+    background-color: #f0f0f0;
+    color: #000;
+  }
+  .dashboard-menu .logout-btn {
+    background-color: #ff4c4c;
+    color: #fff;
+    margin-top: 15px;
+    margin-left: 10px;
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+    padding-inline: 60px;
+    text-decoration: none;
+    
+  }
+  .dashboard-menu .logout-btn:hover {
+    background-color: #e43e3e;
+  }
+
+  /* Main Content (Right Content Cards) */
+  .card {
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 20px;
+  }
+  .card.mx-auto {
+    max-width: 600px;
+  }
+  .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eaeaea;
+    border-radius: 10px 10px 0 0;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+  }
+  .card-body {
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .btn-success {
+    background-color: #3b74f2;
+    border-color: #3b74f2;
+  }
+  .btn-success:hover {
+    background-color: #345fcb;
+    border-color: #345fcb;
+  }
+  .btn-outline-secondary {
+    border-radius: 6px;
+  }
+
+  /* Orders Tab - New Order Card Design */
+  .orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .order-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    padding: 15px;
+  }
+  .order-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .order-id {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+  }
+  .order-date {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  .order-status {
+    text-align: left;
+    max-width: fit-content;
+    margin-bottom: 8px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  /* Status colors (adjust as needed) */
+  .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  .status-processing {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+  .status-delivered {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  .status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  .order-products {
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+  .product-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .product-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  .product-info {
+    flex: 1;
+    text-align: left;
+  }
+  .product-name {
+    font-weight: 500;
+    color: #333;
+  }
+  .product-qty {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  .product-price {
+    font-weight: 600;
+    color: #333;
+  }
+  .order-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+  .order-total {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+  }
+  .order-actions a,
+  .order-actions button {
+    margin-left: 5px;
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
 </style>
 
 <main class="main">
-  <!-- Breadcrumb (optional) -->
-  
+  <!-- Breadcrumb -->
   <div class="breadcrumbs">
     <a href="/products">Home</a>
     <span class="separator">/</span>
@@ -115,7 +224,6 @@
     <span class="separator">/</span>
     <span>Account</span>
   </div>
-  
 
   <section class="pt-10 pb-10">
     <div class="container">
@@ -125,44 +233,37 @@
           <div class="dashboard-menu">
             <ul class="nav flex-column" role="tablist">
               <li class="nav-item">
-                <!-- NOTE: data-toggle instead of data-bs-toggle -->
-                <a class="nav-link active" id="mydetails-tab" data-toggle="tab" href="#mydetails" role="tab"
-                  aria-controls="mydetails" aria-selected="true">
+                <a class="nav-link active" data-toggle="tab" href="#mydetails" role="tab">
                   <i class="fi-rs-user mr-10"></i> My Details
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="address-tab" data-toggle="tab" href="#address" role="tab"
-                  aria-controls="address" aria-selected="false">
+                <a class="nav-link" data-toggle="tab" href="#address" role="tab">
                   <i class="fi-rs-marker mr-10"></i> Address
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="orders-tab" data-toggle="tab" href="#orders" role="tab"
-                  aria-controls="orders" aria-selected="false">
+                <a class="nav-link" data-toggle="tab" href="#orders" role="tab">
                   <i class="fi-rs-shopping-bag mr-10"></i> Orders
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="wallet-tab" data-toggle="tab" href="#wallet" role="tab"
-                  aria-controls="wallet" aria-selected="false">
+                <a class="nav-link" data-toggle="tab" href="#wallet" role="tab">
                   <i class="fi-rs-wallet mr-10"></i> Wallet
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="wallet-history-tab" data-toggle="tab" href="#wallet-history" role="tab"
-                  aria-controls="wallet-history" aria-selected="false">
+                <a class="nav-link" data-toggle="tab" href="#wallet-history" role="tab">
                   <i class="fi-rs-history mr-10"></i> Wallet History
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="referrals-tab" data-toggle="tab" href="#referrals" role="tab"
-                  aria-controls="referrals" aria-selected="false">
+                <a class="nav-link" data-toggle="tab" href="#referrals" role="tab">
                   <i class="fi-rs-megaphone mr-10"></i> Referrals
                 </a>
               </li>
             </ul>
-            <a class="btn logout-btn" href="/logout">
+            <a href="/logout" class="logout-btn">
               <i class="fi-rs-sign-out mr-10"></i> Logout
             </a>
           </div>
@@ -170,16 +271,15 @@
 
         <!-- RIGHT CONTENT -->
         <div class="col-md-8 col-lg-9">
-          <div class="tab-content dashboard-content">
-            
-            <!-- My Details -->
-            <div class="tab-pane fade show active" id="mydetails" role="tabpanel" aria-labelledby="mydetails-tab">
+          <div class="tab-content">
+            <!-- My Details Tab -->
+            <div class="tab-pane fade show active" id="mydetails" role="tabpanel">
               <div class="card mx-auto">
                 <div class="card-header">
                   <h5 class="mb-0">My Details</h5>
                   <a href="/profileEdit" class="btn btn-outline-secondary btn-sm">Edit</a>
                 </div>
-                <div class="card-body">
+                <div class="card-body text-center">
                   <p><strong>Name:</strong> <%= user.name %></p>
                   <p><strong>Phone Number:</strong> <%= user.phone %></p>
                   <p><strong>Email:</strong> <%= user.email %></p>
@@ -192,98 +292,114 @@
             </div>
 
             <!-- Address Tab -->
-            <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
-              <div class="card mx-auto">
+            <div class="tab-pane fade" id="address" role="tabpanel">
+              <div class="card">
                 <div class="card-header">
                   <h5 class="mb-0">My Address</h5>
+                  <a href="/addAddress?redirect=profile" class="btn btn-primary btn-sm">+ Add Address</a>
                 </div>
                 <div class="card-body">
-                  <% if(userAddress){ %>
-                    <% userAddress.address.forEach(function(address, index){ %>
+                  <% if(userAddress && userAddress.address && userAddress.address.length > 0) { %>
+                    <% userAddress.address.forEach(function(address) { %>
                       <div class="card mb-3">
-                        <div class="card-header">
-                          <h5 class="mb-0"><%= address.title || ('Address ' + (index + 1)) %></h5>
-                        </div>
                         <div class="card-body text-start">
                           <address>
-                            <%= address.addressType %><br>
+                            <strong><%= address.addressType %></strong><br>
                             <%= address.name %><br>
                             <%= address.city %>, <%= address.state %> - <%= address.pincode %><br>
-                            <%= address.landmark %><br>
-                           
+                            <%= address.landmark %>
                           </address>
-                          <p><%= address.phone %></p>
-                          <p><%= address.altPhone %></p>
-                          <div class="d-flex justify-content-between">
-                            <a href="/editAddress?id=<%= address._id %>" class="btn btn-sm btn-primary">Edit</a>
-                            <a href="#" 
-                              class="btn btn-sm btn-danger"
-                              onclick="confirmDelete('<%= address._id %>'); return false;">
-                              Delete
-                            </a>
-                          </div>
+                          <p>Phone: <%= address.phone %></p>
+                          <p>Alt Phone: <%= address.altPhone %></p>
+                          <a href="/editAddress?id=<%= address._id %>&redirect=profile" class="btn btn-sm btn-primary">Edit</a>
                         </div>
                       </div>
-                    <% }); %>
+                    <% }) %>
                   <% } else { %>
                     <p>No address found.</p>
                   <% } %>
-                  <a href="/addAddress">
-                    <button class="btn btn-primary mt-2">Add Address</button>
-                  </a>
                 </div>
               </div>
             </div>
 
-            <!-- Orders Tab -->
-            <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-              <div class="card mx-auto">
+            <!-- Orders Tab (New Orders Card Style) -->
+            <div class="tab-pane fade" id="orders" role="tabpanel">
+              <div class="card">
                 <div class="card-header">
-                  <h5 class="mb-0">Your Orders</h5>
+                  <h5 class="mb-0">My Orders</h5>
                 </div>
                 <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table text-start">
-                      <thead>
-                        <tr>
-                          <th>Order</th>
-                          <th>Status</th>
-                          <th>Total</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <% if(user.orders && user.orders.length > 0){ %>
-                          <% user.orders.forEach(function(order){ %>
-                            <tr>
-                              <td>#<%= order.id %></td>
-                              <td><%= order.status %></td>
-                              <td>₹<%= order.total %></td>
-                              <td>
-                                <a href="/order/<%= order.id %>" class="btn btn-sm btn-primary">View</a>
-                              </td>
-                            </tr>
-                          <% }); %>
-                        <% } else { %>
-                          <tr>
-                            <td colspan="4">No orders found.</td>
-                          </tr>
-                        <% } %>
-                      </tbody>
-                    </table>
-                  </div>
+                  <% if (user && user.orderHistory && user.orderHistory.length > 0) { %>
+                    <div class="orders-list">
+                      <% user.orderHistory.forEach(order => { %>
+                        <div class="order-card">
+                          <!-- Top row: Order ID and date -->
+                          <div class="order-top-row">
+                            <div class="order-id">Order <%= order.orderId %></div>
+                            <div class="order-date">
+                              <%= new Date(order.createdAt).toLocaleDateString() %>
+                            </div>
+                          </div>
+                          <!-- Status Badge -->
+                          <div class="order-status <%= 'status-' + order.status.toLowerCase() %>">
+                            <%= order.status %>
+                          </div>
+                          <!-- List of Ordered Products -->
+                          <div class="order-products">
+                            <% if (order.orderedItems && order.orderedItems.length > 0) { %>
+                              <% order.orderedItems.forEach(item => { %>
+                                <div class="product-item">
+                                  <img src="/uploads/product-images/<%= item.product && item.product.productImage && item.product.productImage[0] ? item.product.productImage[0] : 'placeholder.jpg' %>" alt="<%= item.product ? item.product.productName : 'Product' %>">
+                                  <div class="product-info">
+                                    <div class="product-name">
+                                      <%= item.product ? item.product.productName : 'Unknown Product' %>
+                                    </div>
+                                    <div class="product-qty">
+                                      Qty: <%= item.quantity %> 
+                                      <% if (item.size) { %>
+                                        | Size: <%= item.size %>
+                                      <% } %>
+                                    </div>
+                                  </div>
+                                  <div class="product-price">
+                                    ₹<%= item.price.toLocaleString('en-IN') %>
+                                  </div>
+                                </div>
+                              <% }) %>
+                            <% } %>
+                          </div>
+                          <!-- Bottom row: Total and Actions -->
+                          <div class="order-bottom-row">
+                            <div class="order-total">
+                              Total: ₹<%= order.finalAmount.toLocaleString('en-IN') %>
+                            </div>
+                            <div class="order-actions">
+                              <a href="/order/details?orderId=<%= order.orderId %>" class="btn btn-sm btn-primary">View</a>
+                              <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                                <button class="btn btn-sm btn-danger">Cancel</button>
+                              <% } else if (order.status === 'Delivered') { %>
+                                <button class="btn btn-sm btn-warning">Return</button>
+                              <% } %>
+                            </div>
+                          </div>
+                        </div>
+                      <% }) %>
+                    </div>
+                  <% } else { %>
+                    <p>No orders found.</p>
+                  <% } %>
                 </div>
               </div>
             </div>
 
             <!-- Wallet Tab -->
-            <div class="tab-pane fade" id="wallet" role="tabpanel" aria-labelledby="wallet-tab">
+            <div class="tab-pane fade" id="wallet" role="tabpanel">
               <div class="card mx-auto">
                 <div class="card-header">
                   <h5 class="mb-0">Wallet</h5>
                 </div>
                 <div class="card-body">
-                  <p><strong>Current Balance:</strong> ₹<%= user.walletBalance %></p>
+                  <p><strong>Current Balance:</strong> ₹<%= user.wallet %></p>
                   <form action="/add-money" method="POST" class="mt-3">
                     <div class="form-group mb-3">
                       <label for="walletAmount">Amount</label>
@@ -296,13 +412,13 @@
             </div>
 
             <!-- Wallet History Tab -->
-            <div class="tab-pane fade" id="wallet-history" role="tabpanel" aria-labelledby="wallet-history-tab">
+            <div class="tab-pane fade" id="wallet-history" role="tabpanel">
               <div class="card mx-auto">
                 <div class="card-header">
                   <h5 class="mb-0">Wallet History</h5>
                 </div>
                 <div class="card-body">
-                  <div class="table-responsive">
+                  <% if (user.walletHistory && user.walletHistory.length > 0) { %>
                     <table class="table text-start">
                       <thead>
                         <tr>
@@ -312,28 +428,24 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <% if(user.walletHistory && user.walletHistory.length > 0){ %>
-                          <% user.walletHistory.forEach(function(entry){ %>
-                            <tr>
-                              <td><%= entry.date %></td>
-                              <td><%= entry.status %></td>
-                              <td>₹<%= entry.amount %></td>
-                            </tr>
-                          <% }); %>
-                        <% } else { %>
+                        <% user.walletHistory.forEach(function(entry) { %>
                           <tr>
-                            <td colspan="3">No wallet history found.</td>
+                            <td><%= new Date(entry.date).toLocaleDateString() %></td>
+                            <td><%= entry.status %></td>
+                            <td>₹<%= entry.amount %></td>
                           </tr>
-                        <% } %>
+                        <% }) %>
                       </tbody>
                     </table>
-                  </div>
+                  <% } else { %>
+                    <p>No wallet history found.</p>
+                  <% } %>
                 </div>
               </div>
             </div>
 
             <!-- Referrals Tab -->
-            <div class="tab-pane fade" id="referrals" role="tabpanel" aria-labelledby="referrals-tab">
+            <div class="tab-pane fade" id="referrals" role="tabpanel">
               <div class="card mx-auto">
                 <div class="card-header">
                   <h5 class="mb-0">Referrals</h5>
@@ -345,8 +457,7 @@
                 </div>
               </div>
             </div>
-            <!-- End Tab Content -->
-
+            <!-- End Tabs -->
           </div>
         </div>
       </div>
@@ -357,7 +468,6 @@
 <%- include("../../views/partials/user/footer") %>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
   function confirmDelete(addressId) {
     Swal.fire({

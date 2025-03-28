@@ -2,6 +2,8 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
+const Cart = require("../../models/cartSchema");
+
 
 
 const getProductDetails = async (req, res) => {
@@ -51,11 +53,14 @@ const getProductDetails = async (req, res) => {
       if (userId) {
         userData = await User.findById(userId);
       }
-  
+      
+      const cart = await Cart.findOne({ userId: req.session.user }).lean();
+
       return res.render("product-details2", {
         user: userData,
         product,
-        relatedProducts
+        relatedProducts,
+        cart
       });
     } catch (error) {
       console.error("Error in getProductDetails:", error);

@@ -165,24 +165,33 @@ const postNewPassword = async(req,res)=>{
     }
 }
 
-const userProfile = async(req,res)=>{
+const userProfile = async (req, res) => {
     try {
+      const userId = req.session.user;
+      // populate orderHistory
+      const userData = await User.findById(userId)
+      .populate({
+        path: 'orderHistory',
+        populate: {
+          path: 'orderedItems.product',
+          model: 'Product'
+        }
+      });
 
-        const userId = req.session.user;
-        const userData = await User.findById(userId);
-
-        const addressData = await Address.findOne({userId:userId})
-
-        res.render('profile',{
-            user:userData,
-            userAddress : addressData,
-        })
-        
+  
+      // also fetch addresses
+      const addressData = await Address.findOne({ userId });
+  
+      res.render('profile', {
+        user: userData,
+        userAddress: addressData,
+      });
     } catch (error) {
-        console.error("Error for retrieve profile data",error);
-        res.redirect("/pageNotFound")
+      console.error("Error for retrieve profile data", error);
+      res.redirect("/pageNotFound");
     }
-}
+  };
+  
 
 const changeEmail = async(req,res)=>{
     try {
@@ -347,40 +356,45 @@ const getChangePasswordOtpPage = (req, res) => {
     try {
         
         const user = req.session.user;
-        res.render("add-address",{user:user})
+        res.render("add-address",{user:user , redirect: req.query.redirect })
 
     } catch (error) {
         res.redirect("/pageNotFound")
     }
   }
 
-  const postAddAddress = async(req,res)=>{
+  const postAddAddress = async (req, res) => {
     try {
-
-        const userId = req.session.user;
-        const userData = await User.findOne({_id:userId})
-
-        const {addressType,name,city,landmark,state,pincode,phone,altPhone} = req.body;
-
-        const userAddress = await Address.findOne({userId :userData._id})
-        if(!userAddress){
-            const newAddress = new Address({
-                userId : userData._id,
-                address : [{addressType,name,city,landmark,state,pincode,phone,altPhone}]
-            });
-            await newAddress.save();
-        }else{
-            userAddress.address.push({addressType,name,city,landmark,state,pincode,phone,altPhone});
-            await userAddress.save();
-        }
-
-        res.redirect("/userProfile")
-
+      const userId = req.session.user;
+      const { redirect } = req.body;   // Extract the redirect value from the form data
+      const userData = await User.findOne({ _id: userId });
+      const { addressType, name, city, landmark, state, pincode, phone, altPhone } = req.body;
+  
+      const userAddress = await Address.findOne({ userId: userData._id });
+      if (!userAddress) {
+        const newAddress = new Address({
+          userId: userData._id,
+          address: [{ addressType, name, city, landmark, state, pincode, phone, altPhone }]
+        });
+        await newAddress.save();
+      } else {
+        userAddress.address.push({ addressType, name, city, landmark, state, pincode, phone, altPhone });
+        await userAddress.save();
+      }
+  
+      // Redirect based on the query parameter
+      // Redirect based on the hidden input value:
+      if (redirect === 'checkout') {
+        res.redirect("/checkout");
+      } else {
+        res.redirect("/userProfile");
+      }
     } catch (error) {
-        console.error("Error adding address:",error)
-        res.redirect("/pageNotFound")
+      console.error("Error adding address:", error);
+      res.redirect("/pageNotFound");
     }
-  }
+  };
+  
 
   const editAddress = async(req,res)=>{
     try {
@@ -403,7 +417,7 @@ const getChangePasswordOtpPage = (req, res) => {
             return res.redirect("/pageNotFound")
         }
 
-        res.render("edit-address",{address : addressData,user : user});
+        res.render("edit-address",{address : addressData,user : user, redirect: req.query.redirect });
 
     } catch (error) {
         console.error("Error in edit address",error)
@@ -411,41 +425,49 @@ const getChangePasswordOtpPage = (req, res) => {
     }
   }
 
-  const postEditAddress = async(req,res)=>{
+  const postEditAddress = async (req, res) => {
     try {
-
-        const data = req.body;
-        const addressId = req.query.id;
-        const user = req.session.user;
-        const findAddress = await Address.findOne({"address._id":addressId});
-        if(!findAddress){
-           return res.redirect("/pageNotFound")
+      const data = req.body;
+      const { redirect } = req.body; // Extract the redirect value from the form data
+      const addressId = req.query.id;
+      const user = req.session.user;
+      const findAddress = await Address.findOne({ "address._id": addressId });
+      if (!findAddress) {
+        return res.redirect("/pageNotFound");
+      }
+  
+      await Address.updateOne(
+        { "address._id": addressId },
+        {
+          $set: {
+            "address.$": {
+              _id: addressId,
+              addressType: data.addressType,
+              name: data.name,
+              city: data.city,
+              landmark: data.landmark,
+              state: data.state,
+              pincode: data.pincode,
+              phone: data.phone,
+              altPhone: data.altPhone,
+            }
+          }
         }
-
-        await Address.updateOne(
-            {"address._id":addressId},
-            {$set : {
-                "address.$" : {
-                    _id : addressId,
-                    addressType : data.addressType,
-                    name : data.name,
-                    city : data.city,
-                    landmark : data.landmark,
-                    state : data.state,
-                    pincode : data.pincode,
-                    phone : data.phone,
-                    altPhone : data.altPhone,
-                }
-            }}
-        )
-
-       return res.redirect("/userProfile")
-        
+      );
+  
+      // Redirect based on the query parameter
+     // Redirect based on the hidden input value:
+    if (redirect === 'checkout') {
+        res.redirect("/checkout");
+      } else {
+        res.redirect("/userProfile");
+      }
     } catch (error) {
-        console.error("Error in edit address",error)
-        res.redirect("/pageNotFound")
+      console.error("Error in edit address", error);
+      res.redirect("/pageNotFound");
     }
-  }
+  };
+  
 
   const deleteAddress = async(req,res)=>{
     try {

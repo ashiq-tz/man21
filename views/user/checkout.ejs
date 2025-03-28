@@ -1,0 +1,233 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+  .checkout-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+  .checkout-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  /* Address Section */
+  .address-section {
+    flex: 1 1 60%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  .address-section h4 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+  .address-box {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    position: relative;
+  }
+  .address-box.selected {
+    border: 2px solid #3b74f2;
+  }
+  .address-box .address-details {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.4;
+  }
+  .address-actions {
+    margin-top: 10px;
+  }
+  /* Order Summary Section */
+  .order-summary-section {
+    flex: 1 1 35%;
+    min-width: 300px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  .order-summary-section h4 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+  .order-items {
+    margin-top: 15px;
+  }
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .order-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  .coupon-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  .payment-methods {
+    margin-top: 15px;
+  }
+  .place-order-btn {
+    width: 100%;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="checkout-container">
+  <h2>Checkout</h2>
+  <div class="checkout-row">
+    <!-- LEFT: Address Section -->
+    <div class="address-section">
+      <h4>Select Shipping Address</h4>
+      <% if (userAddress && userAddress.address && userAddress.address.length > 0) { %>
+        <% userAddress.address.forEach((addr, index) => { %>
+          <div class="address-box <%= index === 0 ? 'selected' : '' %>" data-address-id="<%= addr._id %>">
+            <div class="address-details">
+              <strong><%= addr.addressType %></strong><br>
+              <%= addr.name %><br>
+              <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %><br>
+              <%= addr.landmark %><br>
+              Phone: <%= addr.phone %> / <%= addr.altPhone %>
+            </div>
+            <div class="address-actions">
+              <!-- Include redirect query parameter -->
+              <a href="/editAddress?id=<%= addr._id %>&redirect=checkout" class="btn btn-outline-secondary btn-sm">Edit</a>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>No saved addresses found.</p>
+      <% } %>
+      <!-- Add New Address link with redirect query parameter -->
+      <a href="/addAddress?redirect=checkout" class="btn btn-primary mt-2">Add New Address</a>
+    </div>
+
+    <!-- RIGHT: Order Summary Section -->
+    <div class="order-summary-section">
+      <h4>Order Summary</h4>
+      <% if (cart && cart.items && cart.items.length > 0) { 
+           let subtotal = 0;
+      %>
+        <div class="order-items">
+          <% cart.items.forEach(item => {
+             const product = item.productId;
+             const itemTotal = product.salePrice * item.quantity;
+             subtotal += itemTotal;
+          %>
+            <div class="order-item">
+              <div>
+                <img 
+                  src="/uploads/product-images/<%= product.productImage && product.productImage.length ? product.productImage[0] : 'placeholder.jpg' %>" 
+                  alt="<%= product.productName %>"
+                />
+                <span><%= product.productName %> (Size <%= item.size %>) x <%= item.quantity %></span>
+              </div>
+              <div>₹<%= itemTotal.toLocaleString('en-IN') %></div>
+            </div>
+          <% }) %>
+        </div>
+        <div class="coupon-section">
+          <input type="text" class="form-control" id="couponCode" placeholder="Enter Coupon Code" />
+          <button class="btn btn-secondary" id="applyCouponBtn">Apply</button>
+        </div>
+        <div class="summary-line d-flex justify-content-between">
+          <span>Subtotal:</span>
+          <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+        </div>
+        <div class="summary-line d-flex justify-content-between">
+          <span>You Saved:</span>
+          <span>₹0</span>
+        </div>
+        <div class="summary-line d-flex justify-content-between">
+          <span>Delivery Fee:</span>
+          <span>₹0</span>
+        </div>
+        <hr />
+        <div class="summary-line d-flex justify-content-between">
+          <strong>Total:</strong>
+          <strong>₹<%= subtotal.toLocaleString('en-IN') %></strong>
+        </div>
+        <div class="payment-methods">
+          <h5>Payment Method</h5>
+          <div>
+            <input type="radio" name="paymentMethod" id="payCOD" value="COD" checked />
+            <label for="payCOD">Cash on Delivery</label>
+          </div>
+          <div>
+            <input type="radio" name="paymentMethod" id="payRazorpay" value="Razorpay" />
+            <label for="payRazorpay">Razorpay</label>
+          </div>
+        </div>
+        <button class="btn btn-success place-order-btn" id="placeOrderBtn">
+          Place Order
+        </button>
+      <% } else { %>
+        <p>Your cart is empty.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include("../../views/partials/user/footer") %>
+
+<script>
+  // Load addresses from the server-provided object
+  let addresses = <%- JSON.stringify(userAddress && userAddress.address ? userAddress.address : []) %>;
+  let selectedAddressId = addresses.length ? addresses[0]._id : null;
+  
+  // Add click event listeners to each address box to mark it as selected
+  document.querySelectorAll('.address-box').forEach(box => {
+    box.addEventListener('click', function() {
+      document.querySelectorAll('.address-box').forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      selectedAddressId = this.getAttribute('data-address-id');
+    });
+  });
+
+  // Handle Place Order button click
+  document.getElementById('placeOrderBtn').addEventListener('click', function() {
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const couponCode = document.getElementById('couponCode').value.trim();
+
+    if (!selectedAddressId) {
+      alert("Please select an address.");
+      return;
+    }
+
+    fetch('/placeOrder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        addressId: selectedAddressId,
+        paymentMethod,
+        couponCode
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data.success) {
+        window.location.href = '/orderSuccess?orderId=' + data.orderId;
+      } else {
+        alert(data.message || 'Something went wrong');
+      }
+    })
+    .catch(err => {
+      console.error('Error placing order:', err);
+      alert('Error placing order. Please try again.');
+    });
+  });
+
+  // Optional: handle coupon application
+  document.getElementById('applyCouponBtn').addEventListener('click', function() {
+    alert('Coupon functionality not implemented yet.');
+  });
+</script>

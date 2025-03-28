@@ -3,6 +3,7 @@ const app = express();
 const path = require("path");
 const env = require("dotenv").config();
 const session = require("express-session")
+const MongoStore = require("connect-mongo");
 
 const passport = require("./config/passport")
 
@@ -16,15 +17,19 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(session({
-  secret:process.env.SESSION_SECRET,
-  resave:false,
-  saveUninitialized:false,
-  cookie:{
-    secure:false,
-    httpOnly:true,
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ 
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  }),
+  cookie: {
+    secure: false,
+    httpOnly: true,
     maxAge: 2 * 24 * 60 * 60 * 1000
   }
-}))
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());

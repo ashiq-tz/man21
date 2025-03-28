@@ -128,6 +128,7 @@
   .size-button.out-of-stock::after {
     transform: translateY(-50%) rotate(-45deg);
   }
+  
   .add-to-cart-btn {
     background-color: #000;
     color: #fff;
@@ -138,13 +139,6 @@
     margin-top: 15px;
     cursor: pointer;
     width: 100%;
-  }
-  .emi-info {
-    background-color: #f8f8f8;
-    padding: 10px;
-    font-size: 14px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
   }
   .reviews-section,
   .related-products {
@@ -305,9 +299,7 @@
         <button class="btn btn-secondary" style="margin-top: 15px;" onclick="window.location.href='/products'">View Similar Products</button>
       <% } %>
 
-      <div class="emi-info">
-        <p style="margin:0;">Rs.1453/month | 3/6/9 EMI available at 0% EMI on Flipkart / Snapmint</p>
-      </div>
+      
 
       <div class="accordion" id="productAccordion">
         <div class="accordion-item">
@@ -426,22 +418,54 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.js"></script>
 
 <script>
-  function selectSize(button) {
-    const buttons = document.querySelectorAll('.size-button');
-    buttons.forEach(btn => btn.style.backgroundColor = '#fff');
-    button.style.backgroundColor = '#f2f2f2';
-    const selectedSize = button.getAttribute('data-size');
-    const stock = Number(button.getAttribute('data-stock'));
-    const stockDisplay = document.getElementById('stockDisplay');
-    stockDisplay.innerText = stock > 0
-      ? `Size ${selectedSize}: ${stock} in stock`
-      : `Size ${selectedSize} is out of stock`;
-  }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const firstInStockButton = document.querySelector('.size-button:not(.out-of-stock)');
-    if (firstInStockButton) firstInStockButton.click();
-  });
+const cartItems = <%- JSON.stringify(cart ? cart.items : []) %>;
+
+let selectedSize = null;
+
+function selectSize(button) {
+  // Reset background for all size buttons
+  const buttons = document.querySelectorAll('.size-button');
+  buttons.forEach(btn => btn.style.backgroundColor = '#fff');
+  
+  // Set the clicked button's background color and update the global selectedSize
+  button.style.backgroundColor = '#f2f2f2';
+  selectedSize = button.getAttribute('data-size');
+  
+  // Update stock display if needed
+  const stock = Number(button.getAttribute('data-stock'));
+  const stockDisplay = document.getElementById('stockDisplay');
+  stockDisplay.innerText = stock > 0
+    ? `Size ${selectedSize}: ${stock} in stock`
+    : `Size ${selectedSize} is out of stock`;
+
+  // Check if the cart already has this product with the selected size
+  const exists = cartItems.some(item =>
+    item.productId.toString() === "<%= product._id %>" &&
+    item.size.toString() === selectedSize.toString()
+  );
+
+  // Get the Add-to-Cart button element
+  const btn = document.querySelector('.add-to-cart-btn');
+  if (exists) {
+    // If the item already exists, change button to "Go to Cart" and redirect on click.
+    btn.innerText = "Go to Cart";
+    btn.onclick = function() {
+      window.location.href = '/cart';
+    };
+  } else {
+    // Otherwise, set the button back to "Add to cart" and the click handler to add the item.
+    btn.innerText = "Add to cart";
+    btn.onclick = function() {
+      addToCart("<%= product._id %>");
+    };
+  }
+}
+
+  // window.addEventListener('DOMContentLoaded', () => {
+  //   const firstInStockButton = document.querySelector('.size-button:not(.out-of-stock)');
+  //   if (firstInStockButton) firstInStockButton.click();
+  // });
 
   function updateMainImage(imgSrc) {
     const mainImg = $("#mainImage");
@@ -474,11 +498,23 @@
     window.location.replace('/products');
   <% } %>
 
+  
+
   function addToCart(productId) {
+  console.log("addToCart called:", productId, "Selected size:", selectedSize);
+  if (!selectedSize) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Select a Size',
+      text: 'Please select a size before adding to cart.',
+    });
+    return;
+  }
+  
   $.ajax({
     url: '/addToCart',
     method: 'POST',
-    data: { productId: productId },
+    data: { productId: productId, size: selectedSize },
     success: function(response) {
       if (response.success) {
         Swal.fire({
@@ -505,6 +541,7 @@
     }
   });
 }
+
 
 
 </script>
