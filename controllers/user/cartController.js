@@ -185,17 +185,14 @@ const removeFromCart = async (req, res) => {
 
 const checkout = async(req,res)=>{
   const userId = req.session.user;
+  const user = await User.findById(userId); 
   const cart = await Cart.findOne({ userId }).populate('items.productId');
   const addressData = await Address.findOne({ userId }); // or however you store addresses
   res.render('checkout', {
     cart,
-    userAddress: addressData
+    userAddress: addressData,
+    user
   });
-}
-
-const orderSuccess = async(req,res)=>{
-  const orderId = req.query.orderId; // or from session
-  res.render('orderSuccess', { orderId });
 }
 
 module.exports = {
@@ -204,5 +201,4 @@ module.exports = {
   updateCartItemQuantity,
   removeFromCart,
   checkout,
-  orderSuccess,
 };
