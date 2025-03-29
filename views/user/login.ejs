@@ -86,9 +86,10 @@
   const loginForm = document.getElementById("loginForm");
 
   function emailValidateChecking() {
-    const emailval = emailid.value;
+    const emailval = emailid.value.trim();
     const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if(!emailpattern.test(emailval)){
+
+    if (!emailpattern.test(emailval)) {
       error1.style.display = "block";
       error1.innerHTML = "Invalid Format";
     } else {
@@ -96,10 +97,11 @@
       error1.innerHTML = "";
     }
   }
-  
+
   function passwordValidateChecking() {
-    const passwordval = passwordid.value;
-    if(passwordval.trim() === ""){
+    const passwordval = passwordid.value.trim();
+
+    if (!passwordval) {
       error2.style.display = "block";
       error2.innerHTML = "Password cannot be empty";
     } else {
@@ -108,27 +110,33 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", function(){
-    loginForm.addEventListener("submit", function(e){
-      emailValidateChecking();
-      passwordValidateChecking();
-      if(error1.innerHTML || error2.innerHTML){
-        e.preventDefault();
-      }
-    });
-  });
-
   function togglePasswordVisibility() {
-    const passwordField = document.getElementById('password');
     const toggleIcon = document.getElementById('toggleIcon').querySelector('i');
-    if (passwordField.type === 'password') {
-      passwordField.type = 'text';
+    if (passwordid.type === 'password') {
+      passwordid.type = 'text';
       toggleIcon.classList.remove('fa-eye');
       toggleIcon.classList.add('fa-eye-slash');
     } else {
-      passwordField.type = 'password';
+      passwordid.type = 'password';
       toggleIcon.classList.remove('fa-eye-slash');
       toggleIcon.classList.add('fa-eye');
     }
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Validate on every keystroke (input event)
+    emailid.addEventListener("input", emailValidateChecking);
+    passwordid.addEventListener("input", passwordValidateChecking);
+
+    // Validate on form submit as well
+    loginForm.addEventListener("submit", (e) => {
+      emailValidateChecking();
+      passwordValidateChecking();
+
+      if (error1.innerHTML || error2.innerHTML) {
+        e.preventDefault();
+      }
+    });
+  });
 </script>
+

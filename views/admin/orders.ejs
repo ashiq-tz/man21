@@ -1,0 +1,291 @@
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'orders' } ) %>
+
+<style>
+  /* Basic table styling */
+  .main-content {
+    padding: 20px;
+  }
+  .content-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+  }
+  .table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  /* Modern header row for search, sort & filter */
+  .orders-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .search-container {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .search-container .input-group {
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .search-container .form-control {
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border-right: none;
+  }
+  .search-container .btn {
+    border: 1px solid #ccc;
+    border-left: none;
+    padding: 10px 15px;
+  }
+  .controls-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .controls-container select {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px 10px;
+    background-color: #fff;
+    color: #333;
+  }
+  .controls-container button {
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 8px 15px;
+    color: #333;
+    cursor: pointer;
+  }
+  .controls-container button:hover {
+    background-color: #ddd;
+  }
+  /* Status dropdown styling remains unchanged */
+  .status-dropdown {
+    padding: 5px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  /* Product image thumbnail */
+  .prod-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+</style>
+
+<div class="main-content">
+  <h2 class="content-title">Orders</h2>
+
+  <!-- Header Row: Search in center; Sort & Filter on right -->
+  <div class="orders-header">
+    <div class="search-container">
+      <div class="input-group">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="form-control" 
+          placeholder="Search by user name" 
+          autocomplete="off">
+          <button class="btn btn-sm" style="background-color: rgba(255, 0, 0, 0.346); color: #fff;" type="button" id="clearBtn">X</button>
+        <button class="btn btn-dark btn-sm" type="button" id="searchBtn">Search</button>
+        
+      </div>
+    </div>
+    <div class="controls-container">
+      <select id="sortSelect">
+        <option value="date_desc">Date: Newest First</option>
+        <option value="date_asc">Date: Oldest First</option>
+        <option value="amount_desc">Amount: High to Low</option>
+        <option value="amount_asc">Amount: Low to High</option>
+      </select>
+      <select id="filterSelect">
+        <option value="">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Processing">Processing</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+        <option value="Returned">Returned</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="table-responsive table-container">
+    <table class="table table-striped table-hover" id="ordersTable">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>User Name</th>
+          <th>Product Image</th>
+          <th>Final Amount</th>
+          <th>Change Status</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody">
+        <% orders.forEach(order => { %>
+          <tr>
+            <td><%= order.orderId %></td>
+            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+            <td><%= order.status %></td>
+            <td><%= order.address ? order.address.name : "N/A" %></td>
+            <td>
+              <div style="display: flex; gap: 5px;">
+                <% if(order.orderedItems && order.orderedItems.length > 0) { %>
+                  <% order.orderedItems.forEach(item => { 
+                       const images = item.product?.productImage; 
+                  %>
+                    <% if(images && images.length > 0) { %>
+                      <img src="/uploads/product-images/<%= images[0] %>" alt="Product" class="prod-thumb">
+                    <% } else { %>
+                      <img src="/uploads/product-images/placeholder.jpg" alt="No Image" class="prod-thumb">
+                    <% } %>
+                  <% }) %>
+                <% } else { %>
+                  N/A
+                <% } %>
+              </div>
+            </td>
+            <td>₹<%= order.finalAmount.toLocaleString('en-IN') %></td>
+            <td>
+              <form action="/admin/orders/updateStatus" method="post">
+                <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                <select name="newStatus" class="status-dropdown" onchange="this.form.submit()">
+                  <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                  <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                  <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                  <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                  <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                </select>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="container mt-3">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center mb-20">
+        <% for(let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= (i === currentPage) ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= i %>&search="><%= i %></a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // Throttle function: limits the number of AJAX calls
+  function throttle(fn, delay) {
+    let lastCall = 0;
+    return function(...args) {
+      const now = new Date().getTime();
+      if (now - lastCall < delay) return;
+      lastCall = now;
+      return fn(...args);
+    }
+  }
+
+  // Elements
+  const searchInput = $("#searchInput");
+  const sortSelect = $("#sortSelect");
+  const filterSelect = $("#filterSelect");
+  const ordersBody = $("#ordersBody");
+
+  // AJAX function: search, sort, and filter orders dynamically
+  const fetchOrders = throttle(function() {
+    const searchTerm = searchInput.val().trim();
+    const sortOption = sortSelect.val();
+    const filterOption = filterSelect.val();
+
+    $.ajax({
+      url: "/admin/orders",
+      method: "GET",
+      data: { 
+        search: searchTerm,
+        sort: sortOption,
+        filter: filterOption
+      },
+      dataType: "json",
+      success: function(data) {
+        let rows = "";
+        data.orders.forEach(order => {
+          rows += `<tr>
+            <td>${order.orderId}</td>
+            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+            <td>${order.status}</td>
+            <td>${order.address && order.address.name ? order.address.name : "N/A"}</td>
+            <td>
+              <div style="display: flex; gap: 5px;">`;
+          if(order.orderedItems && order.orderedItems.length > 0){
+            order.orderedItems.forEach(item => {
+              const images = item.product?.productImage;
+              if(images && images.length > 0){
+                rows += `<img src="/uploads/product-images/${images[0]}" alt="Product" class="prod-thumb">`;
+              } else {
+                rows += `<img src="/uploads/product-images/placeholder.jpg" alt="No Image" class="prod-thumb">`;
+              }
+            });
+          } else {
+            rows += "N/A";
+          }
+          rows += `</div>
+            </td>
+            <td>₹${order.finalAmount.toLocaleString("en-IN")}</td>
+            <td>
+              <form action="/admin/orders/updateStatus" method="post">
+                <input type="hidden" name="orderId" value="${order.orderId}">
+                <select name="newStatus" class="status-dropdown" onchange="this.form.submit()">
+                  <option value="Pending" ${order.status === "Pending" ? "selected" : ""}>Pending</option>
+                  <option value="Processing" ${order.status === "Processing" ? "selected" : ""}>Processing</option>
+                  <option value="Shipped" ${order.status === "Shipped" ? "selected" : ""}>Shipped</option>
+                  <option value="Delivered" ${order.status === "Delivered" ? "selected" : ""}>Delivered</option>
+                  <option value="Cancelled" ${order.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+                  <option value="Returned" ${order.status === "Returned" ? "selected" : ""}>Returned</option>
+                </select>
+              </form>
+            </td>
+          </tr>`;
+        });
+        ordersBody.html(rows);
+      },
+      error: function(err) {
+        console.error("Error fetching orders:", err);
+      }
+    });
+  }, 300);
+
+  // Attach events
+  searchInput.on("keyup", fetchOrders);
+  $("#searchBtn").on("click", fetchOrders);
+  sortSelect.on("change", fetchOrders);
+  filterSelect.on("change", fetchOrders);
+  $("#clearBtn").on("click", function() {
+    searchInput.val("");
+    fetchOrders();
+  });
+</script>

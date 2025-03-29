@@ -172,6 +172,7 @@ const userProfile = async (req, res) => {
       const userData = await User.findById(userId)
       .populate({
         path: 'orderHistory',
+        options: { sort: { createdAt: -1 } },
         populate: {
           path: 'orderedItems.product',
           model: 'Product'
@@ -203,38 +204,38 @@ const changeEmail = async(req,res)=>{
     }
 }
 
-const changeEmailValid = async(req,res)=>{
+const changeEmailValid = async (req, res) => {
     try {
-
-        const {email} = req.body;
-
-        const userExists = await User.findOne({email});
-        if(userExists){
-
-            const otp = generateOtp();
-            const emailSent = await sendVerificationEmail(email,otp);
-            if(emailSent){
-                req.session.userOtp = otp;
-                req.session.userData = req.body;
-                req.session.email = email;
-
-                res.render("change-email-otp");
-                console.log("Email sent:",email);
-                console.log("OTP",otp);
-            }else{
-                res.json("email-error")
-            }
-
-        }else{
-            res.render("change-email",{
-                message:"User with this email not exist"
-            })
-        }
-        
+      const { email } = req.body;
+      // Retrieve current logged in user
+      const currentUser = await User.findById(req.session.user);
+      
+      // Check if the entered email matches the current user's email
+      if (!currentUser || currentUser.email !== email) {
+        return res.render("change-email", {
+          message: "Please enter your current email correctly."
+        });
+      }
+      
+      // Proceed with OTP generation and email verification
+      const otp = generateOtp();
+      const emailSent = await sendVerificationEmail(email, otp);
+      if (emailSent) {
+        req.session.userOtp = otp;
+        req.session.userData = req.body;
+        req.session.email = email;
+  
+        res.render("change-email-otp");
+        console.log("Email sent:", email);
+        console.log("OTP", otp);
+      } else {
+        res.json("email-error");
+      }
     } catch (error) {
-        res.redirect("/pageNotFound");
+      res.redirect("/pageNotFound");
     }
-}
+  };
+  
 
 const verifyEmailOtp = async(req,res)=>{
     try {
@@ -257,20 +258,27 @@ const verifyEmailOtp = async(req,res)=>{
     }
 }
 
-const updateEmail = async(req,res)=>{
+const updateEmail = async (req, res) => {
     try {
-
-        const newEmail = req.body.newEmail;
-        const userId = req.session.user;
-
-        await User.findByIdAndUpdate(userId,{email:newEmail});
-
-        res.redirect("/userProfile")
-        
+      const newEmail = req.body.newEmail;
+      const userId = req.session.user;
+      
+      // Check if newEmail already exists for another user
+      const existingUser = await User.findOne({ email: newEmail });
+      if (existingUser) {
+        return res.render("new-email", {
+          message: "This email is already in use."
+        });
+      }
+      
+      await User.findByIdAndUpdate(userId, { email: newEmail });
+      res.redirect("/userProfile");
     } catch (error) {
-        res.redirect("/pageNotFound")
+      console.error("Error updating email", error);
+      res.redirect("/pageNotFound");
     }
-}
+  };
+  
 
 const changePassword = async(req,res)=>{
     try {

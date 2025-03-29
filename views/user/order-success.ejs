@@ -8,6 +8,7 @@
   <p>Your order <strong><%= orderId %></strong> has been placed successfully.</p>
   
   <!-- Button to view order details (maybe link to /userProfile? or a dedicated /order/:id page) -->
+  <div style="margin-bottom: 50px;">
   <a href="/userProfile#orders" class="btn btn-primary">View My Orders</a>
   
   <!-- or if you have a dedicated route: /order/details?orderId=<%= orderId %> -->
@@ -15,6 +16,7 @@
 
   <!-- Button to continue shopping -->
   <a href="/products" class="btn btn-secondary">Continue Shopping</a>
+  </div>
 </div>
 
 <%- include("../../views/partials/user/footer") %>

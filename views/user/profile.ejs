@@ -363,7 +363,7 @@
                                     <% } else if (item.itemStatus === 'Returned') { %>
                                       <span style="color: orange;">(Returned)</span>
                                     <% } else { %>
-                                      <span style="color: green;">(Active)</span>
+                                      <span style="color: #666;">(<%= item.itemStatus %>)</span>
                                     <% } %>
                                   </div>
                                   <div class="product-price">₹<%= item.price.toLocaleString('en-IN') %></div>

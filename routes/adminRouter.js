@@ -7,6 +7,7 @@ const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const bannerController = require("../controllers/admin/bannerController")
 const couponController = require("../controllers/admin/couponController")
+const orderAdminController = require("../controllers/admin/orderController");
 
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
@@ -80,5 +81,9 @@ router.post("/createCoupon",adminAuth,couponController.createCoupon)
 router.get("/editCoupon",adminAuth,couponController.editCoupon)
 router.post("/updateCoupon",adminAuth,couponController.updateCoupon)
 router.get("/deleteCoupon",adminAuth,couponController.deleteCoupon)
+
+// Orders Management
+router.get("/orders", adminAuth, orderAdminController.loadOrders);
+router.post("/orders/updateStatus", adminAuth, orderAdminController.updateOrderStatus);
 
 module.exports = router 

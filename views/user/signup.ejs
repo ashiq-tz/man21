@@ -182,19 +182,33 @@
         }
       }
     
-      document.addEventListener("DOMContentLoaded", function(){
-        signupForm.addEventListener("submit", function(e){
-          nameValidateChecking();
-          phoneValidateChecking();
-          emailValidateChecking();
-          passwordValidateChecking();
-    
-          // Prevent form submission if there are any errors
-          if(error1.innerHTML || error2.innerHTML || error3.innerHTML || error4.innerHTML || error5.innerHTML){
-            e.preventDefault();
-          }
-        });
-      });
+      // Attach the validation checks to real-time events
+  document.addEventListener("DOMContentLoaded", () => {
+    nameid.addEventListener("input", nameValidateChecking);
+    phoneid.addEventListener("input", phoneValidateChecking);
+    emailid.addEventListener("input", emailValidateChecking);
+    passwordid.addEventListener("input", passwordValidateChecking);
+    cpasswordid.addEventListener("input", passwordValidateChecking);
+
+    signupForm.addEventListener("submit", function (e) {
+      // Run validation on submit too
+      nameValidateChecking();
+      phoneValidateChecking();
+      emailValidateChecking();
+      passwordValidateChecking();
+
+      // If any error message is still present, prevent submission
+      if (
+        error1.innerHTML ||
+        error2.innerHTML ||
+        error3.innerHTML ||
+        error4.innerHTML ||
+        error5.innerHTML
+      ) {
+        e.preventDefault();
+      }
+    });
+  });
     </script>
     
 

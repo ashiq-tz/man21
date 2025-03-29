@@ -5,6 +5,12 @@
    <div class="card mx-auto card-login col-4">
        <div class="card-body">
            <h4 class="card-title mb-4">Enter New Email</h4>
+           <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert alert-danger">
+              <%= message %>
+            </div>
+          <% } %>
+          
            <form method="post" action="/update-email" onsubmit="return validateEmailForm()">
                <div class="mb-3">
                    <input class="form-control" name="newEmail" placeholder="New Email" type="text" id="email">

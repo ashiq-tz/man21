@@ -39,10 +39,17 @@
   <p><strong>Final Amount:</strong> ₹<%= order.finalAmount %></p>
   
   <h3>Shipping Address</h3>
-  <% if(order.address) { %>
-    <!-- If your order stores full address details or if address is populated -->
-    <p><%= order.address.name || "Address details not available" %></p>
-    <!-- Adjust as needed -->
+  <% if (order.address) { %>
+    <p><strong>Address Type:</strong> <%= order.address.addressType %></p>
+    <p><strong>Name:</strong> <%= order.address.name %></p>
+    <p><strong>City:</strong> <%= order.address.city %></p>
+    <p><strong>State:</strong> <%= order.address.state %></p>
+    <p><strong>Pincode:</strong> <%= order.address.pincode %></p>
+    <p><strong>Landmark:</strong> <%= order.address.landmark %></p>
+    <p><strong>Phone:</strong> <%= order.address.phone %></p>
+    <p><strong>Alternate Phone:</strong> <%= order.address.altPhone %></p>
+  <% } else { %>
+    <p>No shipping address available.</p>
   <% } %>
   
   <br>

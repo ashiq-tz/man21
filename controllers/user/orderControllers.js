@@ -21,10 +21,10 @@ const placeOrder = async (req, res) => {
 
     // 2) Find the address
     const userAddressDoc = await Address.findOne({ userId });
-    if (!userAddressDoc) {
+    if (!userAddressDoc || !userAddressDoc.address || userAddressDoc.address.length === 0) {
       return res.json({ success: false, message: "No addresses found. Please add an address." });
     }
-    // Select the address by id
+    // Pick the selected address object from the array
     const selectedAddress = userAddressDoc.address.find((a) => a._id.toString() === addressId);
     if (!selectedAddress) {
       return res.json({ success: false, message: "Selected address not found." });
@@ -45,7 +45,6 @@ const placeOrder = async (req, res) => {
       const variantIndex = product.variants.findIndex(v => v.size == item.size);
       if (variantIndex > -1) {
         product.variants[variantIndex].stock -= quantity;
-        console.log(`Decremented stock for product ${product._id} (size ${item.size}). New stock: ${product.variants[variantIndex].stock}`);
         await product.save();
       } else {
         console.log(`Variant with size ${item.size} not found for product ${product._id}`);
@@ -69,7 +68,7 @@ const placeOrder = async (req, res) => {
       totalPrice,
       discount,
       finalAmount,
-      address: userAddressDoc.userId, // or store the entire selectedAddress if preferred
+      address: selectedAddress, // or store the entire selectedAddress if preferred
       status: "Pending",
       createdAt: Date.now(),
       couponApplied: couponCode ? true : false,
@@ -119,7 +118,7 @@ const cancelOrder = async (req, res) => {
 
     // If productsToCancel is present, do partial cancellation
     if (productsToCancel && productsToCancel.length > 0) {
-      console.log("Processing partial cancellation...");
+      // console.log("Processing partial cancellation...");
 
       for (const cancelItem of productsToCancel) {
         // Find the matching item
@@ -142,7 +141,6 @@ const cancelOrder = async (req, res) => {
             if (variant) {
               const qtyToRestore = Math.min(cancelItem.quantity, orderItem.quantity);
               variant.stock += qtyToRestore;
-              console.log(`Restored stock for product ${cancelItem.productId}: new stock ${variant.stock}`);
             }
             await product.save();
           }
@@ -150,7 +148,7 @@ const cancelOrder = async (req, res) => {
           // Update order item status or quantity
           if (cancelItem.quantity >= orderItem.quantity) {
             orderItem.itemStatus = "Cancelled";
-            console.log(`Item fully cancelled for product ${cancelItem.productId}`);
+            // console.log(`Item fully cancelled for product ${cancelItem.productId}`);
           } else {
             orderItem.quantity -= cancelItem.quantity;
             // console.log(`Item partially cancelled for product ${cancelItem.productId}: new quantity ${orderItem.quantity}`);
@@ -166,7 +164,7 @@ const cancelOrder = async (req, res) => {
 
     } else {
       // Full order cancellation
-      console.log("Processing full order cancellation...");
+      // console.log("Processing full order cancellation...");
 
       for (const item of order.orderedItems) {
         const product = await Product.findById(item.product);
@@ -185,7 +183,6 @@ const cancelOrder = async (req, res) => {
     }
 
     await order.save();
-    console.log("Order cancellation processed:", order.orderId);
     return res.json({ success: true, message: "Order cancellation processed." });
   } catch (error) {
     console.error("Error cancelling order:", error);
@@ -198,7 +195,7 @@ const cancelOrder = async (req, res) => {
 const returnOrder = async (req, res) => {
   try {
     const { orderId, returnReason, productsToReturn } = req.body;
-    console.log("Return order request received:", { orderId, returnReason, productsToReturn });
+    // console.log("Return order request received:", { orderId, returnReason, productsToReturn });
 
     const order = await Order.findOne({ orderId }).populate('orderedItems.product');
     if (!order) {
@@ -207,13 +204,13 @@ const returnOrder = async (req, res) => {
     }
     
     if (order.status !== "Delivered") {
-      console.log("Order is not delivered:", order.status);
+      // console.log("Order is not delivered:", order.status);
       return res.json({ success: false, message: "Only delivered orders can be returned." });
     }
     
     // Partial return branch: if productsToReturn is provided
     if (productsToReturn && productsToReturn.length > 0) {
-      console.log("Processing partial return...");
+      // console.log("Processing partial return...");
       for (const returnItem of productsToReturn) {
         const orderItemIndex = order.orderedItems.findIndex(item =>
           item.product._id.toString() === returnItem.productId &&
@@ -221,7 +218,7 @@ const returnOrder = async (req, res) => {
         );
         if (orderItemIndex > -1) {
           const orderItem = order.orderedItems[orderItemIndex];
-          console.log(`Found item for return: Product ${returnItem.productId}, Current quantity: ${orderItem.quantity}`);
+          // console.log(`Found item for return: Product ${returnItem.productId}, Current quantity: ${orderItem.quantity}`);
 
           // Restore stock for the returned quantity
           const product = await Product.findById(returnItem.productId);
@@ -232,7 +229,7 @@ const returnOrder = async (req, res) => {
             if (variant) {
               const qtyToRestore = Math.min(returnItem.quantity, orderItem.quantity);
               variant.stock += qtyToRestore;
-              console.log(`Restored stock for product ${returnItem.productId}: New stock ${variant.stock}`);
+              
             }
             await product.save();
           }
@@ -240,10 +237,9 @@ const returnOrder = async (req, res) => {
           // Update order item based on return quantity
           if (returnItem.quantity >= orderItem.quantity) {
             orderItem.itemStatus = "Returned";
-            console.log(`Item fully returned for product ${returnItem.productId}`);
+            
           } else {
             orderItem.quantity -= returnItem.quantity;
-            console.log(`Item partially returned for product ${returnItem.productId}: New quantity ${orderItem.quantity}`);
           }
         } else {
           console.log(`No matching item found for return: Product ${returnItem.productId}`);
@@ -251,7 +247,6 @@ const returnOrder = async (req, res) => {
       }
       if (returnReason) {
         order.returnReason = returnReason;
-        console.log("Return reason stored:", returnReason);
       }
     } else {
       // Full order return branch
@@ -276,7 +271,6 @@ const returnOrder = async (req, res) => {
     }
     
     await order.save();
-    console.log("Order return processed:", order.orderId);
     return res.json({ success: true, message: "Return processed successfully." });
   } catch (error) {
     console.error("Error processing return:", error);
