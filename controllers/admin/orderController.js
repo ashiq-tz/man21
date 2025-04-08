@@ -65,35 +65,6 @@ const loadOrders = async (req, res) => {
   
   
 
-// GET /admin/orders/view?orderId=...
-// Show a single order's details, user info, etc.
-const viewOrder = async (req, res) => {
-  try {
-    const { orderId } = req.query;
-
-    // Find the order, optionally populate orderedItems.product if you want product details
-    const order = await Order.findOne({ orderId })
-      .populate("orderedItems.product")
-      .lean();
-
-    if (!order) {
-      return res.redirect("/admin/pageerror");
-    }
-
-    // If you want user info, you might have stored user ID in order, or do a separate lookup
-    // If you store user info in the order schema, you can do something like:
-    // const userData = await User.findById(order.userId).lean();
-
-    res.render("order-details", {
-      order,
-      // userData,
-    });
-  } catch (error) {
-    console.error("Error in viewOrder:", error);
-    res.redirect("/admin/pageerror");
-  }
-};
-
 
 const updateOrderStatus = async (req, res) => {
     try {
@@ -117,6 +88,5 @@ const updateOrderStatus = async (req, res) => {
 
 module.exports = {
   loadOrders,
-  viewOrder,
   updateOrderStatus,
 };

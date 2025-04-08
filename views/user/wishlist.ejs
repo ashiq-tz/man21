@@ -138,12 +138,15 @@
               -<%= discountPercent %>%
             </div>
           <% } %>
+
+          <a href="/product/<%= item._id %>">
           <img 
             src="/uploads/product-images/<%= item.productImage && item.productImage.length 
                   ? item.productImage[0] 
                   : 'placeholder.jpg' %>" 
             alt="<%= item.productName %>"
           />
+        </a>
           <h4><%= item.productName %></h4>
           <div class="price-section">
             <span class="sale-price">₹<%= item.salePrice.toLocaleString('en-IN') %></span>

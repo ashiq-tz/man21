@@ -35,6 +35,7 @@ router.get(
     res.redirect('/');
   }
 );
+
 router.get('/login',userController.loadLogin);
 router.post('/login',userController.login);
 

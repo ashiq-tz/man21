@@ -153,6 +153,14 @@ const addProductOffer = async (req, res) => {
       await findCategory.save();
     }
 
+    if (percentage >= 100) {
+      return res.status(400).json({ status: false, message: "Percentage must be less than 100." });
+    }
+    if (percentage < 0) {
+      return res.status(400).json({ status: false, message: "Percentage cannot be negative." });
+    }
+    
+
     findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
     findProduct.productOffer = parseInt(percentage);
     await findProduct.save();

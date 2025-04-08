@@ -138,7 +138,7 @@ const cancelOrder = async (req, res) => {
             const variant = product.variants.find(v =>
               cancelItem.size ? v.size.toString() === cancelItem.size.toString() : true
             );
-            if (variant) {
+            if (variant && order.status!=="Cancelled") {
               const qtyToRestore = Math.min(cancelItem.quantity, orderItem.quantity);
               variant.stock += qtyToRestore;
             }
@@ -172,7 +172,7 @@ const cancelOrder = async (req, res) => {
           const variant = product.variants.find(v =>
             item.size ? v.size.toString() === item.size.toString() : true
           );
-          if (variant) {
+          if (variant && order.status!=="Cancelled") {
             variant.stock += item.quantity;
           }
           await product.save();
