@@ -84,6 +84,9 @@
     object-fit: cover;
     border-radius: 4px;
   }
+  .clickable-row {
+    cursor: pointer;
+  }
 </style>
 
 <div class="main-content">
@@ -124,62 +127,45 @@
   </div>
 
   <!-- Orders Table -->
-  <div class="table-responsive table-container">
-    <table class="table table-striped table-hover" id="ordersTable">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>User Name</th>
-          <th>Product Image</th>
-          <th>Final Amount</th>
-          <th>Change Status</th>
-        </tr>
-      </thead>
-      <tbody id="ordersBody">
-        <% orders.forEach(order => { %>
+    <div class="table-responsive table-container">
+      <table class="table table-striped table-hover" id="ordersTable">
+        <thead>
           <tr>
-            <td><%= order.orderId %></td>
-            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-            <td><%= order.status %></td>
-            <td><%= order.address ? order.address.name : "N/A" %></td>
-            <td>
-              <div style="display: flex; gap: 5px;">
-                <% if(order.orderedItems && order.orderedItems.length > 0) { %>
-                  <% order.orderedItems.forEach(item => { 
-                       const images = item.product?.productImage; 
-                  %>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>User Name</th>
+            <th>Product Image</th>
+            <th>Final Amount</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <% orders.forEach(order => { %>
+            <tr class="clickable-row" data-href="/admin/order/details/<%= order.orderId %>">
+              <td><%= order.orderId %></td>
+              <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+              <td><%= order.status %></td>
+              <td><%= order.address ? order.address.name : "N/A" %></td>
+              <td>
+                <div style="display: flex; gap: 5px;">
+                  <% if(order.product) { %>
+                    <% const images = order.product.productImage; %>
                     <% if(images && images.length > 0) { %>
                       <img src="/uploads/product-images/<%= images[0] %>" alt="Product" class="prod-thumb">
                     <% } else { %>
                       <img src="/uploads/product-images/placeholder.jpg" alt="No Image" class="prod-thumb">
                     <% } %>
-                  <% }) %>
-                <% } else { %>
-                  N/A
-                <% } %>
-              </div>
-            </td>
-            <td>₹<%= order.finalAmount.toLocaleString('en-IN') %></td>
-            <td>
-              <form action="/admin/orders/updateStatus" method="post">
-                <input type="hidden" name="orderId" value="<%= order.orderId %>">
-                <select name="newStatus" class="status-dropdown" onchange="this.form.submit()">
-                  <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                  <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                  <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                  <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                  <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                  <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
-                </select>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
+                  <% } else { %>
+                    N/A
+                  <% } %>
+                </div>
+              </td>
+              <td>₹<%= order.finalAmount.toLocaleString('en-IN') %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
 
   <!-- Pagination -->
   <div class="container mt-3">
@@ -198,6 +184,8 @@
 <%- include("../../views/partials/admin/footer") %>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
   // Throttle function: limits the number of AJAX calls
   function throttle(fn, delay) {
@@ -241,18 +229,17 @@
             <td>${order.address && order.address.name ? order.address.name : "N/A"}</td>
             <td>
               <div style="display: flex; gap: 5px;">`;
-          if(order.orderedItems && order.orderedItems.length > 0){
-            order.orderedItems.forEach(item => {
-              const images = item.product?.productImage;
-              if(images && images.length > 0){
-                rows += `<img src="/uploads/product-images/${images[0]}" alt="Product" class="prod-thumb">`;
+                if (order.product) {
+                const images = order.product.productImage;
+                if (images && images.length > 0) {
+                  rows += `<img src="/uploads/product-images/${images[0]}" alt="Product" class="prod-thumb">`;
+                } else {
+                  rows += `<img src="/uploads/product-images/placeholder.jpg" alt="No Image" class="prod-thumb">`;
+                }
               } else {
-                rows += `<img src="/uploads/product-images/placeholder.jpg" alt="No Image" class="prod-thumb">`;
+                rows += "N/A";
               }
-            });
-          } else {
-            rows += "N/A";
-          }
+
           rows += `</div>
             </td>
             <td>₹${order.finalAmount.toLocaleString("en-IN")}</td>
@@ -288,4 +275,13 @@
     searchInput.val("");
     fetchOrders();
   });
+
+// Make each table row clickable.
+  $(document).ready(function(){
+    $(".clickable-row").on("click", function(){
+      window.location = $(this).data("href");
+    });
+  });
+
+
 </script>

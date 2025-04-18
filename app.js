@@ -49,6 +49,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use("/",userRouter);
 app.use("/admin",adminRouter);
 
+// Global error-handling middleware
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err.stack);
+  if (req.xhr || req.headers.accept.indexOf("json") > -1) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  } else {
+    res.status(500).render("pageerror", { error: err });
+  }
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

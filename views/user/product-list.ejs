@@ -211,8 +211,10 @@
   <div class="product-list-header header-row" style="background-color: rgba(102, 105, 105, 0.421); height: 100px; padding: 10px; border-radius: 10px;"> 
     <h1>FOOTWEARS</h1>
     <div class="search-group">
-      <input type="text" id="searchBar" class="form-control" placeholder="Search products" style="width: 250px;">
+      <input type="text" id="searchBar" class="form-control" placeholder="Search products" style="width: 250px;" value="<%= searchQuery %>">
+      <button id="clearSearchBtn" class="btn btn-secondary">X</button>
       <button id="searchBtn" class="btn btn-success">Search</button>
+      
     </div>
   </div>
 
@@ -329,6 +331,7 @@
   $(function() {
     $('.selectpicker').selectpicker();
   });
+  
   document.addEventListener('DOMContentLoaded', function(){
     const brandFilter = document.getElementById('brandFilter');
     const categoryFilter = document.getElementById('categoryFilter');
@@ -338,48 +341,62 @@
     const searchBtn = document.getElementById('searchBtn');
     const clearBtn = document.getElementById('clearFilters');
     const applyBtn = document.getElementById('applyFilters');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-    function applyFilters(){
-      let url = '?page=1';
-      
-      // Gather selected brands
-      let selectedBrands = Array.from(brandFilter.selectedOptions).map(opt => opt.value).filter(v => v);
-      selectedBrands.forEach(b => { url += '&brand=' + encodeURIComponent(b); });
-      
-      // Gather selected categories
-      let selectedCategories = Array.from(categoryFilter.selectedOptions).map(opt => opt.value).filter(v => v);
-      selectedCategories.forEach(c => { url += '&category=' + encodeURIComponent(c); });
-      
-      // Gather selected price ranges
-      let selectedPrices = Array.from(priceFilter.selectedOptions).map(opt => opt.value).filter(v => v);
-      selectedPrices.forEach(p => { url += '&price=' + encodeURIComponent(p); });
-      
-      // Add search query if provided
-      let searchQuery = searchBar.value.trim();
-      if(searchQuery){
-        url += '&search=' + encodeURIComponent(searchQuery);
-      }
-      
-      // Sort
-      if(sortBy.value) {
-        url += '&sortBy=' + encodeURIComponent(sortBy.value);
-      }
-      
-      // Navigate
-      window.location.replace(url);
-    }
+    // Helper: Get selected values from a multi-select input
+function getSelectedValues(selectElement) {
+  return Array.from(selectElement.selectedOptions)
+              .map(opt => opt.value)
+              .filter(val => val);
+}
 
-    // "Apply Filters" button triggers applyFilters
-    applyBtn.addEventListener('click', applyFilters);
+function applyFilters() {
+  // Create a URLSearchParams object with the initial page parameter
+  const params = new URLSearchParams({ page: 1 });
 
-    // "Search" button also triggers the same filter logic
-    searchBtn.addEventListener('click', applyFilters);
+  // Append selected brands, categories, and price ranges
+  const brands = getSelectedValues(brandFilter);
+  brands.forEach(b => params.append('brand', b));
 
-    // Clear all
-    clearBtn.addEventListener('click', function(){
-      window.location.replace('/products?page=1');
-    });
-  });
+  const categories = getSelectedValues(categoryFilter);
+  categories.forEach(c => params.append('category', c));
+
+  const prices = getSelectedValues(priceFilter);
+  prices.forEach(p => params.append('price', p));
+
+  // Add search query if provided
+  const searchQuery = searchBar.value.trim();
+  if (searchQuery) {
+    params.set('search', searchQuery);
+  }
+
+  // Add sort criteria if selected
+  if (sortBy.value) {
+    params.set('sortBy', sortBy.value);
+  }
+  // Use location.replace to update the URL without creating a new history entry with our query parameters
+  window.location.replace('/products?' + params.toString());
+}
+
+// Bind the filtering function to Apply Filters and Search buttons
+applyBtn.addEventListener('click', applyFilters);
+searchBtn.addEventListener('click', applyFilters);
+
+// Clear filters and navigate to a clean URL
+clearBtn.addEventListener('click', function(){
+  window.location.href = '/products?page=1';
+});
+
+clearSearchBtn.addEventListener('click', function(){
+  searchBar.value = '';
+  sortBy.value = 'newArrivals';
+  applyFilters();
+ });
+
+})
+
+
+
 
   function addToWishlist(productId){
 

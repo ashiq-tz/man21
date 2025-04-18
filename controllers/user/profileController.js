@@ -174,7 +174,7 @@ const userProfile = async (req, res) => {
         path: 'orderHistory',
         options: { sort: { createdAt: -1 } },
         populate: {
-          path: 'orderedItems.product',
+          path: 'product',
           model: 'Product'
         }
       });
@@ -210,14 +210,12 @@ const changeEmailValid = async (req, res) => {
       // Retrieve current logged in user
       const currentUser = await User.findById(req.session.user);
       
-      // Check if the entered email matches the current user's email
       if (!currentUser || currentUser.email !== email) {
         return res.render("change-email", {
           message: "Please enter your current email correctly."
         });
       }
       
-      // Proceed with OTP generation and email verification
       const otp = generateOtp();
       const emailSent = await sendVerificationEmail(email, otp);
       if (emailSent) {
@@ -293,7 +291,17 @@ const changePassword = async(req,res)=>{
 const changePasswordValid = async(req,res)=>{
     try {
         const { email } = req.body;
+        
+        const currentUser = await User.findById(req.session.user);
         const userExists = await User.findOne({ email });
+      
+        if (!currentUser || currentUser.email !== email) {
+          return res.render("change-password", {
+            message: "Please enter your current email correctly."
+          });
+        }
+
+
         if(userExists){
             const otp = generateOtp();
             const emailSent = await sendVerificationEmail(email, otp);
@@ -301,10 +309,10 @@ const changePasswordValid = async(req,res)=>{
                 req.session.userOtp = otp;
                 req.session.userData = req.body;
                 req.session.email = email;
-                // Instead of rendering the OTP page, send JSON with a redirect URL.
+                
                 res.json({
                     success: true,
-                    redirectUrl: "/change-password-otp"  // or the proper route for OTP entry
+                    redirectUrl: "/change-password-otp" 
                 });
                 console.log("OTP:", otp);
             } else {
@@ -314,7 +322,6 @@ const changePasswordValid = async(req,res)=>{
                 });
             }
         } else {
-            // When the user is not found, return JSON with an error message.
             res.json({
                 success: false,
                 message: "User with this email does not exist"
@@ -322,11 +329,7 @@ const changePasswordValid = async(req,res)=>{
         }
     } catch (error) {
         console.error("Error in change password validation", error);
-        // You can also return JSON here if needed.
-        res.json({
-            success: false,
-            message: "An internal error occurred. Please try again later."
-        });
+       res.redirect("/pageNotFound")
     }
 }
 
@@ -353,14 +356,13 @@ const verifyChangePassOtp = async(req,res)=>{
 
 const getChangePasswordOtpPage = (req, res) => {
     try {
-      // Render your existing EJS file named "change-password-otp.ejs"
       res.render("change-password-otp");
     } catch (error) {
       res.redirect("/pageNotFound");
     }
   };
 
-  const addAddress = async(req,res)=>{
+const addAddress = async(req,res)=>{
     try {
         
         const user = req.session.user;
@@ -369,12 +371,12 @@ const getChangePasswordOtpPage = (req, res) => {
     } catch (error) {
         res.redirect("/pageNotFound")
     }
-  }
+}
 
   const postAddAddress = async (req, res) => {
     try {
       const userId = req.session.user;
-      const { redirect } = req.body;   // Extract the redirect value from the form data
+      const { redirect } = req.body; 
       const userData = await User.findOne({ _id: userId });
       const { addressType, name, city, landmark, state, pincode, phone, altPhone } = req.body;
   
@@ -436,7 +438,7 @@ const getChangePasswordOtpPage = (req, res) => {
   const postEditAddress = async (req, res) => {
     try {
       const data = req.body;
-      const { redirect } = req.body; // Extract the redirect value from the form data
+      const { redirect } = req.body; 
       const addressId = req.query.id;
       const user = req.session.user;
       const findAddress = await Address.findOne({ "address._id": addressId });
@@ -506,7 +508,7 @@ const getChangePasswordOtpPage = (req, res) => {
     }
   }
 
-  // Render the edit profile page
+
 const getEditProfilePage = async (req, res) => {
     try {
       const userId = req.session.user;

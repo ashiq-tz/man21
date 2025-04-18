@@ -9,10 +9,7 @@ const customerInfo = async (req,res)=>{
         if(req.query.search){
             search = req.query.search;
         }
-        // let page = 1;
-        // if(req.query.page){
-        //     page = req.query.page;
-        // }
+        
         let page = parseInt(req.query.page) || 1;
 
         const limit = 5
@@ -36,7 +33,6 @@ const customerInfo = async (req,res)=>{
             ]
         }).countDocuments();
 
-        // res.render('customers')
         res.render('customers', {
             data: userData,
             totalPages: Math.ceil(count / limit),
@@ -57,7 +53,7 @@ const customerBlocked = async (req,res)=>{
         res.redirect(`/admin/users?page=${page}`);
 
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 

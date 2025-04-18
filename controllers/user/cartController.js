@@ -4,11 +4,11 @@ const Wishlist = require("../../models/wishlistSchema");
 const User = require("../../models/userSchema"); 
 const Address = require("../../models/addressSchema")
 
-// Helper to check if product is available for cart addition
+// Helper to check if product is available 
 async function isProductAvailable(productId) {
-    // Fetch product along with category information if needed
+    
     const product = await Product.findById(productId).populate('category');
-    // Change the check to use "Available" and also verify if the product is not blocked
+    
     if (!product || product.isBlocked || product.status !== "Available" || (product.category && product.category.isListed === false)) {
       return null;
     }
@@ -65,7 +65,7 @@ const addToCart = async (req, res) => {
       }
       cart.items.push({
         productId,
-        size, // store the selected size
+        size, 
         quantity: 1,
         price: product.salePrice,
         totalPrice: product.salePrice,
@@ -187,7 +187,7 @@ const checkout = async(req,res)=>{
   const userId = req.session.user;
   const user = await User.findById(userId); 
   const cart = await Cart.findOne({ userId }).populate('items.productId');
-  const addressData = await Address.findOne({ userId }); // or however you store addresses
+  const addressData = await Address.findOne({ userId }); 
   res.render('checkout', {
     cart,
     userAddress: addressData,

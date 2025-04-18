@@ -29,6 +29,7 @@ router.get("/users",adminAuth,customerController.customerInfo);
 
 router.get("/blockCustomer",adminAuth,customerController.customerBlocked)
 router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
+
 //Category M
 router.get("/category",adminAuth,categoryController.categoryInfo);
 router.post("/addCategory",adminAuth,categoryController.addCategory)
@@ -84,6 +85,9 @@ router.get("/deleteCoupon",adminAuth,couponController.deleteCoupon)
 
 // Orders Management
 router.get("/orders", adminAuth, orderAdminController.loadOrders);
-router.post("/orders/updateStatus", adminAuth, orderAdminController.updateOrderStatus);
+
+router.get("/order/details/:orderId", adminAuth, orderAdminController.orderDetails);
+router.post("/order/details/:orderId", adminAuth, orderAdminController.updateOrderDetailsStatus);
+
 
 module.exports = router 

@@ -1,0 +1,156 @@
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'orders' } ) %>
+
+<style>
+  .order-details-container {
+    max-width: 800px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .order-details-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #333;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+  .back-link:hover {
+    background-color: #5a6268;
+    color: #fff;
+  }
+  .order-info {
+    margin-bottom: 25px;
+  }
+  .order-info p {
+    margin: 10px 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+  .order-info p strong {
+    min-width: 150px;
+    color: #555;
+  }
+  .order-info .return-reason {
+    color: #d9534f;
+    font-weight: bold;
+  }
+  .order-info img {
+    max-width: 120px;
+    border-radius: 8px;
+    margin-top: 15px;
+    transition: transform 0.2s ease;
+  }
+  .order-info img:hover {
+    transform: scale(1.05);
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid #e0e0e0;
+    margin: 25px 0;
+  }
+  .order-info h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+  }
+  .status-update-form {
+    margin-top: 30px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  .status-update-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+  }
+  .status-update-form select {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #fff;
+    transition: border-color 0.3s ease;
+  }
+  .status-update-form select:focus {
+    border-color: #3b74f2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 116, 242, 0.2);
+  }
+  .status-update-form button {
+    padding: 12px;
+    width: 100%;
+    background-color: #3b74f2;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .status-update-form button:hover {
+    background-color: #345fcb;
+  }
+</style>
+
+<div class="order-details-container">
+  <a href="/admin/orders" class="back-link">Back to Orders</a>
+  <h2>Order Details</h2>
+  <div class="order-info">
+    <p><strong>Order ID:</strong> <%= order.orderId %></p>
+    <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+    <p><strong>Status:</strong> <%= order.status %></p>
+    <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toLocaleString('en-IN') %></p>
+    <% if (order.status === 'Return Requested' && order.returnReason) { %>
+      <p class="return-reason"><strong>Return Request Reason:</strong> <%= order.returnReason %></p>
+    <% } %>
+    <hr>
+    <h4>Product Details</h4>
+    <p><strong>Product:</strong> <%= order.product ? order.product.productName : 'N/A' %></p>
+    <p><strong>Quantity:</strong> <%= order.quantity %></p>
+    <p><strong>Size:</strong> <%= order.size %></p>
+    <% if (order.product && order.product.productImage && order.product.productImage.length > 0) { %>
+      <img src="/uploads/product-images/<%= order.product.productImage[0] %>" alt="Product Image">
+    <% } else { %>
+      <p>No product image available.</p>
+    <% } %>
+  </div>
+  
+  <form class="status-update-form" action="/admin/order/details/<%= order.orderId %>" method="post">
+    <label for="newStatus">Change Status:</label>
+    <select name="newStatus" id="newStatus" required>
+      <% if (order.status === 'Return Requested') { %>
+        <option value="Returned">Accept Return</option>
+        <option value="Return Rejected">Reject Return</option>
+      <% } else { %>
+        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+        <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+        <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+        <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+        <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+      <% } %>
+    </select>
+    <button type="submit">Update Order Status</button>
+  </form>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>

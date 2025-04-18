@@ -36,7 +36,7 @@ const loadOrders = async (req, res) => {
         .sort(sortObj)
         .limit(limit)
         .skip((page - 1) * limit)
-        .populate("orderedItems.product")
+        .populate("product")
         .lean();
   
       const count = await Order.countDocuments(query);
@@ -62,31 +62,87 @@ const loadOrders = async (req, res) => {
       res.redirect("/admin/pageerror");
     }
   };
-  
-  
 
-
-const updateOrderStatus = async (req, res) => {
-    try {
-      const { orderId, newStatus } = req.body;
-      let updateFields = { status: newStatus };
-  
-      // For statuses "Cancelled", "Returned", or "Delivered", set all items to that status.
-      if (["Cancelled", "Returned", "Delivered"].includes(newStatus)) {
-        updateFields["orderedItems.$[].itemStatus"] = newStatus;
-      } else {
-        updateFields["orderedItems.$[].itemStatus"] = "Active";
-      }
-  
-      await Order.updateOne({ orderId }, { $set: updateFields });
-      res.redirect("/admin/orders");
-    } catch (error) {
-      console.error("Error in updateOrderStatus:", error);
-      res.redirect("/admin/pageerror");
+const orderDetails = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    // Find the order
+    const order = await Order.findOne({ orderId })
+      .populate('product')
+      .populate('address');
+    if (!order) {
+      return res.redirect('/admin/pageerror');
     }
-  };
+    res.render("order-details-admin", { order });
+  } catch (error) {
+    console.error("Error in orderDetails:", error);
+    res.redirect('/admin/pageerror');
+  }
+};
+
+
+const updateOrderDetailsStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { newStatus } = req.body;
+    
+    //order
+    const order = await Order.findOne({ orderId }).populate('product');
+    if (!order) {
+      return res.redirect('/admin/pageerror');
+    }
+
+    const previousStatus = order.status;
+    
+    const activeStatuses = ["Pending", "Processing", "Shipped", "Delivered"];
+    const product = order.product;
+
+    const variant = product.variants.find(v => v.size.toString() === order.size.toString());
+    
+    if (previousStatus === "Return Requested") {
+      // If the admin accepts the return:
+      if (newStatus === "Returned") {
+        // When a return is accepted, restore the stock.
+        if (variant) {
+          variant.stock += order.quantity;
+          await product.save();
+        }
+      }
+      // If the admin rejects the return, no stock adjustment is made.
+    } else {
+      // For all other transitions
+      if (activeStatuses.includes(previousStatus) && (newStatus === "Cancelled" || newStatus === "Returned")) {
+        if (variant) {
+          variant.stock += order.quantity;
+          await product.save();
+        }
+      } else if ((previousStatus === "Cancelled" || previousStatus === "Returned") && activeStatuses.includes(newStatus)) {
+        if (variant && variant.stock >= order.quantity) {
+          variant.stock -= order.quantity;
+          await product.save();
+        } else {
+          return res.json({ success: false, message: "Insufficient stock to reactivate the order" });
+        }
+      }
+    }
+    
+    order.status = newStatus;
+   
+    await order.save();
+    
+    res.redirect("/admin/orders");
+  } catch (error) {
+    console.error("Error in updateOrderDetailsStatus:", error);
+    res.redirect('/admin/pageerror');
+  }
+};
+
+
+
 
 module.exports = {
   loadOrders,
-  updateOrderStatus,
+  orderDetails,
+  updateOrderDetailsStatus,
 };
+

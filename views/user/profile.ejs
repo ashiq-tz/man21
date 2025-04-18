@@ -164,6 +164,19 @@
     background-color: #b9ecf9;
     color: #009cc3;
   }
+  .status-shipped{
+    background-color: #ceb9f9;
+    color: #4202c3;
+  }
+  .status-return-requested{
+    background-color: #b9f9e2;
+    color: #00c67d;
+  }
+  .status-return-rejected{
+    background-color: #f9beb9;
+    color: #ed3f2f;
+  }
+
   .order-products {
     margin-top: 10px;
     border-top: 1px solid #eee;
@@ -215,6 +228,89 @@
     margin-left: 5px;
     font-size: 0.85rem;
     text-decoration: none;
+  }
+    /* Wallet Card */
+    .wallet-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .wallet-card h2 {
+    font-size: 36px;
+    margin: 0;
+    color: #333;
+  }
+  .wallet-card p {
+    color: #666;
+    margin: 10px 0;
+    font-size: 16px;
+  }
+  .wallet-card button {
+    margin-top: 15px;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3b74f2;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .wallet-card button:hover {
+    background-color: #345fcb;
+  }
+
+  /* Wallet History Table */
+  .wallet-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .wallet-history-table thead {
+    background-color: #3b74f2;
+    color: #fff;
+  }
+  .wallet-history-table th, .wallet-history-table td {
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 14px;
+  }
+  .wallet-history-table tbody tr {
+    border-bottom: 1px solid #f1f1f1;
+  }
+  .wallet-history-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  .wallet-history-table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  /* Transaction Type Badges */
+  .badge-credit {
+    background-color: #28a745;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .badge-debit {
+    background-color: #dc3545;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  /* Transaction Status Styling */
+  .transaction-status {
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: capitalize;
   }
 </style>
 
@@ -315,6 +411,7 @@
                           <p>Phone: <%= address.phone %></p>
                           <p>Alt Phone: <%= address.altPhone %></p>
                           <a href="/editAddress?id=<%= address._id %>&redirect=profile" class="btn btn-sm btn-primary">Edit</a>
+                          <a href="/deleteAddress?id=<%= address._id %>&redirect=profile" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure to delete')">Delete</a>
                         </div>
                       </div>
                     <% }) %>
@@ -325,135 +422,136 @@
               </div>
             </div>
 
-            <!-- Orders Tab -->
-            <div class="tab-pane fade" id="orders" role="tabpanel">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="mb-0">My Orders</h5>
-                </div>
-                <div class="card-body">
-                  <% if (user && user.orderHistory && user.orderHistory.length > 0) { %>
-                    <div class="orders-list">
-                      <% user.orderHistory.forEach(order => { %>
-                        <div class="order-card">
-                          <!-- Order Header -->
-                          <div class="order-top-row">
-                            <div class="order-id">Order <%= order.orderId %></div>
-                            <div class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></div>
-                          </div>
-                          <!-- Order Status -->
-                          <div class="order-status <%= 'status-' + order.status.toLowerCase() %>">
-                            <%= order.status %>
-                          </div>
-                          <!-- Ordered Products List -->
-                          <div class="order-products">
-                            <% if (order.orderedItems && order.orderedItems.length > 0) { %>
-                              <% order.orderedItems.forEach(item => { %>
-                                <div class="product-item">
-                                  <img src="/uploads/product-images/<%= item.product?.productImage?.[0] || 'placeholder.jpg' %>" alt="<%= item.product?.productName || 'Product' %>">
-                                  <div class="product-info">
-                                    <div class="product-name"><%= item.product?.productName %></div>
-                                    <div class="product-qty">
-                                      Qty: <%= item.quantity %>
-                                      <% if (item.size) { %> | Size: <%= item.size %><% } %>
-                                    </div>
-                                    <!-- Display item status -->
-                                    <% if (item.itemStatus === 'Cancelled') { %>
-                                      <span style="color: red;">(Cancelled)</span>
-                                    <% } else if (item.itemStatus === 'Returned') { %>
-                                      <span style="color: orange;">(Returned)</span>
-                                    <% } else { %>
-                                      <span style="color: #666;">(<%= item.itemStatus %>)</span>
-                                    <% } %>
-                                  </div>
-                                  <div class="product-price">₹<%= item.price.toLocaleString('en-IN') %></div>
-                                  <!-- Button for single-item cancellation (if item is still Active) -->
-                                  <% if (order.orderedItems.length > 1 && item.itemStatus === 'Active') { %>
-                                    <button
-                                      class="btn btn-sm btn-danger"
-                                      onclick="cancelSingleItem('<%= order.orderId %>', '<%= item.product._id %>', <%= item.quantity %>, <%= item.size ? `'${item.size}'` : 'null' %>)"
-                                    >
-                                      Cancel
-                                    </button>
-                                  <% } %>
-                                </div>
-                              <% }) %>
-                            <% } %>
-                          </div>
-                          <!-- Order Footer -->
-                          <div class="order-bottom-row">
-                            <div class="order-total">Total: ₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
-                            <div class="order-actions">
-                              <a href="/order/details?orderId=<%= order.orderId %>" class="btn btn-sm btn-primary">View</a>
-                              <% if (order.status === 'Pending' || order.status === 'Processing') { %>
-                                <button class="btn btn-sm btn-danger" onclick="openCancelModal('<%= order.orderId %>')">Cancel Order</button>
-                              <% } else if (order.status === 'Delivered') { %>
-                                <button class="btn btn-sm btn-warning" onclick="openReturnModal('<%= order.orderId %>')">Return Order</button>
-                              <% } %>
-                            </div>
-                          </div>
-                        </div>
-                      <% }) %>
-                    </div>
-                  <% } else { %>
-                    <p>No orders found.</p>
-                  <% } %>
-                </div>
+           <!-- Orders Tab -->
+          <div class="tab-pane fade" id="orders" role="tabpanel">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">My Orders</h5>
               </div>
-            </div>
+              <div class="card-body">
+                <% if (user && user.orderHistory && user.orderHistory.length > 0) { %>
+                  <div class="orders-list">
+                    <% user.orderHistory.forEach(order => { %>
+                      <div class="order-card">
+                        <!-- Order Header -->
+                        <div class="order-top-row">
+                          <div class="order-id">Order <%= order.orderId %></div>
+                          <div class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+                        </div>
+                        <!-- Order Status -->
+                        
+                          <div class="order-status <%= 'status-' + order.status.toLowerCase().replace(/\s+/g, '-') %>">
+
+                          <%= order.status %>
+                        </div>
+                        <!-- Ordered Product -->
+                        <div class="order-products">
+                          <div class="product-item">
+                            <img src="/uploads/product-images/<%= order.product?.productImage?.[0] || 'placeholder.jpg' %>" alt="<%= order.product?.productName || 'Product' %>">
+                            <div class="product-info">
+                              <div class="product-name"><%= order.product?.productName %></div>
+                              <div class="product-qty">
+                                Qty: <%= order.quantity %>
+                                <% if (order.size) { %> | Size: <%= order.size %><% } %>
+                              </div>
+                              
+                            </div>
+                            <div class="product-price">₹<%= (order.price || 0).toLocaleString('en-IN') %></div>
 
             
-             <!-- Wallet Tab -->
-            <div class="tab-pane fade" id="wallet" role="tabpanel">
-              <div class="card mx-auto">
-                <div class="card-header">
-                  <h5 class="mb-0">Wallet</h5>
-                </div>
-                <div class="card-body">
-                  <p><strong>Current Balance:</strong> ₹<%= user.wallet %></p>
-                  <form action="/add-money" method="POST" class="mt-3">
-                    <div class="form-group mb-3">
-                      <label for="walletAmount">Amount</label>
-                      <input type="number" class="form-control" id="walletAmount" name="amount" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Add Money</button>
-                  </form>
-                </div>
+                          </div>
+                        </div>
+                        <!-- Order Footer -->
+                        <div class="order-bottom-row">
+                          <div class="order-total">Total: ₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+                          <div class="order-actions">
+                            <a href="/order/details?orderId=<%= order.orderId %>" class="btn btn-sm btn-primary">View</a>
+                            <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+                              <button class="btn btn-sm btn-danger" onclick="openCancelModal('<%= order.orderId %>')">Cancel Order</button>
+                            <% } else if (order.status === 'Delivered') { %>
+                              <button class="btn btn-sm btn-warning" onclick="openReturnModal('<%= order.orderId %>')">Return Order</button>
+                            <% } %>
+                          </div>
+                        </div>
+                      </div>
+                    <% }) %>
+                  </div>
+                <% } else { %>
+                  <p>No orders found.</p>
+                <% } %>
               </div>
             </div>
+          </div>
 
-            <!-- Wallet History Tab -->
-            <div class="tab-pane fade" id="wallet-history" role="tabpanel">
-              <div class="card mx-auto">
-                <div class="card-header">
-                  <h5 class="mb-0">Wallet History</h5>
+
+            
+          <!-- Wallet Tab -->
+          <div class="tab-pane fade" id="wallet" role="tabpanel">
+            <div class="wallet-card mx-auto" style="max-width: 500px;">
+              <h2>₹<%= user.wallet ? user.wallet.toLocaleString('en-IN') : '0' %></h2>
+              <p>Current Balance</p>
+              <form action="/add-money" method="POST">
+                <div class="form-group mb-3">
+                  <input type="number" class="form-control" name="amount" placeholder="Enter amount" required>
                 </div>
-                <div class="card-body">
-                  <% if (user.walletHistory && user.walletHistory.length > 0) { %>
-                    <table class="table text-start">
-                      <thead>
+                <button type="submit">Add Money</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Wallet History Tab -->
+          <% 
+          const sortedWalletHistory = user.walletHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+          const walletHistoryToShow = sortedWalletHistory.slice(0, 5);
+        %>
+          <div class="tab-pane fade" id="wallet-history" role="tabpanel">
+            <div class="card mx-auto" style="max-width: 800px;">
+              <div class="card-header">
+                <h5 class="mb-0">Recent Wallet History</h5>
+              </div>
+              <div class="card-body">
+                <% if (walletHistoryToShow && walletHistoryToShow.length > 0) { %>
+                  <table class="wallet-history-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Order ID</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% walletHistoryToShow.forEach(function(entry) { %>
+                        
                         <tr>
-                          <th>Date</th>
-                          <th>Status</th>
-                          <th>Amount</th>
+                         
+                          <td><%= new Date(entry.date).toLocaleDateString() %></td>
+                          <td>
+                            <a href="/order/details?orderId=<%= entry.orderId %>"><%= entry.orderId %></a>
+                          </td>
+                          <td>
+                            <% if(entry.type && entry.type.toLowerCase() === 'credit') { %>
+                              <span class="badge-credit">Credit</span>
+                            <% } else { %>
+                              <span class="badge-debit">Debit</span>
+                            <% } %>
+                          </td>
+                          <td class="transaction-status"><%= entry.status %></td>
+                          <td>₹<%= Number(entry.amount).toLocaleString('en-IN') %></td>
+                        
                         </tr>
-                      </thead>
-                      <tbody>
-                        <% user.walletHistory.forEach(function(entry) { %>
-                          <tr>
-                            <td><%= new Date(entry.date).toLocaleDateString() %></td>
-                            <td><%= entry.status %></td>
-                            <td>₹<%= entry.amount %></td>
-                          </tr>
-                        <% }) %>
-                      </tbody>
-                    </table>
-                  <% } else { %>
-                    <p>No wallet history found.</p>
-                  <% } %>
-                </div>
+                      <% }) %>
+                    
+                    </tbody>
+                  </table>
+                <% } else { %>
+                  <p>No wallet history found.</p>
+                <% } %>
               </div>
             </div>
+          </div>
+
 
             <!-- Referrals Tab -->
             <div class="tab-pane fade" id="referrals" role="tabpanel">
@@ -498,39 +596,6 @@
         headers: { 'Content-Type': 'application/json' },
         
         body: JSON.stringify({ orderId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        Swal.fire(data.message);
-        if (data.success) window.location.reload();
-      })
-      .catch(err => console.error('Error:', err));
-    }
-  });
-}
-
-
-  // Single-item (partial) cancellation modal
-  function cancelSingleItem(orderId, productId, quantity, size) {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: "Do you really want to cancel this item? This action cannot be undone.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, cancel it',
-    cancelButtonText: 'No, keep it'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Build the productsToCancel array for partial cancellation
-      const productsToCancel = [{ productId, size, quantity }];
-
-      fetch('/cancelOrder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId,
-          productsToCancel
-        })
       })
       .then(res => res.json())
       .then(data => {

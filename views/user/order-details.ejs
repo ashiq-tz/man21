@@ -13,23 +13,26 @@
       <tr>
         <th>Image</th>
         <th>Product</th>
+        <th>Size</th>
         <th>Quantity</th>
         <th>Price</th>
-        <th>Item Status</th>
+       
+       
       </tr>
     </thead>
     <tbody>
-      <% order.orderedItems.forEach(item => { %>
+      
         <tr>
           <td>
-            <img src="/uploads/product-images/<%= item.product?.productImage?.[0] || 'placeholder.jpg' %>" alt="<%= item.product?.productName || 'Product' %>" style="width: 50px; height: 50px; object-fit: cover;">
+            <img src="/uploads/product-images/<%= order.product?.productImage?.[0] || 'placeholder.jpg' %>" alt="<%= order.product?.productName || 'Product' %>" style="width: 50px; height: 50px; object-fit: cover;">
           </td>
-          <td><%= item.product?.productName %></td>
-          <td><%= item.quantity %></td>
-          <td>₹<%= item.price.toLocaleString('en-IN') %></td>
-          <td><%= item.itemStatus %></td>
+          <td><%= order.product?.productName %></td>
+          <td><%= order.size %></td>
+          <td><%= order.quantity %></td>
+          <td>₹<%= order.price.toLocaleString('en-IN') %></td>
+         
+          
         </tr>
-      <% }) %>
     </tbody>
   </table>
   
@@ -37,6 +40,7 @@
   <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
   <p><strong>Discount:</strong> ₹<%= order.discount %></p>
   <p><strong>Final Amount:</strong> ₹<%= order.finalAmount %></p>
+  <p><strong>Payment:</strong> <%= order.paymentMethod %></p>
   
   <h3>Shipping Address</h3>
   <% if (order.address) { %>

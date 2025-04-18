@@ -372,6 +372,7 @@
         })
         .catch(error=>{
           if(error.message === "Category already exist"){
+            
             Swal.fire({
 
               icon:'error',
@@ -457,7 +458,7 @@
               location.reload();
             })
           }else{
-            swa.fire("Failed", data.message || "Adding Offer Failed","error");
+            Swal.fire("Failed", data.message || "Adding Offer Failed","error");
           }
 
         } catch (error) {

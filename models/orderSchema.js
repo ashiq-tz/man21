@@ -4,32 +4,33 @@ const { Schema } = mongoose;
 const { v4: uuidv4 } = require("uuid");
 
 const orderSchema = new Schema({
-  orderId: {
-    type: String,
-    default: () => uuidv4(),
-    unique: true
+  orderId: { 
+    type: String, 
+    default: () => uuidv4(), 
+    unique: true 
   },
-  orderedItems: [{
-    product: {
-      type: Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true
-    },
-    quantity: {
-      type: Number,
-      required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    },
-    // New field to track each item’s status
-    itemStatus: {
-      type: String,
-      default: "Active", // "Active" means the item is not cancelled or returned.
-      enum: ["Active", "Cancelled", "Returned"]
-    }
-  }],
+  // Group Order Id used to track all orders
+  groupOrderId: {
+    type: String
+  },
+  // Instead of an array, store the product details directly.
+  product: {
+    type: Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true
+  },
+  size: {  // include variant information 
+    type: Number,
+    required: true
+  },
+  quantity: {
+    type: Number,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
   totalPrice: {
     type: Number,
     required: true
@@ -49,11 +50,10 @@ const orderSchema = new Schema({
   invoiceDate: {
     type: Date
   },
-  // Overall order status
   status: {
     type: String,
     required: true,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned']
+    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'Return Requested', 'Return Rejected']
   },
   createdAt: {
     type: Date,
@@ -63,7 +63,16 @@ const orderSchema = new Schema({
   couponApplied: {
     type: Boolean,
     default: false
+  },
+  paymentMethod: {           
+    type: String,
+    required: false
+  },
+  returnReason: {
+    type: String,
+    default: ""
   }
+
 });
 
 const Order = mongoose.model("Order", orderSchema);

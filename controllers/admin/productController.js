@@ -6,6 +6,7 @@ const Users = require("../../models/userSchema");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
+const { log } = require("console");
 
 const getProductAddPage = async (req, res) => {
   try {
@@ -69,6 +70,14 @@ const addProducts = async (req, res) => {
         return res.status(400).send("Invalid category name");
       }
 
+      let discountPercentage = 0;
+      if (Number(products.regularPrice) > Number(products.salePrice)) {
+        discountPercentage = Math.floor(
+          ((products.regularPrice - products.salePrice) / products.regularPrice) * 100
+        );
+      }
+
+
       // Create a new product using the variants array
       const newProduct = new Product({
         productName: products.productName,
@@ -77,9 +86,9 @@ const addProducts = async (req, res) => {
         category: categoryId._id,
         regularPrice: products.regularPrice,
         salePrice: products.salePrice,
-        // You can remove or repurpose the old quantity field if no longer needed.
+        productOffer: discountPercentage,
         color: products.color,
-        // Save the variants array with each size and its stock
+        
         variants: variants,
         productImage: images,
         status: 'Available',
@@ -87,6 +96,7 @@ const addProducts = async (req, res) => {
 
       await newProduct.save();
       return res.redirect("/admin/addProducts?success=true");
+       
     } else {
       return res.status(400).json("Product already exists. Try with another name");
     }
@@ -188,9 +198,11 @@ const removeProductOffer = async (req, res) => {
 
 const blockProduct = async (req, res) => {
   try {
-    let id = req.query.id;
+    // let id = req.query.id;
+    const { id, page } = req.query;
     await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
-    res.redirect("/admin/products");
+    res.redirect(`/admin/products?page=${page}`);
+   
   } catch (error) {
     res.redirect("/admin/pageerror");
   }
@@ -198,9 +210,10 @@ const blockProduct = async (req, res) => {
 
 const unblockProduct = async (req, res) => {
   try {
-    let id = req.query.id;
+    // let id = req.query.id;
+    const { id, page } = req.query;
     await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
-    res.redirect("/admin/products");
+    res.redirect(`/admin/products?page=${page}`);
   } catch (error) {
     res.redirect("/admin/pageerror");
   }
@@ -229,7 +242,7 @@ const editProduct = async (req, res) => {
     const product = await Product.findOne({ _id: id });
     const data = req.body;
 
-    // 1. Check for duplicate product name
+    //for duplicate product name
     const existingProduct = await Product.findOne({
       productName: data.productName,
       _id: { $ne: id }
@@ -238,7 +251,7 @@ const editProduct = async (req, res) => {
       return res.status(400).json({ error: "Product with this name already exists. Please try with another name" });
     }
 
-    // 2. Update text fields
+    //text fields
     product.productName = data.productName;
     product.description = data.description;
     product.brand = data.brand;
@@ -246,11 +259,18 @@ const editProduct = async (req, res) => {
     product.regularPrice = data.regularPrice;
     product.salePrice = data.salePrice;
     product.color = data.color;
-    // Remove old quantity/size updates:
-    // product.quantity = data.quantity;
-    // product.size = data.size;
 
-    // --- Process variants from sizes & stock inputs ---
+    // Recalculate the discount (productOffer) if salePrice is lower than regularPrice
+    if (Number(data.regularPrice) > Number(data.salePrice)) {
+      product.productOffer = Math.floor(
+        ((data.regularPrice - data.salePrice) / data.regularPrice) * 100
+      );
+    } else {
+      product.productOffer = 0;
+    }
+
+
+    //variants from sizes & stock
     let sizes = req.body.size;
     if (!sizes) {
       sizes = []; // No sizes selected
@@ -267,16 +287,20 @@ const editProduct = async (req, res) => {
       }
     });
     product.variants = variants;
-    // --- End variants processing ---
 
     // 3. Process image updates for each slot (1..4)
     for (let i = 1; i <= 4; i++) {
       const fieldName = 'image' + i;
-      if (req.files && req.files[fieldName] && req.files[fieldName][0]) {
+      if (req.files && req.files[fieldName] && req.files[fieldName][0]  ) {
         const file = req.files[fieldName][0];
         const filename = file.filename;
-        // Resize the image using sharp
+        const validFile = filename.split(".")
+        console.log("ext"+validFile)
+        
+       
+        //resize the image using sharp
         const originalImagePath = file.path;
+        
         const resizedImagePath = path.join("public", "uploads", "product-images", filename);
         await sharp(originalImagePath)
           .resize({ width: 440, height: 440 })
@@ -295,7 +319,6 @@ const editProduct = async (req, res) => {
       }
     }
 
-    // 4. Save changes
     await product.save();
     res.redirect("/admin/products");
   } catch (error) {

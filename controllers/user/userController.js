@@ -1,4 +1,3 @@
-// controllers/user/userController.js
 
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
@@ -344,9 +343,10 @@ const getProductsPage = async (req, res) => {
       currentBrand: req.query.brand || "",
       currentCategory: req.query.category || "",
       currentPrice: req.query.price || "",
-      currentSort: req.query.sortBy || "",
+      currentSort: req.query.sortBy || "newArrivals",
       brands: allBrands,
-      categories
+      categories,
+      searchQuery: req.query.search || ""
     });
   } catch (err) {
     console.error(err);

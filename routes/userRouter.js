@@ -75,8 +75,9 @@ router.post("/editAddress",userAuth,profileController.postEditAddress);
 router.get("/deleteAddress",userAuth,profileController.deleteAddress)
 
 
-router.get("/products",userController.getProductsPage);
+
 //Product Management
+router.get("/products",userController.getProductsPage);
 router.get("/product/:id", productController.getProductDetails);
 
 //Wishlist Management

@@ -5,7 +5,7 @@
 <div class="container d-flex justify-content-center align-items-start min-vh-100 pt-5">
   <div class="row w-100">
     <div class="col-md-6 mx-auto">
-      <form method="post" action="/admin/editCategory/<%= category._id %>">
+      <form method="post" id="editCategoryForm" action="/admin/editCategory/<%= category._id %>">
         <div class="mb-4">
           <label for="product_name" class="form-label">Name</label>
           <input type="text" name="categoryName" value="<%= category.name %>" class="form-control border" />
@@ -23,3 +23,42 @@
 </div>
 
 <%- include("../../views/partials/admin/footer") %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <script>
+    document.getElementById("editCategoryForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      var form = e.target;
+      var categoryName = form.querySelector('input[name="categoryName"]').value.trim();
+      var description = form.querySelector('textarea[name="description"]').value.trim();
+      var url = "/admin/editCategory/<%= category._id %>";
+  
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryName,description })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            throw new Error(err.error);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        window.location.href = "/admin/category";
+      })
+      .catch(error => {
+        Swal.fire({
+          icon: "error",
+          title: "OOPS!",
+          text: error.message || "An error occurred while updating the category."
+        });
+      });
+    });
+  </script>
+  
