@@ -9,7 +9,9 @@ const Cart = require("../../models/cartSchema");
 const getProductDetails = async (req, res) => {
     try {
       const productId = req.params.id;
-      const product = await Product.findById(productId).lean();
+      const product = await Product.findById(productId)
+        .populate('category')  
+        .lean();
   
       if (!product) {
         return res.redirect('/products');
@@ -26,7 +28,13 @@ const getProductDetails = async (req, res) => {
   
       product.availableSizes = product.size || [];
       product.colorName = product.color || '';
-  
+
+      //offers
+      const catOffer    = product.category?.categoryOffer || 0;
+      const prodOffer   = product.productOffer   || 0;
+      product.bestOffer   = Math.max(catOffer, prodOffer);
+      product.discountAmt = Math.floor(product.salePrice * product.bestOffer/100);
+      product.finalPrice  = product.salePrice - product.discountAmt;
 
       const relatedProducts = await Product.find({
         _id: { $ne: productId },

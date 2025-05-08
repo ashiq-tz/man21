@@ -259,12 +259,22 @@
       <% if(product.color) { %>
         <div class="product-color"><%= product.color.toUpperCase() %></div>
       <% } %>
-      <div class="price-section">
+      <!-- <div class="price-section">
         ₹<%= product.salePrice.toLocaleString('en-IN') %>
         <% if (product.regularPrice > product.salePrice) { %>
           <span class="regular-price">₹<%= product.regularPrice.toLocaleString('en-IN') %></span>
         <% } %>
+      </div> -->
+      <div class="price-section">
+        <% if (product.bestOffer > 0) { %>
+          ₹<%= product.finalPrice.toLocaleString('en-IN') %>
+          <span class="regular-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
+          <span style="color:red; margin-left:8px;">-<%= product.bestOffer %>%</span>
+        <% } else { %>
+          ₹<%= product.salePrice.toLocaleString('en-IN') %>
+        <% } %>
       </div>
+      
 
       <% if(product.variants && product.variants.length) { %>
         <div>
@@ -339,6 +349,7 @@
                aria-labelledby="headingProductDetails"
                data-parent="#productAccordion">
             <div class="accordion-body">
+              <strong>Category:</strong> <%= product.categoryName %>
               <% if (product.details && product.details.length > 0) { %>
                 <ul>
                   <% product.details.forEach(detail => { %>

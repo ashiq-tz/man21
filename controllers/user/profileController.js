@@ -166,32 +166,32 @@ const postNewPassword = async(req,res)=>{
 }
 
 const userProfile = async (req, res) => {
-    try {
-      const userId = req.session.user;
-      // populate orderHistory
-      const userData = await User.findById(userId)
+  try {
+    const userId = req.session.user;
+
+    // 1) Load the user and populate their orders & products
+    const user = await User.findById(userId)
       .populate({
         path: 'orderHistory',
         options: { sort: { createdAt: -1 } },
-        populate: {
-          path: 'product',
-          model: 'Product'
-        }
+        populate: { path: 'product', model: 'Product' }
       });
 
-  
-      // also fetch addresses
-      const addressData = await Address.findOne({ userId });
-  
-      res.render('profile', {
-        user: userData,
-        userAddress: addressData,
-      });
-    } catch (error) {
-      console.error("Error for retrieve profile data", error);
-      res.redirect("/pageNotFound");
-    }
-  };
+    // 2) Fetch their addresses
+    const userAddress = await Address.findOne({ userId });
+
+    // 3) Build your magic referral link
+    const host  = req.get('host');     // "localhost:3000"
+    const proto = req.protocol;        // "http"
+    user.referralLink = `${proto}://${host}/signup?ref=${user.referralCode}`;
+
+    // 4) Render with *one* user object
+    res.render('profile', { user, userAddress });
+  } catch (error) {
+    console.error("Error retrieving profile data", error);
+    res.redirect("/pageNotFound");
+  }
+};
   
 
 const changeEmail = async(req,res)=>{
@@ -280,9 +280,12 @@ const updateEmail = async (req, res) => {
 
 const changePassword = async(req,res)=>{
     try {
+      // grab the user’s email
+      const user = await User.findById(req.session.user);
+      req.session.email = user.email;
 
-        res.render("change-password")
-        
+      return res.redirect("/reset-password");
+
     } catch (error) {
         res.redirect("/pageNotFound")
     }
@@ -290,43 +293,45 @@ const changePassword = async(req,res)=>{
 
 const changePasswordValid = async(req,res)=>{
     try {
-        const { email } = req.body;
+        // const { email } = req.body;
         
-        const currentUser = await User.findById(req.session.user);
-        const userExists = await User.findOne({ email });
+        // const currentUser = await User.findById(req.session.user);
+        // const userExists = await User.findOne({ email });
       
-        if (!currentUser || currentUser.email !== email) {
-          return res.render("change-password", {
-            message: "Please enter your current email correctly."
-          });
-        }
+        // if (!currentUser || currentUser.email !== email) {
+        //   return res.render("change-password", {
+        //     message: "Please enter your current email correctly."
+        //   });
+        // }
 
 
-        if(userExists){
-            const otp = generateOtp();
-            const emailSent = await sendVerificationEmail(email, otp);
-            if(emailSent){
-                req.session.userOtp = otp;
-                req.session.userData = req.body;
-                req.session.email = email;
+        // if(userExists){
+        //     const otp = generateOtp();
+        //     const emailSent = await sendVerificationEmail(email, otp);
+        //     if(emailSent){
+        //         req.session.userOtp = otp;
+        //         req.session.userData = req.body;
+        //         req.session.email = email;
                 
-                res.json({
-                    success: true,
-                    redirectUrl: "/change-password-otp" 
-                });
-                console.log("OTP:", otp);
-            } else {
-                res.json({
-                    success: false,
-                    message: "Failed to send OTP. Please try again",
-                });
-            }
-        } else {
-            res.json({
-                success: false,
-                message: "User with this email does not exist"
-            });
-        }
+        //         res.json({
+        //             success: true,
+        //             redirectUrl: "/change-password-otp" 
+        //         });
+        //         console.log("OTP:", otp);
+        //     } else {
+        //         res.json({
+        //             success: false,
+        //             message: "Failed to send OTP. Please try again",
+        //         });
+        //     }
+        // } else {
+        //     res.json({
+        //         success: false,
+        //         message: "User with this email does not exist"
+        //     });
+        // }
+
+        return res.redirect("/reset-password");
     } catch (error) {
         console.error("Error in change password validation", error);
        res.redirect("/pageNotFound")

@@ -114,7 +114,7 @@
                   <th>Expire On</th>
                   <th>Offer Price</th>
                   <th>Minimum Price</th>
-                  <!-- <th>Status</th> -->
+                  <th>Status</th>
                   <th>Edit/Delete</th>
                 </tr>
               </thead>
@@ -126,7 +126,13 @@
                     <td><%= new Date(coupons[i].expireOn).toLocaleDateString('en-us') %></td>
                     <td><%= coupons[i].offerPrice %></td>
                     <td><%= coupons[i].minimumPrice %></td>
-                    <!-- <td><%= coupons[i].isList %></td> -->
+                    <td>
+                         <% if (coupons[i].isActive) { %>
+                           <span class="badge bg-success">Active</span>
+                         <% } else { %>
+                           <span class="badge bg-danger">Expired</span>
+                         <% } %>
+                   </td>
                     <td>
                       <a href="/admin/editCoupon?id=<%= coupons[i]._id %>" class="btn btn-primary btn-sm">Edit</a>
                       <button

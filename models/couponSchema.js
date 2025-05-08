@@ -5,7 +5,10 @@ const couponSchema = new mongoose.Schema({
     name: {
         type: String,
         required:true,
-        unique:true
+        unique:true,
+        uppercase: true,
+        trim: true
+
     },
     createdOn:{
         type:Date,
@@ -26,9 +29,9 @@ const couponSchema = new mongoose.Schema({
     },
     isDeleted:{
         type:Boolean,
-        default:true
+        default:false
     },
-    userId:[{
+    usedBy:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }]

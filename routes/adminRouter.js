@@ -8,18 +8,18 @@ const productController = require("../controllers/admin/productController")
 const bannerController = require("../controllers/admin/bannerController")
 const couponController = require("../controllers/admin/couponController")
 const orderAdminController = require("../controllers/admin/orderController");
+const dashboardController = require("../controllers/admin/dashboardController");
 
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
-const multer = require("multer");
-const storage = require("../helpers/multer");
-const uploads = multer({storage:storage});
+
+// const storage = require("../helpers/multer");
+// const uploads = multer({storage:storage});
+const uploads = require("../helpers/multer")
 
 //Admin Login
 router.get("/login",adminController.loadLogin)
 router.post("/login",adminController.login)
-
-router.get("/",adminAuth,adminController.loadDashboard);
 
 router.get("/pageerror",adminController.pageerror);
 
@@ -88,6 +88,11 @@ router.get("/orders", adminAuth, orderAdminController.loadOrders);
 
 router.get("/order/details/:orderId", adminAuth, orderAdminController.orderDetails);
 router.post("/order/details/:orderId", adminAuth, orderAdminController.updateOrderDetailsStatus);
+
+//Dashboard
+router.get("/dashboard", adminAuth, dashboardController.loadDashboard);
+router.get("/",adminAuth,dashboardController.loadDashboard);
+// router.get("/dashboard/generate", adminAuth, dashboardController.generateReport)
 
 
 module.exports = router 

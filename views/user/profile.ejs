@@ -352,11 +352,6 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#wallet-history" role="tab">
-                  <i class="fi-rs-history mr-10"></i> Wallet History
-                </a>
-              </li>
-              <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" href="#referrals" role="tab">
                   <i class="fi-rs-megaphone mr-10"></i> Referrals
                 </a>
@@ -447,7 +442,9 @@
                         <!-- Ordered Product -->
                         <div class="order-products">
                           <div class="product-item">
+                            <a href="/product/<%= order.product._id %>">
                             <img src="/uploads/product-images/<%= order.product?.productImage?.[0] || 'placeholder.jpg' %>" alt="<%= order.product?.productName || 'Product' %>">
+                          </a>
                             <div class="product-info">
                               <div class="product-name"><%= order.product?.productName %></div>
                               <div class="product-qty">
@@ -456,7 +453,7 @@
                               </div>
                               
                             </div>
-                            <div class="product-price">₹<%= (order.price || 0).toLocaleString('en-IN') %></div>
+                            <div class="product-price">₹<%= order.price.toLocaleString('en-IN') %></div>
 
             
                           </div>
@@ -487,7 +484,8 @@
             
           <!-- Wallet Tab -->
           <div class="tab-pane fade" id="wallet" role="tabpanel">
-            <div class="wallet-card mx-auto" style="max-width: 500px;">
+            <!-- Wallet -->
+            <div class="wallet-card mx-auto" style="max-width: 500px; margin-bottom: 30px;">
               <h2>₹<%= user.wallet ? user.wallet.toLocaleString('en-IN') : '0' %></h2>
               <p>Current Balance</p>
               <form action="/add-money" method="POST">
@@ -497,17 +495,15 @@
                 <button type="submit">Add Money</button>
               </form>
             </div>
-          </div>
-
-          <!-- Wallet History Tab -->
+            <!-- Wallet History Tab -->
           <% 
           const sortedWalletHistory = user.walletHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
           const walletHistoryToShow = sortedWalletHistory.slice(0, 5);
         %>
-          <div class="tab-pane fade" id="wallet-history" role="tabpanel">
+          
             <div class="card mx-auto" style="max-width: 800px;">
               <div class="card-header">
-                <h5 class="mb-0">Recent Wallet History</h5>
+                <h5 class="mb-0"> Wallet History</h5>
               </div>
               <div class="card-body">
                 <% if (walletHistoryToShow && walletHistoryToShow.length > 0) { %>
@@ -551,6 +547,9 @@
               </div>
             </div>
           </div>
+
+          
+          
 
 
             <!-- Referrals Tab -->

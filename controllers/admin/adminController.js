@@ -38,19 +38,19 @@ const login = async (req,res)=>{
     }
 }
 
-const loadDashboard = async (req,res)=>{
-    if(req.session.admin){
-        try {
+// const loadDashboard = async (req,res)=>{
+//     if(req.session.admin){
+//         try {
             
-            res.render("dashboard");
+//             res.render("dashboard");
 
-        } catch (error) {
-            res.redirect("/pageerror")
-        }
-    }else{
-        return res.redirect("/admin/login");
-    }
-}
+//         } catch (error) {
+//             res.redirect("/admin/pageerror")
+//         }
+//     }else{
+//         return res.redirect("/admin/login");
+//     }
+// }
 
 const logout = async (req,res)=>{
     try {
@@ -73,7 +73,6 @@ const logout = async (req,res)=>{
 module.exports = {
     loadLogin,
     login,
-    loadDashboard,
     pageerror,
     logout
     

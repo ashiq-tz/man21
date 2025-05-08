@@ -38,33 +38,38 @@
           <form id="signupForm" class="signup-form" method="post" action="/signup">
             <div class="form-field">
               <i class="ti ti-user"></i>
-              <input type="text" id="name" name="name" placeholder="Username" required />
+              <input type="text" id="name" name="name" placeholder="Username" />
               <div id="error1" class="error-msg"></div>
             </div>
 
             <div class="form-field">
               <i class="ti ti-phone"></i>
-              <input type="tel" id="phone" name="phone" placeholder="Phone" required />
+              <input type="tel" id="phone" name="phone" placeholder="Phone"  />
               <div id="error2" class="error-msg"></div>
             </div>
 
             <div class="form-field">
               <i class="ti ti-mail"></i>
-              <input type="email" id="email" name="email" placeholder="Email" required />
+              <input type="email" id="email" name="email" placeholder="Email"  />
               <div id="error3" class="error-msg"></div>
             </div>
 
             <div class="form-field">
               <i class="ti ti-lock"></i>
-              <input type="password" id="password" name="password" placeholder="Password" required />
+              <input type="password" id="password" name="password" placeholder="Password"  />
               <div id="error4" class="error-msg"></div>
             </div>
 
             <div class="form-field">
               <i class="ti ti-lock"></i>
-              <input type="password" id="cpassword" name="cpassword" placeholder="Confirm Password" required />
+              <input type="password" id="cpassword" name="cpassword" placeholder="Confirm Password" />
               <div id="error5" class="error-msg"></div>
             </div>
+
+            <input type="hidden"
+                  name="referralCode"
+                  value="<%= typeof referralCode!=='undefined' ? referralCode : '' %>" />
+
 
             <button type="submit" class="register-button">REGISTER</button>
 

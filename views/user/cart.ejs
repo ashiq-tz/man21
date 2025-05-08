@@ -124,8 +124,7 @@
       <!-- LEFT: Cart Items -->
       <div class="col-lg-8 mb-4">
         <% if (cart && cart.items.length > 0) { 
-             let subtotal = 0;
-             let totalStockIssues = false;
+          let totalStockIssues = false;
         %>
           <% cart.items.forEach(item => { 
                const product = item.productId;
@@ -134,8 +133,7 @@
                const availableStock = variant ? variant.stock : 0;
                // Determine if this item is out of stock (for its selected size)
                const outOfStock = (availableStock === 0);
-               const itemSubtotal = product.salePrice * item.quantity;
-               subtotal += itemSubtotal;
+               
                if (outOfStock) totalStockIssues = true;
           %>
             <!-- Single Cart Row -->
@@ -156,9 +154,9 @@
                 <div class="cart-product-title"><%= product.productName %></div>
                 <!-- Show the selected size -->
                 <div class="cart-product-size">Size: <%= item.size %></div>
-                <div class="cart-product-price">₹<%= product.salePrice.toLocaleString('en-IN') %></div>
+                <div class="cart-product-price">₹<%= item.price.toLocaleString('en-IN') %></div>
                 <div class="cart-product-subtotal">
-                  Total: ₹<%= itemSubtotal.toLocaleString('en-IN') %>
+                  Total: ₹<%= item.totalPrice.toLocaleString('en-IN') %>
                 </div>
               </div>
 
@@ -188,15 +186,26 @@
               </button>
             </div>
           <% }) %>
+
+      <!-- PAGINATION NAV -->
+      <% if (totalPages > 1) { %>
+        <nav aria-label="Cart pages" class="d-flex justify-content-center">
+          <ul class="pagination">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      <% } %>
+
+
+
       </div>
 
       <!-- RIGHT: Order Summary -->
       <div class="col-lg-4">
-        <% 
-          let youSaved = 0;  
-          let deliveryFee = 0; 
-          let total = subtotal + deliveryFee;
-        %>
         <div class="order-summary">
           <h5>Order Summary</h5>
           <div class="summary-line">
@@ -209,12 +218,12 @@
           </div>
           <div class="summary-line">
             <span>Delivery Fee:</span>
-            <span>₹<%= deliveryFee.toLocaleString('en-IN') %></span>
+             <span class="text-secondary">Free Delivery</span>
           </div>
           <hr />
           <div class="summary-total">
             <span>Total:</span>
-            <span>₹<%= total.toLocaleString('en-IN') %></span>
+            <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
           </div>
           <!-- Disable checkout if any product is out of stock -->
           <a 

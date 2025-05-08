@@ -231,6 +231,8 @@
                 </div>
 
                 <!-- Loop: 2 images per row -->
+                <div id="images-error" class="error-message"></div>
+
                 <% for (let i = 1; i <= 4; i += 2) { %>
                   <div class="row mb-3">
                     <!-- Image i -->
@@ -257,7 +259,7 @@
                           class="form-control" 
                           onchange="viewImage(event, <%= i %>)"
                         >
-                        <div id="images-error" class="error-message"></div>
+                        <div id="images-error<%= i %>" class="error-message"></div>
                         <div 
                           class="image-cropper d-flex flex-column align-items-center" 
                           style="width: 100%;"
@@ -302,7 +304,7 @@
                           class="form-control" 
                           onchange="viewImage(event, <%= i+1 %>)"
                         >
-                        <div id="images-error" class="error-message"></div>
+                        <div id="images-error<%= i+1 %>" class="error-message"></div>
                         <div 
                           class="image-cropper d-flex flex-column align-items-center" 
                           style="width: 100%;"
@@ -514,8 +516,22 @@
       isValid = false;
     }
 
+     // image‐type check
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    for (let i = 1; i <= 4; i++) {
+      const input = document.getElementById(`input${i}`);
+      if (input.files.length > 0) {
+        if (!allowedTypes.includes(input.files[0].type)) {
+          displayErrorMessage(`images-error${i}`, 'Invalid Format! Only JPG and PNG images are allowed.');
+          return false;
+        }
+      }
+    }
+
     return isValid;
   }
+
+
 
   function displayErrorMessage(elementId, message) {
     const errorElement = document.getElementById(elementId);
@@ -528,6 +544,10 @@
     Array.from(errorElements).forEach(element => {
       element.innerText = '';
     });
+    // specifically clear the image errors too
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById(`images-error${i}`).innerText = '';
+    }
   }
 
   // SweetAlert popup if product add is successful

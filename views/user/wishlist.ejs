@@ -119,9 +119,9 @@
 
 <div class="wishlist-container">
   <div class="wishlist-header">
-    <h2>My Wishlist (<%= wishlistItems.length %>)</h2>
+    <h2>My Wishlist (<%= totalItems %>)</h2>
     <!-- "Move All To Cart" button -->
-    <button onclick="moveAllToCart()">Move All To Cart</button>
+    <button onclick="removeAllWishlist()">Remove All</button>
   </div>
 
   <!-- Wishlist Grid -->
@@ -177,41 +177,23 @@
     <% } %>
   </div>
 </div>
+<!-- Pagination Navigation -->
+<% if (totalPages > 1) { %>
+  <nav aria-label="Wishlist pages" class="d-flex justify-content-center">
+    <ul class="pagination">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+    </ul>
+  </nav>
+<% } %>
 
 <%- include("../partials/user/footer") %>
 
 <script>
-  // Function to move all wishlist items to the cart
-  function moveAllToCart() {
-    $.ajax({
-      url: '/moveAllToCart',
-      method: 'POST',
-      success: function(response) {
-        if(response.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Moved!',
-            text: response.message,
-            timer: 1500,
-            showConfirmButton: false
-          }).then(() => location.reload());
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: response.message
-          });
-        }
-      },
-      error: function() {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Something went wrong. Please try again.'
-        });
-      }
-    });
-  }
+  
 
   // Function to add a single wishlist item to cart without size prompt (if needed)
   function addToCart(itemId) {
@@ -386,6 +368,43 @@
       }
     });
   }
+
+  function removeAllWishlist() {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'This will remove ALL wishlist items.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, remove all!',
+    cancelButtonText: 'No, cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $.ajax({
+        url: '/removeAllWishlist',
+        method: 'POST',
+        success: function(response) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Removed!',
+            text: response.message,
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => location.reload());
+        },
+        error: function() {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong. Please try again.'
+          });
+        }
+      });
+    }
+  });
+}
+
 </script>
+
+
 
 

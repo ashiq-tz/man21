@@ -194,7 +194,7 @@
                       <% } else { %>
                         <img src="" alt="" id="finalCropped<%= i+1 %>" class="final-cropped img-fluid">
                       <% } %>
-                      <div id="images-error" class="error-message"></div>
+                      <div id="images-error<%= i+1 %>" class="error-message"></div>
                     </div>
                     <div class="image-cropper d-flex align-items-center" style="display:none; width: 300px; height: 200px; margin-bottom: 20px;" id="cropperContainer<%= i+1 %>">
                       <img src="" id="croppedImg<%= i+1 %>" alt="">
@@ -409,6 +409,20 @@
         isValid = false;
       }
     }
+
+    // image‐type check
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg'];
+    for (let i = 1; i <= 4; i++) {
+    const input = document.getElementById(`input${i}`);
+    if (input.files.length > 0) {
+      if (!allowed.includes(input.files[0].type)) {
+        // target the matching error div
+        displayErrorMessage(`images-error${i}`,
+                            'Invalid Format! Only JPG and PNG images are allowed.');
+        return false;
+      }
+    }
+  }
   
     return isValid;
   }
@@ -424,6 +438,11 @@
     Array.from(errorElements).forEach(element => {
       element.innerText = '';
     });
+    //for image error hide by id
+    for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`images-error${i}`);
+    if (el) el.innerText = '';
+    }
   }
   
   const urlParams = new URLSearchParams(window.location.search);

@@ -80,6 +80,10 @@
     width: 100%;
     margin-top: 20px;
   }
+  .payment-methods input[disabled] + label {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 </style>
 
 <div class="checkout-container">
@@ -114,15 +118,13 @@
     <!-- RIGHT: Order Summary Section -->
     <div class="order-summary-section">
       <h4>Order Summary</h4>
-      <% if (cart && cart.items && cart.items.length > 0) { 
-           let subtotal = 0;
-      %>
+
+      
+      <%if (cart && cart.items && cart.items.length > 0) { %>
         <div class="order-items">
-          <% cart.items.forEach(item => {
-             const product = item.productId;
-             const itemTotal = product.salePrice * item.quantity;
-             subtotal += itemTotal;
-          %>
+          <% cart.items.forEach(item => { 
+            const product = item.productId;
+          %>  
             <div class="order-item">
               <div>
                 <img 
@@ -131,43 +133,77 @@
                 />
                 <span><%= product.productName %> (Size <%= item.size %>) x <%= item.quantity %></span>
               </div>
-              <div>₹<%= itemTotal.toLocaleString('en-IN') %></div>
+              <!-- <div>₹<%= item.price.toLocaleString('en-IN') %> × <%= item.quantity %></div> -->
+              <div>₹<%= item.totalPrice.toLocaleString('en-IN') %></div>
             </div>
           <% }) %>
         </div>
         <div class="coupon-section">
           <input type="text" class="form-control" id="couponCode" placeholder="Enter Coupon Code" />
           <button class="btn btn-secondary" id="applyCouponBtn">Apply</button>
+          <button class="btn btn-outline-danger" id="removeCouponBtn" style="display:none;">Remove</button>
         </div>
         <div class="summary-line d-flex justify-content-between">
           <span>Subtotal:</span>
-          <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+          <span id="subtotal-value">₹<%= subtotal.toLocaleString('en-IN') %></span>
         </div>
         <div class="summary-line d-flex justify-content-between">
           <span>You Saved:</span>
-          <span>₹0</span>
+          <span id="discount-value">₹<%= youSaved.toLocaleString('en-IN') %></span>
         </div>
+
+        <div class="summary-line d-flex justify-content-between">
+          <span>Coupon Savings:</span>
+          <span id="coupon-saved-value">₹0</span>
+        </div>
+
         <div class="summary-line d-flex justify-content-between">
           <span>Delivery Fee:</span>
-          <span>₹0</span>
+          <span class="text-secondary">Free Delivery</span>
         </div>
         <hr />
         <div class="summary-line d-flex justify-content-between">
           <strong>Total:</strong>
-          <strong>₹<%= subtotal.toLocaleString('en-IN') %></strong>
+          <strong id="total-value">₹<%= subtotal.toLocaleString('en-IN') %></strong>
         </div>
         <div class="payment-methods">
           <h5>Payment Method</h5>
           <div>
-            <input type="radio" name="paymentMethod" id="payCOD" value="COD" checked />
-            <label for="payCOD">Cash on Delivery</label>
+
+            <input 
+            type="radio" 
+            name="paymentMethod" 
+            id="payCOD" 
+            value="COD" 
+            <% if (disableCOD) { %> disabled <% } %>
+            checked 
+          />
+
+          <label for="payCOD">
+            Cash on Delivery
+            <% if (disableCOD) { %>
+              <small class="text-danger">(only up to ₹5,000)</small>
+            <% } %>
+          </label>
+
           </div>
           <div>
-            <input type="radio" name="paymentMethod" id="payRazorpay" value="Razorpay" />
+
+            <input type="radio" 
+            name="paymentMethod" 
+            id="payRazorpay" 
+            value="Razorpay"
+            <%= disableCOD ? 'checked' : '' %> 
+             />
             <label for="payRazorpay">Razorpay</label>
           </div>
         </div>
-        <button class="btn btn-success place-order-btn" id="placeOrderBtn">
+
+        <button 
+        class="btn btn-success place-order-btn" 
+        id="placeOrderBtn"
+        <%= disableCOD ? '' : '' %>
+        >
           Place Order
         </button>
       <% } else { %>
@@ -178,6 +214,10 @@
 </div>
 
 <%- include("../../views/partials/user/footer") %>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <script>
   // Load addresses from the server-provided object
@@ -193,29 +233,105 @@
     });
   });
 
+  //Coupon Logicss
+  const couponSavedEl = document.getElementById('coupon-saved-value');
+  const totalEl    = document.getElementById('total-value');
+  const applyBtn   = document.getElementById('applyCouponBtn');
+  const removeBtn  = document.getElementById('removeCouponBtn');
+  const codeInput  = document.getElementById('couponCode');
+
+  let originalSubtotal = <%= subtotal %>;
+  let netTotal = originalSubtotal;
+  let appliedCoupon = null;
+  let discountAmount = 0;
+
+  // Apply coupon
+  applyBtn.addEventListener('click', async () => {
+    if (appliedCoupon) return;
+    const code = codeInput.value.trim();
+    if (!code) {
+  return Swal.fire({
+    icon: 'warning',
+    title: 'Hold on…',
+    text: 'Please enter a coupon code'
+  });
+}
+
+
+    const resp = await fetch('/validate-coupon', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ code, cartTotal: originalSubtotal })
+    });
+    const data = await resp.json();
+
+    if (!data.valid) {
+  return Swal.fire({
+    icon: 'error',
+    title: 'Coupon Error',
+    text: data.message
+  });
+}
+
+
+    // Success!
+    appliedCoupon  = code.toUpperCase();
+    discountAmount = data.offerPrice;
+    netTotal = originalSubtotal - discountAmount;
+
+    couponSavedEl.textContent = `₹${discountAmount.toLocaleString('en-IN')}`;
+    totalEl.textContent       = `₹${(originalSubtotal - discountAmount).toLocaleString('en-IN')}`;
+
+
+    applyBtn.disabled      = true;
+    codeInput.disabled     = true;
+    removeBtn.style.display = 'inline-block';
+  });
+
+  // Remove coupon
+  removeBtn.addEventListener('click', () => {
+    appliedCoupon  = null;
+    discountAmount = 0;
+    netTotal = originalSubtotal;
+
+    couponSavedEl.textContent = `₹0`;
+    totalEl.textContent       = `₹${originalSubtotal.toLocaleString('en-IN')}`;
+
+    applyBtn.disabled   = false;
+    codeInput.disabled  = false;
+    codeInput.value     = '';
+    removeBtn.style.display = 'none';
+  });
+
+
+
   // Handle Place Order button click
-  document.getElementById('placeOrderBtn').addEventListener('click', function() {
+  document.getElementById('placeOrderBtn').addEventListener('click', async function() {
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    const couponCode = document.getElementById('couponCode').value.trim();
+    const couponCode = appliedCoupon;
 
     if (!selectedAddressId) {
-      alert("Please select an address.");
-      return;
-    }
+  return Swal.fire({
+    icon: 'warning',
+    title: 'Missing Address',
+    text: 'Select a shipping address before placing your order.'
+  });
+}
 
-    fetch('/placeOrder', {
+
+    if (paymentMethod === 'COD') {
+   fetch('/placeOrder', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        addressId: selectedAddressId,
-        paymentMethod,
-        couponCode
-      })
+         addressId: selectedAddressId,
+         paymentMethod,
+         couponCode })
     })
     .then(res => res.json())
     .then(data => {
       if(data.success) {
-        window.location.href = '/orderSuccess?orderId=' + data.orderIds[0];
+        window.location.href = '/orderSuccess?groupOrderId=' + data.groupOrderId;
       } else {
         alert(data.message || 'Something went wrong');
       }
@@ -224,10 +340,67 @@
       console.error('Error placing order:', err);
       alert('Error placing order. Please try again.');
     });
-  });
+  }
 
-  // Optional: handle coupon application
-  document.getElementById('applyCouponBtn').addEventListener('click', function() {
-    alert('Coupon functionality not implemented yet.');
-  });
+  else if (paymentMethod === 'Razorpay'){
+  // --- 2) Razorpay flow
+
+  const razorResp = await fetch('/create-razorpay-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          amount: netTotal,
+          couponCode: appliedCoupon 
+        })
+      });
+      const { order, groupOrderId } = await razorResp.json();
+
+  // 2.2 open checkout
+  const options = {
+    key: "rzp_test_Fwu0LGrzQ8ECFQ",
+    amount: order.amount,
+    currency: order.currency,
+    order_id: order.id,
+    name: "MAN 21",
+    description: "Order #" + order.receipt,
+    handler: async function (response) {
+      // on payment success → verify on server
+      const verifyRes = await fetch('/verify-payment', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          razorpay_order_id:   response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature:  response.razorpay_signature,
+          addressId: selectedAddressId, 
+          couponCode,
+          groupOrderId
+        })
+      })
+      const verifyData = await verifyRes.json()
+      if (verifyData.success) {
+        window.location = '/orderSuccess?groupOrderId=' + verifyData.groupOrderId;
+      } else {
+        alert(verifyData.message || "Payment verification failed")
+      }
+    },
+    prefill: {
+      // optional: fill user name, email, phone
+    },
+    theme: { color: "#3b74f2" }
+  }
+  const rzp = new Razorpay(options)
+  rzp.on('payment.failed', function (response) {
+  // send the user to our failure page, carrying all the info we need
+  window.location.href =
+    '/orderFailure?groupOrderId=' + groupOrderId +
+    '&amount='   + netTotal +
+    '&addressId='+ selectedAddressId +
+    '&couponCode=' + (couponCode || '');
+ }); 
+  rzp.open()
+}
+
+})
+
 </script>

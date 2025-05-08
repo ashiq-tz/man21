@@ -9,7 +9,6 @@ const categoryInfo = async (req, res) => {
       const limit = 4;
       const skip = (page - 1) * limit;
   
-      // Build query: if a search term is provided, filter by name (case‑insensitive)
       const query = {};
       if (req.query.search) {
         query.name = { $regex: new RegExp(req.query.search, 'i') };
@@ -77,25 +76,27 @@ const addCategoryOffer = async (req,res)=>{
 
     try {
         
-        const percentage = parseInt(req.body.percentage);
-        const categoryId = req.body.categoryId;
-        const category =  await Category.findById(categoryId);
-        if(!category){
-            return res.status(404).json({status:false , message:"Category not found"});
-        }
-        const products = await Product.find({category:category._id});
-        const hasProductOffer = products.some((product)=>product.productOffer > percentage);
-        if(hasProductOffer){
-            return res.json({status:false , message:"Products within this category already have product-offer"})
-        }
-        await Category.updateOne({_id:categoryId},{$set:{categoryOffer:percentage}});
+        const {categoryId, percentage} = req.body;
 
-        for(const product of products){
-            product.productOffer = 0;
-            product.salePrice = product.regularPrice;
-            await product.save();
+        if (percentage >= 100) {
+            return res.status(400).json({ status: false, message: "Percentage must be less than 100." });
         }
-        res.json({status:true});
+        if (percentage <= 0) {
+            return res.status(400).json({ status: false, message: "Percentage must be greater than 0" });
+        }
+
+        // const category =  await Category.findById(categoryId);
+        // if(!category){
+        //     return res.status(404).json({status:false , message:"Category not found"});
+        // }
+        // const products = await Product.find({category:category._id});
+        // const hasProductOffer = products.some((product)=>product.productOffer > percentage);
+        // if(hasProductOffer){
+        //     return res.json({status:false , message:"Products within this category already have product-offer"})
+        // }
+        // await Category.updateOne({_id:categoryId},{$set:{categoryOffer:percentage}});
+        await Category.findByIdAndUpdate(categoryId, { categoryOffer: percentage });
+        return res.json({status:true});
 
     } catch (error) {
         res.status(500).json({status:false , message:"Internal Server Error"})
@@ -109,26 +110,13 @@ const removeCategoryOffer = async (req,res)=>{
     try {
         
         const categoryId = req.body.categoryId;
-        const category = await Category.findById(categoryId);
+        // const category = await Category.findById(categoryId);
 
-        if(!category){
-            return res.status(404).json({status:"false" , message:"Category not found"})
-        }
-
-        const percentage = category.categoryOffer;
-        const products = await Product.find({category:category._id});
-
-        if(products.length > 0){
-            for(const product of products){
-                product.salePrice += Math.floor(product.regularPrice * (percentage/100) );
-                product.productOffer = 0;
-                await product.save();
-            }
-        }
-
-        category.categoryOffer = 0;
-        await category.save();
-        res.json({status:true})
+        // if(!category){
+        //     return res.status(404).json({status:"false" , message:"Category not found"})
+        // }
+        await Category.findByIdAndUpdate(categoryId, { categoryOffer:0 });
+        return res.json({status:true});
 
     } catch (error) {
         res.status(500).json({status:false , message:"Internal Server Error"})
@@ -138,8 +126,10 @@ const removeCategoryOffer = async (req,res)=>{
 const getListCategory = async (req,res)=>{
     try {
         let id = req.query.id;
+        let page = req.query.page;
         await Category.updateOne({_id:id},{$set:{isListed:false}});
-        res.redirect("/admin/category");
+        await Product.updateMany({ category: id }, { $set: { isBlocked: true } });
+        res.redirect("/admin/category?page="+page);
 
     } catch (error) {
         res.redirect("admin/pageerror")
@@ -148,9 +138,10 @@ const getListCategory = async (req,res)=>{
 
 const getUnlistCategory = async (req,res)=>{
     try {
-        let id = req.query.id;
+        let { id, page}  = req.query;
         await Category.updateOne({_id:id},{$set:{isListed:true}});
-        res.redirect("/admin/category");
+        await Product.updateMany({ category: id }, { $set: { isBlocked: false } });
+        res.redirect("/admin/category?page="+page);
 
     } catch (error) {
         res.redirect("admin/pageerror")

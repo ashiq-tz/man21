@@ -155,28 +155,17 @@ const getAllProducts = async (req, res) => {
 const addProductOffer = async (req, res) => {
   try {
     const { productId, percentage } = req.body;
-    const findProduct = await Product.findOne({ _id: productId });
-    const findCategory = await Category.findOne({ _id: findProduct.category });
-
-    if (findCategory.categoryOffer && findCategory.categoryOffer > 0) {
-      findCategory.categoryOffer = 0;
-      await findCategory.save();
-    }
 
     if (percentage >= 100) {
       return res.status(400).json({ status: false, message: "Percentage must be less than 100." });
     }
-    if (percentage < 0) {
-      return res.status(400).json({ status: false, message: "Percentage cannot be negative." });
+    if (percentage <= 0) {
+      return res.status(400).json({ status: false, message: "Percentage must be greater than 0" });
     }
-    
 
-    findProduct.salePrice = findProduct.regularPrice - Math.floor(findProduct.regularPrice * (percentage / 100));
-    findProduct.productOffer = parseInt(percentage);
-    await findProduct.save();
-    findCategory.categoryOffer = 0;
-    await findCategory.save();
-    res.json({ status: true });
+    await Product.findByIdAndUpdate(productId, { productOffer: percentage });
+    return res.json({ status:true });
+
   } catch (error) {
     res.redirect("/admin/pageerror");
     res.status(500).json({ status: false, message: "Internal server error" });
@@ -186,11 +175,14 @@ const addProductOffer = async (req, res) => {
 const removeProductOffer = async (req, res) => {
   try {
     const { productId } = req.body;
-    const findProduct = await Product.findOne({ _id: productId });
-    findProduct.salePrice = findProduct.regularPrice;
-    findProduct.productOffer = 0;
-    await findProduct.save();
-    res.json({ status: true });
+
+    // const findProduct = await Product.findOne({ _id: productId });
+    // findProduct.salePrice = findProduct.regularPrice;
+    // findProduct.productOffer = 0;
+    // await findProduct.save();
+    //NO VALIDATIONS????
+    await Product.findByIdAndUpdate(productId, { productOffer: 0 });
+    return res.json({ status: true });
   } catch (error) {
     res.redirect("/admin/pageerror");
   }
@@ -288,14 +280,13 @@ const editProduct = async (req, res) => {
     });
     product.variants = variants;
 
-    // 3. Process image updates for each slot (1..4)
+    
     for (let i = 1; i <= 4; i++) {
       const fieldName = 'image' + i;
       if (req.files && req.files[fieldName] && req.files[fieldName][0]  ) {
         const file = req.files[fieldName][0];
         const filename = file.filename;
-        const validFile = filename.split(".")
-        console.log("ext"+validFile)
+        
         
        
         //resize the image using sharp

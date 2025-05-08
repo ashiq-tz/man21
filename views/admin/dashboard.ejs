@@ -1,9 +1,324 @@
-<%-include("../../views/partials/admin/header")%>
-<%-include("../../views/partials/admin/sidebar", { activePage: 'dashboard' } )%>
+<%- include("../../views/partials/admin/header") %>
+<%- include("../../views/partials/admin/sidebar", { activePage: 'dashboard' }) %>
 
-        
-      
-        <%-include("../../views/partials/admin/footer")%>
+<style>
+   .report-type-select {
+    width: 150px;
+    background-color: #f8f9fa;
+  }    
+  .best-selling-card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+  }
+  .best-selling-card:hover {
+    transform: translateY(-5px);
+  }
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }   
+</style>
+
+<div class="main-content">
+  <h2 class="content-title">Sales Report</h2>
+
+  <div class="card p-4 mb-4">
+    <form class="d-flex align-items-center justify-content-between" action="/admin/dashboard" method="get">
+    <div class="d-flex align-items-center">  
+      <label class="mr-2">Report Type:</label>
+      <select name="range" id="rangeSelect" class="form-control mr-3 report-type-select">
+        <option value="daily"   <%= query.range==='daily'?'selected':'' %>>Today</option>
+        <option value="weekly"  <%= query.range==='weekly'?'selected':'' %>>7 Days</option>
+        <option value="monthly" <%= query.range==='monthly'?'selected':'' %>>This Month</option>
+        <option value="yearly"  <%= query.range==='yearly'?'selected':'' %>>This Year</option>
+        <option value="custom"  <%= query.range==='custom'?'selected':'' %>>Custom</option>
+      </select>
+
+      <div id="customDates" style="display:<%= query.range==='custom'?'inline-block':'none' %>">
+        <input type="date" name="startDate" value="<%= query.startDate||'' %>" class="form-control mr-2">
+        <input type="date" name="endDate"   value="<%= query.endDate||''   %>" class="form-control mr-3">
+      </div>
+      <button type="submit" class="btn btn-primary mr-2" style="margin-left: 20px;">Generate Report</button>
+    </div> 
+
+      <div class="d-flex align-items-center">
+        <% if (data) { %>
+          <a style="margin-right: 20px;" href="?<%= new URLSearchParams({ ...query, download:'1', format:'excel' }).toString() %>" class="btn btn-success ">Download Excel</a>
+          <a href="?<%= new URLSearchParams({ ...query, download:'1', format:'pdf' }).toString() %>" class="btn btn-danger ">Download PDF</a>
+        <% } %>
+      </div>
+    </form>
+  </div>
+
+  <% if (data) { %>
+
+
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card p-3 text-center">
+          <h6>Total Sales</h6>
+          <h3 class="text-success">₹<%= data.stats.totalAmount.toLocaleString('en-IN', { minimumFractionDigits:3 }) %></h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3 text-center">
+          <h6>Orders</h6>
+          <h3 class="text-primary"><%= data.stats.totalOrders %></h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3 text-center">
+          <h6>Discounts</h6>
+          <h3 class="text-danger">₹<%= data.stats.totalDiscount.toLocaleString('en-IN', { minimumFractionDigits:3 }) %></h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-3 text-center">
+          <h6>Coupons</h6>
+          <h3 class="text-info">₹<%= data.stats.totalCoupons.toLocaleString('en-IN', { minimumFractionDigits:3 }) %></h3>
+        </div>
+      </div>
+    </div>
+
+    <% if (data && data.breakdown.length) { %>
+      <div class="card p-4 mb-4">
+        <h5>Sales Over Time</h5>
+        <div style="position: relative; height: 300px; width: 100%;">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+    <% } %>
     
 
-   
+    <!-- Best Selling Products (Top 3) -->
+<div class="row mb-4">
+  <div class="col-12">
+    <h5>Best Selling Products (Top 3)</h5>
+  </div>
+  <% data.bestSellingProducts.forEach(product => { %>
+    <div class="col-md-4 mb-3">
+      <div class="card best-selling-card">
+        <img src="/uploads/product-images/<%= product.productImage %>" alt="<%= product.productName %>" class="card-img-top">
+        <div class="card-body">
+          <h6 class="card-title"><%= product.productName %></h6>
+          <!-- <p class="card-text mb-1"><strong>Price:</strong> ₹<%= product.productPrice %></p> -->
+          <p class="card-text mb-1"><strong>Category:</strong> <%= product.productCategory %></p>
+          <p class="card-text text-success"><%= product.totalQuantity %> sold</small></p>
+        </div>
+      </div>
+    </div>
+  <% }); %>
+</div>
+
+<!-- Best Selling Brands (Top 3) -->
+<div class="row mb-4">
+  <div class="col-12">
+    <h5>Best Selling Brands (Top 3)</h5>
+  </div>
+  <% data.bestSellingBrands.forEach(brand => { %>
+    <div class="col-md-4 mb-3">
+      <div class="card best-selling-card">
+        <img 
+          src="/uploads/re-image/<%= brand.brandImage %>" 
+          alt="<%= brand.brandName %>" 
+          class="card-img-top"
+        >
+        <div class="card-body text-center">
+          <h6 class="card-title"><%= brand.brandName %></h6>
+          <p class="card-text text-success"><strong><%= brand.totalQuantity %> sold</strong></p>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+
+<!-- Best Selling Categories (Top 3) -->
+<div class="row mb-4">
+  <div class="col-12">
+    <h5>Best Selling Categories (Top 3)</h5>
+  </div>
+  <% data.bestSellingCategories.forEach(category => { %>
+    <div class="col-md-4 mb-3">
+      <div class="card best-selling-card">
+        <div class="card-body text-center">
+          <h6 class="card-title"><%= category.categoryName %></h6>
+          <p class="card-text text-success"><strong><%= category.totalQuantity %> sold</strong></p>
+        </div>
+      </div>
+    </div>
+  <% }); %>  
+</div>
+
+    
+    <h5 class="mb-3">Detailed Sales</h5>
+    <div class="table-responsive card p-3">
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Order ID</th>
+            <th>Amount</th>
+            <th>Discount</th>
+            <th>Coupon</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.orders.forEach(o => { %>
+            <tr>
+              <td><%= new Date(o.createdAt).toLocaleDateString('en-GB') %></td>
+              <td><%= o.orderId %></td>
+              <td class="text-success">₹<%= o.finalAmount.toLocaleString('en-IN', { minimumFractionDigits:3 }) %></td>
+              <td class="text-danger">₹<%= (o.productDiscount||0).toLocaleString('en-IN') %></td>
+              <td class="text-purple">₹<%= (o.couponAmount||0).toLocaleString('en-IN', { minimumFractionDigits:3 }) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>
+
+<script>
+  // show/hide custom dates
+  document.getElementById('rangeSelect')
+    .addEventListener('change', e => {
+      document.getElementById('customDates').style.display =
+        e.target.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    // validate custom range on form submit with SweetAlert2
+  document.querySelector('form[action="/admin/dashboard"]').addEventListener('submit', function(e) {
+    const range = document.getElementById('rangeSelect').value;
+    if (range === 'custom') {
+      const startInput = document.querySelector('input[name="startDate"]');
+      const endInput   = document.querySelector('input[name="endDate"]');
+      const startDate  = new Date(startInput.value);
+      const endDate    = new Date(endInput.value);
+
+      // align both dates to local midnight
+      startDate.setHours(0,0,0,0);
+      endDate.setHours(0,0,0,0);
+
+      const today      = new Date();
+      today.setHours(0,0,0,0);
+
+      if (!startInput.value || !endInput.value) {
+        e.preventDefault();
+        return Swal.fire({
+          icon: 'warning',
+          title: 'Missing Dates',
+          text: 'Please select both start and end dates.',
+        });
+      }
+      if (startDate > endDate) {
+        e.preventDefault();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Invalid Range',
+          text: 'Start date cannot be after end date.',
+        });
+      }
+      if (startDate > today || endDate > today) {
+        e.preventDefault();
+        return Swal.fire({
+          icon: 'error',
+          title: 'Future Dates',
+          text: 'Dates cannot be in the future.',
+        });
+      }
+    }
+  });
+
+</script>
+
+<script>
+  <% if (data && data.breakdown.length) { %>
+    const breakdown = <%- JSON.stringify(data.breakdown) %>;
+    const range     = '<%= query.range %>';
+    
+    // Build labels with day/month formatting based on range
+    const labels = breakdown.map(r => {
+      if (r._id && r._id.year && r._id.month && r._id.day) {
+        const { year, month, day } = r._id;
+        if (range === 'yearly') {
+          // Yearly: show month abbreviation, e.g., "Apr"
+          return new Date(year, month - 1).toLocaleDateString('en-GB', { month: 'short' });
+        } else if (range === 'monthly') {
+          return new Date(year, month - 1, day).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        } else {
+          // Other: show day and short month, e.g., "04 Apr"
+          return new Date(year, month - 1, day).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+      } else if (r.date) {
+        // Fallback if _id properties are not present
+        return new Date(r.date).toLocaleDateString('en-GB');
+      } else {
+        return '';
+      }
+    });
+    
+    const orderCounts = breakdown.map(r => r.orders);
+    const salesData   = breakdown.map(r => r.amount);
+    
+    // Compute padded max for orders
+    const maxOrders = Math.max(...orderCounts, 1);
+    const paddedMax = Math.ceil(maxOrders * 1.2);
+    
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { 
+            label: 'Orders',
+            data: orderCounts,
+            yAxisID: 'yOrders',
+            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+          },
+          { 
+            label: 'Sales',
+            data: salesData,
+            yAxisID: 'ySales',
+            backgroundColor: 'rgba(75, 192, 192, 0.5)'
+          }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' } },
+        scales: {
+          x: { grid: { display: false } },
+          ySales: {
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: 'Sales (₹)' },
+            grid: { color: 'rgba(0,0,0,0.03)' },
+            ticks: { callback: v => v.toLocaleString('en-IN') }
+          },
+          yOrders: {
+            type: 'linear',
+            position: 'right',
+            title: { display: true, text: 'Order Count' },
+            grid: { drawOnChartArea: false },
+            suggestedMax: paddedMax,
+            ticks: {
+              stepSize: Math.ceil(paddedMax / 5),
+              callback: v => Number(v).toFixed(0)
+            }
+          }
+        }
+      }
+    });
+  <% } %>
+</script>
+
+
+
+

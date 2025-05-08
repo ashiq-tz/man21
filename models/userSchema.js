@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 const {Schema} = mongoose;
+const crypto = require("crypto");
+
+function genReferralCode() {
+    return crypto.randomBytes(3).toString("hex").toUpperCase();
+}  
 
 const userSchema = new Schema({
     name : {
@@ -79,9 +84,26 @@ const userSchema = new Schema({
         type : Date,
         default : Date.now
     },
-    referelCode: {
-        type: String
+    referralCode: {
+        type: String,
+        unique: true,
+        default: genReferralCode
     },
+    referralEarnings: {
+        type: Number,
+        default: 0
+    },
+      // optional: count & list of who they referred
+    referralsCount: {
+        type: Number,
+        default: 0
+    },
+    referredUsers: [{
+        type: Schema.Types.ObjectId,
+        ref: "User"
+     }],
+
+
     redeemed: {
         type : Boolean
     },

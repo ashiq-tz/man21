@@ -1,14 +1,22 @@
 
 const { v4: uuidv4 } = require("uuid");
+const crypto = require('crypto');
 const Order = require("../../models/orderSchema");
 const Cart = require("../../models/cartSchema");
 const User = require("../../models/userSchema");
 const Address = require("../../models/addressSchema");
 const Product = require("../../models/productSchema");
+const Coupon = require("../../models/couponSchema");
 
 const walletController = require("../../controllers/user/walletController");
 
 const PDFDocument = require('pdfkit');
+
+const Razorpay = require("razorpay");
+var razorpayInstance = new Razorpay({
+  key_id: "rzp_test_Fwu0LGrzQ8ECFQ",
+  key_secret: "ChsG59WqjDv71mNV489VOyEj",
+});
 
 const placeOrder = async (req, res) => {
   try {
@@ -31,7 +39,41 @@ const placeOrder = async (req, res) => {
       return res.json({ success: false, message: "Selected address not found." });
     }
 
-    //common group order id 
+    // cartTotal
+    const cartTotal = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+     // enforce COD limit
+    if (paymentMethod === 'COD' && cartTotal > 5000) {
+      return res.json({
+        success: false,
+        message: 'Cash on Delivery is only available for orders up to ₹5,000.'
+      });
+    }
+
+    // Coupon validation & usage
+    let discount    = 0;
+    let couponDoc   = null;
+    if (couponCode) {
+      couponDoc = await Coupon.findOne({name: couponCode.toUpperCase(),isDeleted: false});
+       
+      const now = new Date();
+      if (
+        couponDoc &&
+        now >= couponDoc.createdOn &&
+        now <= couponDoc.expireOn &&
+        cartTotal >= couponDoc.minimumPrice &&
+        !couponDoc.usedBy.includes(userId)
+      ) {
+        discount = couponDoc.offerPrice;
+        // mark as used
+        couponDoc.usedBy.push(userId);
+        await couponDoc.save();
+      }
+    }
+
     const groupOrderId = uuidv4();
     let createdOrderIds = [];
 
@@ -40,14 +82,17 @@ const placeOrder = async (req, res) => {
       const product = item.productId;
       const size = item.size;
       const quantity = item.quantity;
-      const price = product.salePrice;
-      const itemTotal = price * quantity;
-      
-      //discount logic
-      let discount = 0;
-      let finalAmount = itemTotal - discount;
+      const itemUnitPrice = item.price;
+      const regularTotal = product.regularPrice * quantity;
+      const itemTotal    = itemUnitPrice * quantity;
 
-      //decrement stock for corresponding product variant
+      const productDiscount = regularTotal - itemTotal;
+
+      const couponAmount = discount > 0 
+      ? Math.round((itemTotal / cartTotal) * discount): 0;
+
+      const finalAmount = itemTotal - couponAmount;
+      
       const variantIndex = product.variants.findIndex(
         (v) => v.size.toString() === size.toString()
       );
@@ -64,15 +109,17 @@ const placeOrder = async (req, res) => {
         product: product._id,
         size,
         quantity,
-        price,
+        price: itemUnitPrice,
         totalPrice: itemTotal,
-        discount,
+        productDiscount,
+        couponAmount,
         finalAmount,
         address: selectedAddress,
         status: "Pending",
         createdAt: Date.now(),
-        couponApplied: couponCode ? true : false,
-        paymentMethod
+        paymentMethod,
+        couponApplied: couponAmount > 0,
+        couponCode: couponAmount > 0 ? couponCode.toUpperCase() : null
       });
 
       await newOrder.save();
@@ -95,17 +142,189 @@ const placeOrder = async (req, res) => {
 
 };
 
+const createRazorpayOrder = async (req, res) => {
+  try {
+
+    const { amount } = req.body;
+    let groupOrderId = req.body.groupOrderId;  
+    if (!groupOrderId) {
+      groupOrderId = uuidv4();
+    }
+
+    const options = {
+      amount: amount * 100,
+      currency: "INR", 
+      receipt: groupOrderId
+    }
+    const order = await razorpayInstance.orders.create(options)
+    console.log(order)
+    return res.json({ success: true, order, groupOrderId })
+  } catch (err) {
+    console.error("Razorpay order creation failed:", err)
+    return res.status(500).json({ success: false, message: "Unable to create payment order" })
+  }
+}
+
+
+// 2.2 Verify payment & then place your MongoDB orders
+const verifyPayment = async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      addressId,
+      couponCode,
+      groupOrderId
+    } = req.body
+
+    //verify signature
+    const generated_signature = crypto
+      .createHmac('sha256', "ChsG59WqjDv71mNV489VOyEj")
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex')
+
+    if (generated_signature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Invalid signature" })
+    }
+
+    
+
+    const userId = req.session.user;
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+
+    const selectedAddressDoc = await Address.findOne({ userId: req.session.user });
+      if (!selectedAddressDoc || !selectedAddressDoc.address || selectedAddressDoc.address.length === 0) {
+        return res.status(400).json({ success: false, message: "No address found for the user" });
+      }
+
+      // Find the specific address using the addressId
+    const selectedAddress = selectedAddressDoc.address.find(a => a._id.toString() === addressId.toString());
+      if (!selectedAddress) {
+        return res.status(400).json({ success: false, message: "Specified address not found" });
+      }
+
+     // cartTotal
+     const cartTotal = cart.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    // Coupon logic
+    let discount  = 0;
+    let couponDoc = null;
+    if (couponCode) {
+      couponDoc = await Coupon.findOne({
+        name: couponCode.toUpperCase(),
+        isDeleted: false
+      });
+      const now = new Date();
+      if (
+        couponDoc &&
+        now >= couponDoc.createdOn &&
+        now <= couponDoc.expireOn &&
+        cartTotal >= couponDoc.minimumPrice &&
+        !couponDoc.usedBy.includes(userId)
+      ) {
+        discount = couponDoc.offerPrice;
+        couponDoc.usedBy.push(userId);
+        await couponDoc.save();
+      }
+    }
+
+    // Creating ordersss
+    let createdOrderIds = [];
+    for (let item of cart.items) {
+
+      const product = item.productId;
+      const size = item.size;
+      const quantity = item.quantity;
+      const price = item.price;
+      // const itemTotal = item.totalPrice;
+      const regularTotal = product.regularPrice * quantity;
+      const itemTotal    = price * quantity;
+
+      const productDiscount = regularTotal - itemTotal;
+
+      // 2) Coupon allocation = proportion of coupon total
+      const couponAmount   = discount > 0
+      ? Math.round((itemTotal / cartTotal) * discount): 0;
+
+
+      // 3) Final price after coupon
+      const finalAmount = itemTotal - couponAmount;
+
+      // const itemDiscount = Math.round((itemTotal / cartTotal) * discount);
+      // // const finalAmount  = itemTotal - itemDiscount;
+
+      const newOrder = new Order({
+        groupOrderId,
+        product: product._id,
+        size,
+        quantity,
+        price,
+        totalPrice: itemTotal,
+        productDiscount,      // ← NEW
+        couponAmount,         // ← NEW
+        finalAmount,
+        address: selectedAddress,    // see note below
+        status: "Processing",
+        paymentMethod: "Razorpay",
+        couponApplied: couponAmount > 0,
+        couponCode: couponAmount > 0 ? couponCode.toUpperCase() : null
+      });
+      await newOrder.save();
+      createdOrderIds.push(newOrder.orderId);
+
+      // push to user orderHistory
+      await User.findByIdAndUpdate(userId, {
+        $push: { orderHistory: newOrder._id },
+      });
+    }
+
+    // clear cart
+    cart.items = [];
+    await cart.save();
+
+    res.json({ success: true, orderIds: createdOrderIds, groupOrderId });
+
+  } catch (err) {
+    console.error("Razorpay verify error:", err);
+    res.status(500).json({ error: "Payment verification failed" });
+  }
+
+}
+
+
 
 
 const orderSuccess = async (req, res) => {
   try {
     const userId = req.session.user;
+    const { groupOrderId } = req.query;
     const user = await User.findById(userId); 
     const orderId = req.query.orderId;
     
-    res.render("order-success", { orderId,user });
+    
+    res.render("order-success", { user,groupOrderId,orderId });
   } catch (error) {
     console.error("Error in orderSuccess:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+const orderFailure = async (req, res) => {
+  try {
+    const { groupOrderId, amount, addressId, couponCode } = req.query;
+    // render a new failure page, passing along all the bits we need to retry
+    res.render("order-failure", {
+      groupOrderId,
+      amount,
+      addressId,
+      couponCode: couponCode || ""
+    });
+  } catch (err) {
+    console.error("Error in orderFailure:", err);
     res.redirect("/pageNotFound");
   }
 };
@@ -262,8 +481,12 @@ const downloadInvoice = async (req, res) => {
 module.exports = {
   placeOrder,
   orderSuccess,
+  orderFailure,
   cancelOrder,
   returnOrder,
   orderDetails,
-  downloadInvoice
+  downloadInvoice,
+  createRazorpayOrder,
+  verifyPayment
 };
+

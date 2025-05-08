@@ -3,7 +3,16 @@ const mongoose = require("mongoose")
 
 const loadCoupon = async (req, res) => {
   try {
-    const findCoupons = await Coupon.find({});
+    const findCoupons = await Coupon.find({})
+    .sort({ _id: -1 });
+
+    //for status checkk
+    const today = new Date();
+    findCoupons.forEach(c => {
+      c.isActive = today >= new Date(c.createdOn)
+                && today <= new Date(c.expireOn);
+    });
+
     return res.render("coupon", { coupons: findCoupons });
   } catch (error) {
     console.error("Error in loadCoupon:", error);
@@ -29,7 +38,7 @@ const createCoupon = async (req, res) => {
       expireOn: data.endDate,
       offerPrice: data.offerPrice,
       minimumPrice: data.minimumPrice,
-      // isList: <appropriate value if required>
+      isDeleted: false
     });
 
     await newCoupon.save();

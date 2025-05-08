@@ -4,6 +4,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Brand = require("../../models/brandSchema");
 const Banner = require("../../models/bannerSchema");
+const walletController = require("../../controllers/user/walletController");
 
 const env = require('dotenv').config();
 const nodemailer = require('nodemailer');
@@ -53,7 +54,13 @@ const loadSignup = async (req, res) => {
   try {
     const message = req.session.message || "";
     req.session.message = "";
-    return res.render("signup", { message, hideAuthLinks: true });
+
+    return res.render("signup", { 
+      message,
+      hideAuthLinks: true,
+      referralCode: req.query.ref || ""
+    });
+
   } catch (error) {
     console.log("Home page not found");
     res.status(500).send("server error");
@@ -91,7 +98,7 @@ async function sendVerificationEmail(email, otp) {
 
 const signup = async (req, res) => {
   try {
-    const { name, phone, email, password, cpassword } = req.body;
+    const { name, phone, email, password, cpassword, referralCode } = req.body;
     if (password !== cpassword) {
       return res.render('signup', { message: "Password not match" });
     }
@@ -106,7 +113,7 @@ const signup = async (req, res) => {
       return res.json("email.error");
     }
     req.session.userOtp = otp;
-    req.session.userData = { name, phone, email, password };
+    req.session.userData = { name, phone, email, password, referralCode: referralCode?.trim() || null};
     res.render("verify-otp");
     console.log("OTP sent", otp);
   } catch (error) {
@@ -130,6 +137,7 @@ const verifyOtp = async (req, res) => {
     if (otp === req.session.userOtp) {
       const user = req.session.userData;
       const passwordHash = await securePassword(user.password);
+      // 1) Create & save the new user
       const saveUserData = new User({
         name: user.name,
         email: user.email,
@@ -137,6 +145,35 @@ const verifyOtp = async (req, res) => {
         password: passwordHash
       });
       await saveUserData.save();
+
+      const refCode = req.session.userData.referralCode;
+      if (refCode) {
+        const refUser = await User.findOne({ referralCode: refCode });
+        // guard: exists, not self, not already in their referredUsers
+        if (
+          refUser &&
+          !refUser._id.equals(saveUserData._id) &&
+          !refUser.referredUsers.includes(saveUserData._id)
+        ) {
+          // 2) Credit ₹200
+          await walletController.updateWallet(
+            refUser._id,
+            200,
+            "Referral bonus",
+            null,
+            "credit"
+          );
+
+          // 3) Track in your own fields
+          refUser.referralEarnings += 200;
+          refUser.referralsCount += 1;
+          refUser.referredUsers.push(saveUserData._id);
+          await refUser.save();
+        }
+      }
+
+      delete req.session.userData.referralCode;
+
       req.session.user = saveUserData._id;
       res.json({ success: true, redirectUrl: "/" });
     } else {
@@ -180,7 +217,7 @@ const pageNotFound = async (req, res) => {
 const loadLogin = async (req, res) => {
   try {
     if (!req.session.user) {
-      const message = req.session.message || "";
+      const message = req.query.message || req.session.message || "";
       req.session.message = "";
       return res.render("login", { message, hideAuthLinks: true });
     } else {
@@ -238,118 +275,114 @@ const logout = async (req, res) => {
 
 const getProductsPage = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    // 1) Pagination params
+    const page  = parseInt(req.query.page) || 1;
     const limit = 12;
-    const skip = (page - 1) * limit;
-    let query = { isBlocked: false, status: "Available" };
+    const skip  = (page - 1) * limit;
 
-    // Category filter
-    if (req.query.category) {
-      let catNames = req.query.category;
-      if (!Array.isArray(catNames)) {
-        catNames = [catNames];
-      }
-      const cats = await Category.find({ name: { $in: catNames } });
-      if (cats && cats.length) {
-        query.category = { $in: cats.map(c => c._id) };
-      } else {
-        query.category = null;
-      }
+    // 2) Build your existing filters (brand/category/search)
+    const query = { isBlocked: false, status: "Available" };
+    if (req.query.search) {
+      query.productName = { $regex: req.query.search, $options: "i" };
     }
-
-    // Brand filter
+    if (req.query.category) {
+      let cats = Array.isArray(req.query.category)
+        ? req.query.category
+        : [req.query.category];
+      const catDocs = await Category.find({ name: { $in: cats } }).lean();
+      query.category = catDocs.map(c => c._id);
+    }
     if (req.query.brand) {
-      let brands = req.query.brand;
-      if (!Array.isArray(brands)) {
-        brands = [brands];
-      }
+      let brands = Array.isArray(req.query.brand)
+        ? req.query.brand
+        : [req.query.brand];
       query.brand = { $in: brands };
     }
 
-    // Price filter
-    if (req.query.price) {
-      let priceRanges = req.query.price;
-      if (!Array.isArray(priceRanges)) {
-        priceRanges = [priceRanges];
-      }
-      query.$or = priceRanges.map(range => {
-        let [min, max] = range.split('-').map(Number);
-        return { salePrice: { $gte: min, $lte: max } };
-      });
-    }
-
-    // Search filter
-    if (req.query.search) {
-      query.productName = { $regex: req.query.search, $options: 'i' };
-    }
-
-    // Sorting
-    let sort = {};
-    if (req.query.sortBy) {
-      switch (req.query.sortBy) {
-        case 'priceLow':
-          sort.salePrice = 1;
-          break;
-        case 'priceHigh':
-          sort.salePrice = -1;
-          break;
-        case 'az':
-          sort.productName = 1;
-          break;
-        case 'za':
-          sort.productName = -1;
-          break;
-        case 'newArrivals':
-          sort.createdAt = -1;
-          break;
-        case 'featured':
-          sort.featured = -1;
-          break;
-        case 'popularity':
-          sort.popularity = -1;
-          break;
-        default:
-          sort.createdAt = -1;
-      }
-    } else {
-      sort.createdAt = -1;
-    }
-
-    // Execute query
-    const totalCount = await Product.countDocuments(query);
-    const products = await Product.find(query)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
+    // 3) Fetch ALL matching products (no price filter, no sort yet)
+    const productsRaw = await Product.find(query)
+      .populate("category")
       .lean();
-    const totalPages = Math.ceil(totalCount / limit);
 
-    // Additional data
-    const allBrands = await Brand.find({ isBlocked: false }).lean();
-    const categories = await Category.find({ isListed: true }).lean();
+    // 4) Compute finalPrice on each
+    let products = productsRaw.map(p => {
+      const catOffer  = p.category?.categoryOffer || 0;
+      const prodOffer = p.productOffer || 0;
+      const bestOffer = Math.max(catOffer, prodOffer);
+      const discount  = Math.floor(p.salePrice * bestOffer / 100);
+      return { ...p, bestOffer, finalPrice: p.salePrice - discount };
+    });
 
-    const userId = req.session.user;
-    let userData = null;
-    if (userId) {
-      userData = await User.findOne({ _id: userId });
+    // 5) In-memory price filtering (on finalPrice)
+    if (req.query.price) {
+      const ranges = (Array.isArray(req.query.price)
+        ? req.query.price
+        : [req.query.price]
+      ).map(r => r.split("-").map(Number));
+      products = products.filter(p =>
+        ranges.some(([min, max]) => p.finalPrice >= min && p.finalPrice <= max)
+      );
     }
 
-    // Render
+    // 6) In-memory sorting
+    const sortBy = req.query.sortBy;
+    switch (sortBy) {
+      case "priceLow":
+        products.sort((a, b) => a.finalPrice - b.finalPrice);
+        break;
+      case "priceHigh":
+        products.sort((a, b) => b.finalPrice - a.finalPrice);
+        break;
+      case "az":
+        products.sort((a, b) => a.productName.localeCompare(b.productName));
+        break;
+      case "za":
+        products.sort((a, b) => b.productName.localeCompare(a.productName));
+        break;
+      case "newArrivals":
+        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case "popularity":
+        products.sort((a, b) => (b.popularity||0) - (a.popularity||0));
+        break;
+      default:
+        // no sort or you could default to createdAt descending:
+        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+  
+
+    // 7) Compute pagination
+    const totalCount = products.length;
+    const totalPages = Math.ceil(totalCount / limit);
+    const pageItems  = products.slice(skip, skip + limit);
+
+    // 8) Fetch brands & categories for filters UI
+    const [allBrands, allCategories] = await Promise.all([
+      Brand   .find({ isBlocked: false }).lean(),
+      Category.find({ isListed:   true  }).lean()
+    ]);
+
+    // 9) Load user if logged in
+    const userData = req.session.user
+      ? await User.findById(req.session.user)
+      : null;
+
+    // 10) Render
     res.render("product-list", {
-      user: userData,
-      products,
-      currentPage: page,
+      user:            userData,
+      products:        pageItems,
+      currentPage:     page,
       totalPages,
-      currentBrand: req.query.brand || "",
+      currentBrand:    req.query.brand    || "",
       currentCategory: req.query.category || "",
-      currentPrice: req.query.price || "",
-      currentSort: req.query.sortBy || "newArrivals",
-      brands: allBrands,
-      categories,
-      searchQuery: req.query.search || ""
+      currentPrice:    req.query.price    || "",
+      currentSort:     req.query.sortBy   || "newArrivals",
+      brands:          allBrands,
+      categories:      allCategories,
+      searchQuery:     req.query.search   || ""
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error in getProductsPage:", err);
     res.status(500).send("Server Error");
   }
 };

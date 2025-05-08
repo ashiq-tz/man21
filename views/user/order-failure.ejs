@@ -1,0 +1,81 @@
+<%- include("../partials/user/header") %>
+
+<div class="container text-center my-5">
+  <img src="https://framerusercontent.com/images/U0VltHCCefV5vWu8znLfThpPx0.png" alt="Payment Failed" style="width:180px" />
+  <h2 class="mt-4 text-danger">Oops! Payment Failed</h2>
+  <p>Your payment for order <strong><%= groupOrderId %></strong> of <strong>₹<%= amount %></strong> could not be processed.</p>
+
+  <div class="mt-4">
+    <button
+    id="retryPayment"
+    class="btn btn-primary"
+    data-group="<%= groupOrderId %>"
+    data-amount="<%= amount %>"
+    data-address="<%= addressId %>"
+    data-coupon="<%= couponCode %>"
+  >Retry Payment</button>
+    <a href="/userProfile#orders" class="btn btn-secondary">View My Orders</a>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById('retryPayment').addEventListener('click', async function() {
+    const btn       = this;
+    const groupOrderId = btn.dataset.group;
+    const amount    = +btn.dataset.amount;
+    const addressId = btn.dataset.address;
+    const couponCode = btn.dataset.coupon || null;
+
+    //Re-create Razorpay order
+    const resp = await fetch('/create-razorpay-order', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ 
+        amount,
+        couponCode,
+        groupOrderId    
+      })
+    });
+    const { success, order } = await resp.json();
+    if (!success) {
+      return Swal.fire({ icon:'error', text:'Unable to initiate payment. Try again.' });
+    }
+
+    //Razorpay checkout
+    const rzp = new Razorpay({
+      key: 'rzp_test_Fwu0LGrzQ8ECFQ',
+      amount: order.amount,
+      currency: order.currency,
+      order_id: order.id,
+      name: 'MAN 21',
+      handler: async (response) => {
+        // 3) Verify & carry groupOrderId forward
+        const verifyRes = await fetch('/verify-payment', {
+          method:'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            addressId,
+            couponCode,
+            groupOrderId       
+          })
+        });
+        const verifyData = await verifyRes.json();
+        console.log('verifyData:', verifyData);
+        if (verifyData.success) {
+          //Redirect with the same groupOrderId
+          window.location.href = `/orderSuccess?groupOrderId=${groupOrderId}`;
+        } else {
+          Swal.fire({ icon:'error', text: verifyData.message || 'Payment failed' });
+        }
+      },
+      theme: { color: '#3b74f2' }
+    });
+    rzp.open();
+  });
+</script>
+
+<%- include("../partials/user/footer") %>

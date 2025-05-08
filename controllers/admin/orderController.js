@@ -54,6 +54,8 @@ const loadOrders = async (req, res) => {
           currentPage: page,
           totalPages: Math.ceil(count / limit),
           search,
+          filter: req.query.filter || "",
+          sort: req.query.sort   || "" ,
           activePage: "orders"
         });
       }
@@ -108,7 +110,7 @@ const updateOrderDetailsStatus = async (req, res) => {
           await product.save();
         }
       }
-      // If the admin rejects the return, no stock adjustment is made.
+    
     } else {
       // For all other transitions
       if (activeStatuses.includes(previousStatus) && (newStatus === "Cancelled" || newStatus === "Returned")) {
