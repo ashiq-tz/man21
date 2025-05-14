@@ -132,6 +132,8 @@
                   alt="<%= product.productName %>"
                 />
                 <span><%= product.productName %> (Size <%= item.size %>) x <%= item.quantity %></span>
+                <span><%= item.productId.productName %> (Size <%= item.size %>) x <%= item.quantity %></span>
+
               </div>
               <!-- <div>₹<%= item.price.toLocaleString('en-IN') %> × <%= item.quantity %></div> -->
               <div>₹<%= item.totalPrice.toLocaleString('en-IN') %></div>

@@ -32,9 +32,10 @@ const getProductDetails = async (req, res) => {
       //offers
       const catOffer    = product.category?.categoryOffer || 0;
       const prodOffer   = product.productOffer   || 0;
-      product.bestOffer   = Math.max(catOffer, prodOffer);
-      product.discountAmt = Math.floor(product.salePrice * product.bestOffer/100);
-      product.finalPrice  = product.salePrice - product.discountAmt;
+      const bestOfferPct = Math.max(catOffer, prodOffer);
+      product.bestOffer = bestOfferPct;
+      product.finalPrice = Math.round(product.regularPrice * (1 - bestOfferPct/100));
+      product.discountAmt = product.regularPrice - product.finalPrice;
 
       const relatedProducts = await Product.find({
         _id: { $ne: productId },

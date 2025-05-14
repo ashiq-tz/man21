@@ -86,7 +86,7 @@
     <div class="col-lg-12">
       <div class="card mb-4">
         <div class="card-body">
-          <form method="post" action="/admin/EditProduct/<%= product._id %>" enctype="multipart/form-data" onsubmit="return validateAndSubmit()">
+          <form method="post" action="/admin/EditProduct/<%= product._id %>?page=<%= page %>" enctype="multipart/form-data" onsubmit="return validateAndSubmit()">
             
             <!-- First Row: Product Name, Brand, and Category -->
             <div class="full-width-row mb-4">
@@ -131,11 +131,11 @@
                 <input placeholder="₹" name="regularPrice" type="text" value="<%= product.regularPrice %>" class="form-control border">
                 <div id="regularPrice-error" class="error-message"></div>
               </div>
-              <div class="col-quarter">
+              <!-- <div class="col-quarter">
                 <label class="form-label">Sale Price</label>
                 <input placeholder="₹" name="salePrice" type="text" value="<%= product.salePrice %>" class="form-control border">
                 <div id="salePrice-error" class="error-message"></div>
-              </div>
+              </div> -->
               <div class="col-quarter">
                 <label class="form-label">Color</label>
                 <input name="color" type="text" value="<%= product.color %>" class="form-control border">
@@ -353,7 +353,7 @@
     const description = document.getElementById('descriptionid').value;
     const brand = document.getElementsByName('brand')[0].value;
     const price = document.getElementsByName('regularPrice')[0].value;
-    const saleprice = document.getElementsByName('salePrice')[0].value;
+    // const saleprice = document.getElementsByName('salePrice')[0].value;
     const color = document.getElementsByName('color')[0].value;
     const category = document.getElementsByName('category')[0].value;
     let isValid = true;
@@ -379,15 +379,15 @@
       isValid = false;
     }
   
-    if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-      displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-      isValid = false;
-    }
+    // if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+    //   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+    //   isValid = false;
+    // }
   
-    if (parseFloat(price) <= parseFloat(saleprice)) {
-      displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-      isValid = false;
-    }
+    // if (parseFloat(price) <= parseFloat(saleprice)) {
+    //   displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+    //   isValid = false;
+    // }
   
     if (color.trim() === "") {
       displayErrorMessage('color-error', 'Please enter a color.');

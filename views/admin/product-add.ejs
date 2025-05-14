@@ -168,7 +168,7 @@
                 <div id="regularPrice-error" class="error-message"></div>
               </div>
               <!-- Sale Price -->
-              <div class="col-md-2">
+              <!-- <div class="col-md-2">
                 <label class="form-label">Sale Price</label>
                 <input 
                   placeholder="₹" 
@@ -177,7 +177,7 @@
                   class="form-control"
                 >
                 <div id="salePrice-error" class="error-message"></div>
-              </div>
+              </div> -->
               <!-- Color -->
               <div class="col-md-2">
                 <label class="form-label">Color</label>
@@ -470,7 +470,7 @@
     const name = document.getElementsByName('productName')[0].value;
     const description = document.getElementById('descriptionid').value;
     const price = document.getElementsByName('regularPrice')[0].value;
-    const saleprice = document.getElementsByName('salePrice')[0].value;
+    // const saleprice = document.getElementsByName('salePrice')[0].value;
     const color = document.getElementsByName('color')[0].value;
     const images = document.getElementById('input1');
     let isValid = true;
@@ -496,15 +496,15 @@
       isValid = false;
     }
 
-    if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-      displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
-      isValid = false;
-    }
+    // if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
+    //   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
+    //   isValid = false;
+    // }
 
-    if (parseFloat(price) <= parseFloat(saleprice)) {
-      displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-      isValid = false;
-    }
+    // if (parseFloat(price) <= parseFloat(saleprice)) {
+    //   displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+    //   isValid = false;
+    // }
 
     if (color.trim() === "") {
       displayErrorMessage('color-error', 'Please enter a color.');

@@ -70,6 +70,7 @@ const addProducts = async (req, res) => {
         return res.status(400).send("Invalid category name");
       }
 
+      ///
       let discountPercentage = 0;
       if (Number(products.regularPrice) > Number(products.salePrice)) {
         discountPercentage = Math.floor(
@@ -77,6 +78,10 @@ const addProducts = async (req, res) => {
         );
       }
 
+      const regular = Number(products.regularPrice);
+      const offerPct = Number(products.productOffer) || 0;
+      // Compute salePrice automatically
+      const sale = Math.round( regular * (1 - offerPct/100) );
 
       // Create a new product using the variants array
       const newProduct = new Product({
@@ -84,9 +89,9 @@ const addProducts = async (req, res) => {
         description: products.description,
         brand: products.brand,
         category: categoryId._id,
-        regularPrice: products.regularPrice,
-        salePrice: products.salePrice,
-        productOffer: discountPercentage,
+        regularPrice: regular,
+        salePrice: sale,
+        productOffer: offerPct,
         color: products.color,
         
         variants: variants,
@@ -214,6 +219,7 @@ const unblockProduct = async (req, res) => {
 const getEditProduct = async (req, res) => {
   try {
     const id = req.query.id;
+    const page = req.query.page || 1;
     // Populate the category so we can compare its _id later in the view
     const product = await Product.findOne({ _id: id }).populate('category');
     const category = await Category.find({});
@@ -222,6 +228,7 @@ const getEditProduct = async (req, res) => {
       product: product,
       cat: category,
       brand: brand,
+      page
     });
   } catch (error) {
     res.redirect("/admin/pageerror");
@@ -231,6 +238,7 @@ const getEditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
   try {
     const id = req.params.id;
+    const page = req.query.page;
     const product = await Product.findOne({ _id: id });
     const data = req.body;
 
@@ -243,23 +251,31 @@ const editProduct = async (req, res) => {
       return res.status(400).json({ error: "Product with this name already exists. Please try with another name" });
     }
 
+    const regular = Number(data.regularPrice);
+    let offerPct = product.productOffer;       // ← this was previously saved
+    if (data.productOffer !== undefined && data.productOffer !== "") {
+      offerPct = Number(data.productOffer);
+    }
+
     //text fields
     product.productName = data.productName;
     product.description = data.description;
     product.brand = data.brand;
     product.category = data.category;
-    product.regularPrice = data.regularPrice;
-    product.salePrice = data.salePrice;
+    product.regularPrice = regular;
+    product.salePrice    = Math.round( regular * (1 - offerPct/100) );
     product.color = data.color;
 
+    product.productOffer = offerPct;
+
     // Recalculate the discount (productOffer) if salePrice is lower than regularPrice
-    if (Number(data.regularPrice) > Number(data.salePrice)) {
-      product.productOffer = Math.floor(
-        ((data.regularPrice - data.salePrice) / data.regularPrice) * 100
-      );
-    } else {
-      product.productOffer = 0;
-    }
+    // if (Number(data.regularPrice) > Number(data.salePrice)) {
+    //   product.productOffer = Math.floor(
+    //     ((data.regularPrice - data.salePrice) / data.regularPrice) * 100
+    //   );
+    // } else {
+    //   product.productOffer = 0;
+    // }
 
 
     //variants from sizes & stock
@@ -311,7 +327,7 @@ const editProduct = async (req, res) => {
     }
 
     await product.save();
-    res.redirect("/admin/products");
+    res.redirect("/admin/products?page="+page);
   } catch (error) {
     console.error(error);
     res.redirect("/admin/pageerror");

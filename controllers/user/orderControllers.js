@@ -439,7 +439,8 @@ const downloadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query;
    
-    const order = await Order.findOne({ orderId }).populate('orderedItems.product');
+    const order = await Order.findOne({ orderId }).populate('product');
+
     if (!order) {
       return res.status(404).send("Order not found");
     }
@@ -463,12 +464,12 @@ const downloadInvoice = async (req, res) => {
     doc.moveDown();
     
     doc.text('Items:', { underline: true });
-    order.orderedItems.forEach((item, index) => {
-      doc.moveDown(0.5);
-      const productName = item.product?.productName || "Unknown Product";
-      doc.text(`${index + 1}. ${productName} - Qty: ${item.quantity} - Price: ₹${item.price}`);
-    });
+    const items = await Order.find({ groupOrderId: order.groupOrderId }).populate('product');
     
+    items.forEach((item, i) => {
+      doc.text(`${i+1}. ${item.product.productName} — ${item.quantity} × ₹${item.price}`);
+    });
+        
     // Finalize the PDF and end the stream
     doc.end();
     

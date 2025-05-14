@@ -311,11 +311,12 @@
             <% if (product.bestOffer > 0) { %>
               ₹<%= product.finalPrice.toLocaleString('en-IN') %>
               <span class="regular-price" style="text-decoration:line-through; color:#888; margin-left:6px;">
-                ₹<%= product.salePrice.toLocaleString('en-IN') %>
+                ₹<%= product.regularPrice.toLocaleString('en-IN') %>
               </span>
               <span class="badge bg-danger ms-2">-<%= product.bestOffer %>%</span>
             <% } else { %>
-              ₹<%= product.salePrice.toLocaleString('en-IN') %>
+              <!-- ₹<%= product.salePrice.toLocaleString('en-IN') %> -->
+              ₹<%= product.regularPrice.toLocaleString('en-IN') %>
             <% } %>
           </div>
            

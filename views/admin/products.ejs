@@ -163,10 +163,10 @@ th, td {
             <th>Product name</th>
             <th>Brand</th>
             <th>Category</th>
-            <th>Sale Price</th>
-            <th>Offer Price</th>
-            <th>Offer</th>
-            <th>Quantity</th>
+            <th>Price</th>
+            <th>Offer %</th>
+            <th>Offer Edit</th>
+            <th>Image</th>
             <th>Action</th>
             <th>Edit</th>
           </tr>
@@ -177,7 +177,7 @@ th, td {
               <td><%= data[i].productName %></td>
               <td><%= data[i].brand %></td>
               <td><%= data[i].category.name %></td>
-              <td><%= data[i].salePrice %></td>
+              <td><%= data[i].regularPrice %></td>
               <td>
                 <% if (data[i].productOffer) { %>
                   <%= data[i].productOffer %>%
@@ -196,10 +196,24 @@ th, td {
                   </button>
                 <% } %>
               </td>
-              <td><%= data[i].quantity %></td>
+              <td>
+                <% if (data[i].productImage && data[i].productImage.length) { %>
+                  <img
+                    src="/uploads/product-images/<%= data[i].productImage[0] %>"
+                    alt="<%= data[i].productName %>"
+                    style="width:50px; height:50px; object-fit:cover; border-radius:4px;"
+                  >
+                <% } else { %>
+                  <img
+                    src="/uploads/product-images/placeholder.jpg"
+                    alt="No Image"
+                    style="width:50px; height:50px; object-fit:cover; opacity:0.3;"
+                  >
+                <% } %>
+              </td>
               <td>
 
-                <%if(data[i].isBlocked===false){%>
+                <%if(data[i].isBlocked===false){%> 
                   <button class="btn btn-danger" style="width: 80px;">
                     <a href="/admin/blockProduct?id=<%= data[i]._id %>&page=<%= currentPage %>" style="color: white; text-decoration: none;">Block</a>
                 </button>
@@ -211,7 +225,7 @@ th, td {
               </td>
               <td>
                 <button class="btn btn-info" style="width: 80px;">
-                  <a href="/admin/editProduct?id=<%= data[i]._id %>" style="color: white; text-decoration: none;">Edit</a>
+                  <a href="/admin/editProduct?id=<%= data[i]._id %>&page=<%= currentPage %>" style="color: white; text-decoration: none;">Edit</a>
                 </button>
               </td>
             </tr>

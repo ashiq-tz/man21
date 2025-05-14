@@ -309,8 +309,8 @@ const getProductsPage = async (req, res) => {
       const catOffer  = p.category?.categoryOffer || 0;
       const prodOffer = p.productOffer || 0;
       const bestOffer = Math.max(catOffer, prodOffer);
-      const discount  = Math.floor(p.salePrice * bestOffer / 100);
-      return { ...p, bestOffer, finalPrice: p.salePrice - discount };
+      const finalPrice   = Math.round(p.regularPrice * (1 - bestOffer / 100));
+      return { ...p, bestOffer, finalPrice };
     });
 
     // 5) In-memory price filtering (on finalPrice)

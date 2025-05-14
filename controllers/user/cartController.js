@@ -32,7 +32,8 @@ const addToCart = async (req, res) => {
     const prodOffer = product.productOffer   || 0;
     const bestOffer = Math.max(catOffer, prodOffer);
 
-    const unitPrice = Math.floor(product.salePrice * (1 - bestOffer/100));
+    const unitPrice    = Math.round(product.regularPrice * (1 - bestOffer/100));
+
 
 
     // Find the variant for the selected size
@@ -111,6 +112,18 @@ const getCart = async (req, res) => {
     }
     // Sort cart items (last added first)
     cart.items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    for (let item of cart.items) {
+      const prod = await Product.findById(item.productId).populate('category');
+      const catOffer  = prod.category?.categoryOffer || 0;
+      const prodOffer = prod.productOffer   || 0;
+      const bestOffer = Math.max(catOffer, prodOffer);
+      const unitPrice = Math.round(prod.regularPrice * (1 - bestOffer / 100));
+    
+      item.price      = unitPrice;
+      item.totalPrice = unitPrice * item.quantity;
+    }
+
     // Compute the overall subtotal before pagination
     const subtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
     //saved amount
@@ -232,6 +245,18 @@ const checkout = async(req,res)=>{
   const user = await User.findById(userId); 
   const cart = await Cart.findOne({ userId }).populate('items.productId');
   const addressData = await Address.findOne({ userId });
+
+  for (let item of cart.items) {
+      const prod = await Product.findById(item.productId).populate('category');
+      const catOffer  = prod.category?.categoryOffer || 0;
+      const prodOffer = prod.productOffer   || 0;
+      const bestOffer = Math.max(catOffer, prodOffer);
+      const unitPrice = Math.round(prod.regularPrice * (1 - bestOffer / 100));
+    
+      item.price      = unitPrice;
+      item.totalPrice = unitPrice * item.quantity;
+  }
+  
 
    // subtotal to check cod or not
   const subtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);

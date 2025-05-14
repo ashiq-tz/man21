@@ -55,12 +55,12 @@ const login = async (req,res)=>{
 const logout = async (req,res)=>{
     try {
         
-        req.session.destroy(err=>{
+        req.session.destroy((err)=>{
             if(err){
                 console.log("Error at Destroying Session",err);
                 return res.redirect("/pageerror");
             }
-            res.redirect("/admin/login")
+            return res.redirect("/admin/login")
         })
 
     } catch (error) {

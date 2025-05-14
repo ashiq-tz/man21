@@ -38,9 +38,12 @@
   
   <h3>Billing Details</h3>
   <p><strong>Price:</strong> ₹<%= order.price.toLocaleString('en-IN') %></p>
+  <p><strong>Discount:</strong> ₹<%= order.productDiscount.toLocaleString('en-IN') %></p>
   <p><strong>Total Price:</strong> ₹<%= order.totalPrice.toLocaleString('en-IN') %></p>
-  <p><strong>Discount:</strong> ₹<%= order.discount.toLocaleString('en-IN') %></p>
-  <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toLocaleString('en-IN') %></p>  
+ <p><strong>Coupon:</strong> ₹<%= order.couponAmount.toLocaleString('en-IN') %></p>
+ <p><strong>Final Amount:</strong> ₹<%= order.finalAmount.toLocaleString('en-IN') %></p>
+
+
   <p><strong>Payment:</strong> <%= order.paymentMethod %></p>
   
   <h3>Shipping Address</h3>
