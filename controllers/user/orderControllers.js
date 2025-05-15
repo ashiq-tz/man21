@@ -144,26 +144,22 @@ const placeOrder = async (req, res) => {
 
 const createRazorpayOrder = async (req, res) => {
   try {
-
-    const { amount } = req.body;
-    let groupOrderId = req.body.groupOrderId;  
-    if (!groupOrderId) {
-      groupOrderId = uuidv4();
+    const { amount, groupOrderId: incomingGroup } = req.body;
+    if (typeof amount !== "number") {
+      console.error("🚨 Invalid amount:", amount);
+      return res.status(400).json({ success: false, message: "Invalid amount" });
     }
-
-    const options = {
-      amount: amount * 100,
-      currency: "INR", 
-      receipt: groupOrderId
-    }
-    const order = await razorpayInstance.orders.create(options)
-    console.log(order)
-    return res.json({ success: true, order, groupOrderId })
+    const groupOrderId = incomingGroup || uuidv4();
+    const options = { amount: Math.round(amount * 100), currency: "INR", receipt: groupOrderId };
+    console.log("→ Razorpay.create order with:", options);
+    const order = await razorpayInstance.orders.create(options);
+    console.log("← Razorpay order created:", order);
+    return res.json({ success: true, order, groupOrderId });
   } catch (err) {
-    console.error("Razorpay order creation failed:", err)
-    return res.status(500).json({ success: false, message: "Unable to create payment order" })
+    console.error("❌ createRazorpayOrder failed:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
-}
+};
 
 
 // 2.2 Verify payment & then place your MongoDB orders
