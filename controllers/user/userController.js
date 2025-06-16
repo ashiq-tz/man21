@@ -155,7 +155,7 @@ const verifyOtp = async (req, res) => {
           !refUser._id.equals(saveUserData._id) &&
           !refUser.referredUsers.includes(saveUserData._id)
         ) {
-          // 2) Credit ₹200
+          // Credit ₹200
           await walletController.updateWallet(
             refUser._id,
             200,
@@ -164,7 +164,7 @@ const verifyOtp = async (req, res) => {
             "credit"
           );
 
-          // 3) Track in your own fields
+          // track in your own fields
           refUser.referralEarnings += 200;
           refUser.referralsCount += 1;
           refUser.referredUsers.push(saveUserData._id);
@@ -275,16 +275,28 @@ const logout = async (req, res) => {
 
 const getProductsPage = async (req, res) => {
   try {
-    // 1) Pagination params
+    // pagination params
     const page  = parseInt(req.query.page) || 1;
     const limit = 12;
     const skip  = (page - 1) * limit;
 
-    // 2) Build your existing filters (brand/category/search)
+    // existing filters,search (brand/category/search)
     const query = { isBlocked: false, status: "Available" };
+
     if (req.query.search) {
-      query.productName = { $regex: req.query.search, $options: "i" };
+      const term = req.query.search;
+      const regex = { $regex: term, $options: 'i' };
+    
+      // find categories that is searched
+      const matchingCats = await Category.find({ name: regex }).lean();
+      const matchingCatIds = matchingCats.map(c => c._id);
+    
+      query.$or = [
+        { productName: regex },
+        { category: { $in: matchingCatIds } }
+      ];
     }
+
     if (req.query.category) {
       let cats = Array.isArray(req.query.category)
         ? req.query.category
@@ -299,12 +311,12 @@ const getProductsPage = async (req, res) => {
       query.brand = { $in: brands };
     }
 
-    // 3) Fetch ALL matching products (no price filter, no sort yet)
+    //fetch all matching products (no price filter, no sort yet)
     const productsRaw = await Product.find(query)
       .populate("category")
       .lean();
 
-    // 4) Compute finalPrice on each
+    //compute finalPrice on each
     let products = productsRaw.map(p => {
       const catOffer  = p.category?.categoryOffer || 0;
       const prodOffer = p.productOffer || 0;
@@ -313,7 +325,7 @@ const getProductsPage = async (req, res) => {
       return { ...p, bestOffer, finalPrice };
     });
 
-    // 5) In-memory price filtering (on finalPrice)
+    // In-memory price filtering (on finalPrice)
     if (req.query.price) {
       const ranges = (Array.isArray(req.query.price)
         ? req.query.price
@@ -324,7 +336,7 @@ const getProductsPage = async (req, res) => {
       );
     }
 
-    // 6) In-memory sorting
+    // In-memory sorting
     const sortBy = req.query.sortBy;
     switch (sortBy) {
       case "priceLow":
@@ -346,28 +358,28 @@ const getProductsPage = async (req, res) => {
         products.sort((a, b) => (b.popularity||0) - (a.popularity||0));
         break;
       default:
-        // no sort or you could default to createdAt descending:
+        // no sort.. default to createdAt descending
         products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
   
 
-    // 7) Compute pagination
+    //compute pagination
     const totalCount = products.length;
     const totalPages = Math.ceil(totalCount / limit);
     const pageItems  = products.slice(skip, skip + limit);
 
-    // 8) Fetch brands & categories for filters UI
+    //fetch brands & categories for filters UI
     const [allBrands, allCategories] = await Promise.all([
       Brand   .find({ isBlocked: false }).lean(),
       Category.find({ isListed:   true  }).lean()
     ]);
 
-    // 9) Load user if logged in
+    // load user if logged in
     const userData = req.session.user
       ? await User.findById(req.session.user)
       : null;
 
-    // 10) Render
+    // render
     res.render("product-list", {
       user:            userData,
       products:        pageItems,

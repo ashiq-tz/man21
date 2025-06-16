@@ -169,7 +169,7 @@ const userProfile = async (req, res) => {
   try {
     const userId = req.session.user;
 
-    // 1) Load the user and populate their orders & products
+    // load the user and populate their orders & products
     const user = await User.findById(userId)
       .populate({
         path: 'orderHistory',
@@ -177,15 +177,15 @@ const userProfile = async (req, res) => {
         populate: { path: 'product', model: 'Product' }
       });
 
-    // 2) Fetch their addresses
+    // fetch their addresses
     const userAddress = await Address.findOne({ userId });
 
-    // 3) Build your magic referral link
-    const host  = req.get('host');     // "localhost:3000"
-    const proto = req.protocol;        // "http"
+    // creating referral link
+    const host  = req.get('host');     
+    const proto = req.protocol;       
     user.referralLink = `${proto}://${host}/signup?ref=${user.referralCode}`;
 
-    // 4) Render with *one* user object
+    // render with one user object
     res.render('profile', { user, userAddress });
   } catch (error) {
     console.error("Error retrieving profile data", error);

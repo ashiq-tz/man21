@@ -6,6 +6,27 @@
     margin: 0 auto;
     padding: 30px 20px;
   }
+  .breadcrumbs {
+    background-color: #ffffff;
+    padding: 5px 0px;
+    border-radius: 5px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 20px 10px 0px;
+  }
+  .breadcrumbs a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .breadcrumbs a:hover {
+    text-decoration: underline;
+  }
+  .breadcrumbs .separator {
+    color: #6c757d;
+  }
   .checkout-row {
     display: flex;
     flex-wrap: wrap;
@@ -87,6 +108,16 @@
 </style>
 
 <div class="checkout-container">
+
+  <!-- Breadcrumb -->
+<div class="breadcrumbs">
+  <a href="/">Home</a>
+  <span class="separator">/</span>
+  <a href="/cart">Cart</a>
+  <span class="separator">/</span>
+  <span>Checkout</span>
+</div>
+
   <h2>Checkout</h2>
   <div class="checkout-row">
     <!-- LEFT: Address Section -->
@@ -132,7 +163,6 @@
                   alt="<%= product.productName %>"
                 />
                 <span><%= product.productName %> (Size <%= item.size %>) x <%= item.quantity %></span>
-                <span><%= item.productId.productName %> (Size <%= item.size %>) x <%= item.quantity %></span>
 
               </div>
               <!-- <div>₹<%= item.price.toLocaleString('en-IN') %> × <%= item.quantity %></div> -->
@@ -243,9 +273,19 @@
   const codeInput  = document.getElementById('couponCode');
 
   let originalSubtotal = <%= subtotal %>;
-  let netTotal = originalSubtotal;
-  let appliedCoupon = null;
-  let discountAmount = 0;
+  let appliedCoupon = "<%= appliedCoupon || '' %>";
+  let discountAmount = <%= couponDiscount %>;
+  let netTotal = originalSubtotal - discountAmount;
+
+   // immediately reflect the UI:
+   if (appliedCoupon) {
+    codeInput.value = appliedCoupon;
+    applyBtn.disabled = true;
+    codeInput.disabled = true;
+    removeBtn.style.display = 'inline-block';
+    couponSavedEl.textContent = `₹${discountAmount.toLocaleString('en-IN')}`;
+    totalEl.textContent     = `₹${netTotal.toLocaleString('en-IN')}`;
+  }
 
   // Apply coupon
   applyBtn.addEventListener('click', async () => {
@@ -291,7 +331,10 @@
   });
 
   // Remove coupon
-  removeBtn.addEventListener('click', () => {
+  removeBtn.addEventListener('click', async () => {
+
+    await fetch('/remove-coupon', { method: 'POST' });
+
     appliedCoupon  = null;
     discountAmount = 0;
     netTotal = originalSubtotal;

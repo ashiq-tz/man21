@@ -1,5 +1,4 @@
 
-const { v4: uuidv4 } = require("uuid");
 const crypto = require('crypto');
 const Order = require("../../models/orderSchema");
 const Cart = require("../../models/cartSchema");
@@ -12,6 +11,13 @@ const walletController = require("../../controllers/user/walletController");
 
 const PDFDocument = require('pdfkit');
 
+function makeGroupOrderId() {
+  const dt   = Date.now();                          
+  const randm = Math.floor(Math.random() * 900 + 100); //100–999
+  return `GRP${dt}${randm}`;                       
+}
+
+
 const Razorpay = require("razorpay");
 var razorpayInstance = new Razorpay({
   key_id: "rzp_test_Fwu0LGrzQ8ECFQ",
@@ -23,7 +29,7 @@ const placeOrder = async (req, res) => {
     const userId = req.session.user;
     const { addressId, paymentMethod, couponCode } = req.body;
 
-    //Fetch the cart 
+    //fetch the cart 
     const cart = await Cart.findOne({ userId }).populate("items.productId");
     if (!cart || cart.items.length === 0) {
       return res.json({ success: false, message: "Cart is empty." });
@@ -74,7 +80,7 @@ const placeOrder = async (req, res) => {
       }
     }
 
-    const groupOrderId = uuidv4();
+    const groupOrderId = makeGroupOrderId();
     let createdOrderIds = [];
 
     //each item in the cart, create a separate order 
@@ -125,7 +131,7 @@ const placeOrder = async (req, res) => {
       await newOrder.save();
       createdOrderIds.push(newOrder.orderId);
 
-      //update user's order history
+      //update userss order history
       await User.findByIdAndUpdate(userId, { $push: { orderHistory: newOrder._id } });
     }
 
@@ -133,7 +139,9 @@ const placeOrder = async (req, res) => {
     cart.items = [];
     await cart.save();
 
-    //Return success along with the created order IDs
+    delete req.session.coupon;
+
+    //return success with the created order IDs
     return res.json({ success: true, orderIds: createdOrderIds, groupOrderId });
   } catch (error) {
     console.error("Error in placeOrder:", error);
@@ -149,7 +157,7 @@ const createRazorpayOrder = async (req, res) => {
       console.error("🚨 Invalid amount:", amount);
       return res.status(400).json({ success: false, message: "Invalid amount" });
     }
-    const groupOrderId = incomingGroup || uuidv4();
+    const groupOrderId = incomingGroup || makeGroupOrderId();
     const options = { amount: Math.round(amount * 100), currency: "INR", receipt: groupOrderId };
     console.log("→ Razorpay.create order with:", options);
     const order = await razorpayInstance.orders.create(options);
@@ -162,7 +170,7 @@ const createRazorpayOrder = async (req, res) => {
 };
 
 
-// 2.2 Verify payment & then place your MongoDB orders
+// Verify payment & then place order
 const verifyPayment = async (req, res) => {
   try {
     const {
@@ -250,9 +258,6 @@ const verifyPayment = async (req, res) => {
       // 3) Final price after coupon
       const finalAmount = itemTotal - couponAmount;
 
-      // const itemDiscount = Math.round((itemTotal / cartTotal) * discount);
-      // // const finalAmount  = itemTotal - itemDiscount;
-
       const newOrder = new Order({
         groupOrderId,
         product: product._id,
@@ -260,10 +265,10 @@ const verifyPayment = async (req, res) => {
         quantity,
         price,
         totalPrice: itemTotal,
-        productDiscount,      // ← NEW
-        couponAmount,         // ← NEW
+        productDiscount,      
+        couponAmount,         
         finalAmount,
-        address: selectedAddress,    // see note below
+        address: selectedAddress,    
         status: "Processing",
         paymentMethod: "Razorpay",
         couponApplied: couponAmount > 0,
@@ -281,6 +286,8 @@ const verifyPayment = async (req, res) => {
     // clear cart
     cart.items = [];
     await cart.save();
+
+    delete req.session.coupon;
 
     res.json({ success: true, orderIds: createdOrderIds, groupOrderId });
 
@@ -312,7 +319,7 @@ const orderSuccess = async (req, res) => {
 const orderFailure = async (req, res) => {
   try {
     const { groupOrderId, amount, addressId, couponCode } = req.query;
-    // render a new failure page, passing along all the bits we need to retry
+    // render a new failure page
     res.render("order-failure", {
       groupOrderId,
       amount,
@@ -434,46 +441,146 @@ const orderDetails = async (req, res) => {
 const downloadInvoice = async (req, res) => {
   try {
     const { orderId } = req.query;
-   
-    const order = await Order.findOne({ orderId }).populate('product');
+    if (!orderId) return res.status(400).send('Missing orderId');
 
-    if (!order) {
-      return res.status(404).send("Order not found");
-    }
-    
-    // Create a new PDF document
-    const doc = new PDFDocument();
-    
-    // Set response headers to indicate a downloadable PDF file
-    res.setHeader('Content-disposition', 'attachment; filename=invoice_' + orderId + '.pdf');
+    // 1) Load main order & its group items
+    const master = await Order.findOne({ orderId }).populate('address');
+    if (!master) return res.status(404).send('Order not found');
+    const items = await Order.find({ groupOrderId: master.groupOrderId })
+                             .populate('product');
+
+    // 2) Compute totals
+    const subtotal   = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const totalCoupon = items.reduce((sum, i) => sum + (i.couponAmount || 0), 0);
+    const finalAmount = subtotal - totalCoupon;
+
+    // 3) Start PDF
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    res.setHeader(
+      'Content-disposition',
+      `attachment; filename=invoice_${master.groupOrderId}.pdf`
+    );
     res.setHeader('Content-type', 'application/pdf');
-    
-    // Pipe the PDF into the response
     doc.pipe(res);
-    
-    // Add some content to the invoice (you can style it as needed)
-    doc.fontSize(20).text('Invoice', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`Order ID: ${order.orderId}`);
-    doc.text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`);
-    doc.text(`Total: ₹${order.finalAmount}`);
-    doc.moveDown();
-    
-    doc.text('Items:', { underline: true });
-    const items = await Order.find({ groupOrderId: order.groupOrderId }).populate('product');
-    
-    items.forEach((item, i) => {
-      doc.text(`${i+1}. ${item.product.productName} — ${item.quantity} × ₹${item.price}`);
+
+    // heaader
+    // Company name 
+    doc
+      .font('Helvetica-Bold').fontSize(22)
+      .text('MAN21', 50, 50);
+
+    // Company address 
+    doc
+      .font('Helvetica').fontSize(10)
+      .text('MAN21', 0, 50, { align: 'right' })
+      .moveDown(0.2)
+      .text('123 Main Street', { align: 'right' })
+      .moveDown(0.2)
+      .text('Malappuram, Kerala, 659679', { align: 'right' });
+
+    // title invoice
+    const invoiceY = 100;
+    doc
+      .font('Helvetica-Bold').fontSize(18)
+      .text('Invoice', 50, invoiceY)
+      .moveTo(50, invoiceY + 20)
+      .lineTo(545, invoiceY + 20)
+      .stroke();
+
+    // 
+    const metaY = invoiceY + 30;
+    // Left side
+    doc
+      .font('Helvetica').fontSize(10)
+      .text('Invoice Number:', 50, metaY)
+      .text('Invoice Date:',   50, metaY + 15)
+      .text('Payment Method:',    50, metaY + 30);
+
+    doc
+      .font('Helvetica-Bold')
+      .text(master.groupOrderId,          140, metaY)
+      .text(new Date(master.createdAt).toLocaleDateString(), 140, metaY + 15)
+      .text(`${master.paymentMethod}`,          140, metaY + 30);
+
+    // Right side
+    doc
+      .font('Helvetica-Bold').text(master.address.name, 360, metaY)
+      .font('Helvetica').text(master.address.addressType,    360, metaY + 15)
+      .text(`${master.address.city}, ${master.address.state} - ${master.address.pincode}`, 360, metaY + 30);
+
+    // bottom separator under meta
+    doc
+      .moveTo(50, metaY + 50)
+      .lineTo(545, metaY + 50)
+      .stroke();
+
+    // table items
+    const tableTop = metaY + 70;
+    // Header row
+    doc
+      .font('Helvetica-Bold').fontSize(10)
+      .text('No:',        50,  tableTop)
+      .text('Product', 120, tableTop)
+      .text('Unit Price',   320, tableTop, { width: 60, align: 'right' })
+      .text('Quantity',    400, tableTop, { width: 60, align: 'right' })
+      .text('Total',  480, tableTop, { width: 60, align: 'right' });
+
+    // line under header
+    doc
+      .moveTo(50, tableTop + 15)
+      .lineTo(545, tableTop + 15)
+      .stroke();
+
+    // Data rows
+    let y = tableTop + 25;
+    items.forEach((i, idx) => {
+      const lineTotal = i.price * i.quantity;
+      doc
+        .font('Helvetica').fontSize(10)
+        .text(idx + 1, 50, y)
+        .text(i.product.productName, 120, y)
+        .text(`${i.price.toLocaleString('en-IN')}`, 300, y, { width: 60, align: 'right' })
+        .text(i.quantity, 380, y, { width: 60, align: 'right' })
+        .text(`${lineTotal.toLocaleString('en-IN')}`, 480, y, { width: 60, align: 'right' });
+      y += 20;
+      
     });
-        
-    // Finalize the PDF and end the stream
+
+    // summary part
+    y += 15;
+    doc
+      .font('Helvetica-Bold').fontSize(10)
+      .text('Subtotal',   400, y,     { width: 80, align: 'right' })
+      .text(`${subtotal.toLocaleString('en-IN')}`, 480, y, { width: 60, align: 'right' })
+
+      doc
+      .font('Helvetica-Bold')
+      .text('Coupon',     400, y + 15, { width: 80, align: 'right' })
+      .text(`${totalCoupon.toLocaleString('en-IN')}`, 480, y + 15, { width: 60, align: 'right' });
+
+    doc
+      .font('Helvetica-Bold')
+      .text('Final Amount',400, y + 30, { width: 80, align: 'right' })
+      .text(`${finalAmount.toLocaleString('en-IN')}`, 480, y + 30, { width: 60, align: 'right' });  
+
+    // footer
+    doc
+      .font('Helvetica').fontSize(10)
+      .text(
+        '"Thank You For Shopping With Us"',
+        50,
+        780,
+        { align: 'center', width: 500 }
+      );
+
     doc.end();
-    
-  } catch (error) {
-    console.error("Error generating invoice:", error);
-    res.status(500).send("Error generating invoice");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error generating invoice');
   }
 };
+
+
 
 module.exports = {
   placeOrder,

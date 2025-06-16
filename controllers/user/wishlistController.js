@@ -11,7 +11,7 @@ const loadWishlist = async(req,res)=>{
 
         // Pagination parameters
         const currentPage = parseInt(req.query.page) || 1;
-        const limit = 8; // Number of products per page (adjust as needed)
+        const limit = 8; 
         const totalItems = products.length;
         const totalPages = Math.ceil(totalItems / limit);
         const skip = (currentPage - 1) * limit;

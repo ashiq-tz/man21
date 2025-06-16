@@ -1,12 +1,17 @@
 // models/orderSchema.js
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const { v4: uuidv4 } = require("uuid");
+
+function makeOrderId() {
+  const dt = Date.now();                
+  const randm = Math.floor(Math.random()*900 + 100); // 100–999
+  return `ORD${dt}${randm}`;              
+}
 
 const orderSchema = new Schema({
   orderId: { 
     type: String, 
-    default: () => uuidv4(), 
+    default: makeOrderId, 
     unique: true 
   },
   // Group Order Id used to track all orders

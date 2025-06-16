@@ -116,6 +116,7 @@ router.get("/order/invoice", userAuth, orderController.downloadInvoice);
 
 //Coupon Management
 router.post("/validate-coupon", userAuth, couponController.validateCoupon);
+router.post("/remove-coupon",userAuth, couponController.removeCoupon)
 
 
 

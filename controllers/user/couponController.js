@@ -29,18 +29,31 @@ const validateCoupon = async (req, res) => {
       return res.status(400).json({ valid: false, message: "You have already used this coupon." });
     }
 
+    req.session.coupon = {
+      code: coupon.name,
+      discount: coupon.offerPrice,
+      minCart: coupon.minimumPrice
+    };
+
     return res.json({
       valid: true,
       offerPrice: coupon.offerPrice,
       newTotal: cartTotal - coupon.offerPrice
     });
+
   } catch (err) {
     console.error("Coupon validation error:", err);
     return res.status(500).json({ valid: false, message: "Server error validating coupon." });
   }
+
+};
+
+const removeCoupon = (req, res) => {
+  delete req.session.coupon;
+  res.json({ success: true });
 };
 
 module.exports = {
     validateCoupon,
-    
+    removeCoupon
 }

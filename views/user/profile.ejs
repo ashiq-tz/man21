@@ -317,11 +317,9 @@
 <main class="main">
   <!-- Breadcrumb -->
   <div class="breadcrumbs">
-    <a href="/products">Home</a>
+    <a href="/">Home</a>
     <span class="separator">/</span>
     <span>Profile</span>
-    <span class="separator">/</span>
-    <span>Account</span>
   </div>
 
   <section class="pt-10 pb-10">
@@ -559,7 +557,7 @@
                 </div>
                 <div class="card-body">
                   <p>Refer your friends and earn money!</p>
-                  <p>Share this link: <strong><%= user.referralLink %></strong></p>
+                  <p>Share this link: <strong> <a href="<%= user.referralLink %>" target="_blank"><%= user.referralLink %></a> </strong></p>
                   <p>Earned: ₹<%= user.referralEarnings %></p>
                 </div>
               </div>

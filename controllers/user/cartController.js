@@ -4,7 +4,7 @@ const Wishlist = require("../../models/wishlistSchema");
 const User = require("../../models/userSchema"); 
 const Address = require("../../models/addressSchema")
 
-// Helper to check if product is available 
+// helper to check if product is available 
 async function isProductAvailable(productId) {
     
     const product = await Product.findById(productId).populate('category');
@@ -241,6 +241,7 @@ const removeFromCart = async (req, res) => {
 };
 
 const checkout = async(req,res)=>{
+
   const userId = req.session.user;
   const user = await User.findById(userId); 
   const cart = await Cart.findOne({ userId }).populate('items.productId');
@@ -258,7 +259,7 @@ const checkout = async(req,res)=>{
   }
   
 
-   // subtotal to check cod or not
+   // subtotal to check cod,coupon etc..
   const subtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
   // COD only up to ₹2,000
   const disableCOD = subtotal > 5000;
@@ -270,13 +271,24 @@ const checkout = async(req,res)=>{
     return sum + (savedPerUnit * item.quantity);
   }, 0);
 
+  let coupon = req.session.coupon || { code: null, discount: 0, minCart: 0 };
+
+  if (coupon.code) {
+    if (subtotal < coupon.minCart) {
+      delete req.session.coupon;
+      coupon = { code: null, discount: 0, minCart: 0 };
+    }
+  }
+
   res.render('checkout', {
     cart,
     userAddress: addressData,
     user,
     subtotal,
     youSaved,
-    disableCOD
+    disableCOD,
+    appliedCoupon: coupon.code,
+    couponDiscount: coupon.discount
   });
 }
 
