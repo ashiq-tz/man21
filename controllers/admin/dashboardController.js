@@ -280,41 +280,72 @@ res.end();
 
 // PDF download via pdfkit
 async function downloadPdf(res, { stats, breakdown, range, from, to }) {
-const doc = new PDFDocument({ margin: 40 });
-res.setHeader('Content-disposition', `attachment; filename="sales-report-${Date.now()}.pdf"`);
-res.setHeader('Content-type', 'application/pdf');
-doc.pipe(res);
+  const doc = new PDFDocument({ margin: 40 });
+  res.setHeader('Content-disposition', `attachment; filename="sales-report-${Date.now()}.pdf"`);
+  res.setHeader('Content-type', 'application/pdf');
+  doc.pipe(res);
 
-doc.fontSize(18).text('Sales Report', { align: 'center' });
-doc.moveDown();
-doc.fontSize(12).text(`Range: ${range} (${from.toLocaleDateString()} – ${to.toLocaleDateString()})`);
-doc.moveDown();
-doc.text(`Total Orders: ${stats.totalOrders}`);
-doc.text(`Total Amount (₹): ${stats.totalAmount}`);
-doc.text(`Total Discount (₹): ${stats.totalDiscount}`);
-doc.moveDown();
+  // --- Title ---
+  doc.fontSize(20)
+     .font('Helvetica-Bold')
+     .text('Sales Report', { align: 'center' });
+  doc.moveDown(0.5);
+  // underline
+  const titleBottom = doc.y;
+  doc.moveTo(40, titleBottom).lineTo(555, titleBottom).stroke();
+  doc.moveDown();
 
-// table header
-doc.font('Helvetica-Bold')
-   .text('Date', 50)
-   .text('Orders', 150)
-   .text('Amount', 250)
-   .text('Discount', 350);
-doc.moveDown(0.5).font('Helvetica');
-
-breakdown.forEach(r => {
-  const d = r._id;
-  const label = `${d.day}-${d.month}-${d.year}`;
-  doc.text(label, 50)
-     .text(r.orders, 150)
-     .text(r.amount, 250)
-     .text(r.discount, 350);
+  // --- Summary Stats ---
+  doc.fontSize(12).font('Helvetica');
+  doc.text(`Period: ${range} (${from.toLocaleDateString()} – ${to.toLocaleDateString()})`);
+  doc.moveDown(0.5);
+  const statsStartY = doc.y;
+  doc.text(`Total Orders: ${stats.totalOrders}`, 50, statsStartY);
+  doc.text(`Total Amount: ${stats.totalAmount.toLocaleString()}`, 250, statsStartY, { width: 150, align: 'right' });
   doc.moveDown(0.2);
-});
+  doc.text(`Total Discount: ${stats.totalDiscount.toLocaleString()}`, 50);
+  doc.moveDown();
 
-doc.end();
+  // --- Table Header ---
+  const tableTop = doc.y;
+  doc.font('Helvetica-Bold');
+  doc.text('Date',        50, tableTop);
+  doc.text('Orders',     200, tableTop, { width: 80, align: 'right' });
+  doc.text('Amount:', 300, tableTop, { width: 100, align: 'right' });
+  doc.text('Discount:',420, tableTop, { width: 100, align: 'right' });
+  // header underline
+  doc.moveTo(40, tableTop + 18).lineTo(555, tableTop + 18).stroke();
+  doc.moveDown();
 
+  // --- Table Rows ---
+  doc.font('Helvetica');
+  breakdown.forEach((r, i) => {
+    const rowY = tableTop + 25 + (i * 20);
+    const d = r._id;
+    const label = `${d.day}-${d.month}-${d.year}`;
+
+    doc.text(label,        50, rowY);
+    doc.text(r.orders,    200, rowY, { width: 80, align: 'right' });
+    doc.text(r.amount.toLocaleString(), 300, rowY, { width: 100, align: 'right' });
+    doc.text(r.discount.toLocaleString(),420, rowY, { width: 100, align: 'right' });
+
+    // draw line after each row
+    doc.moveTo(40, rowY + 18).lineTo(555, rowY + 18).dash(1, { space: 2 }).stroke().undash();
+  });
+
+  // --- Footer Totals ---
+  const footerY = tableTop + 25 + (breakdown.length * 20) + 10;
+  doc.font('Helvetica-Bold');
+  doc.text('Totals:',    50, footerY);
+  doc.text(stats.totalOrders, 200, footerY, { width: 80, align: 'right' });
+  doc.text(stats.totalAmount.toLocaleString(), 300, footerY, { width: 100, align: 'right' });
+  doc.text(stats.totalDiscount.toLocaleString(),420, footerY, { width: 100, align: 'right' });
+  // final underline
+  doc.moveTo(40, footerY + 18).lineTo(555, footerY + 18).stroke();
+
+  doc.end();
 }
+
         
     
         

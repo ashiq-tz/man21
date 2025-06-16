@@ -255,8 +255,19 @@ const verifyPayment = async (req, res) => {
       ? Math.round((itemTotal / cartTotal) * discount): 0;
 
 
-      // 3) Final price after coupon
+      // final price after coupon
       const finalAmount = itemTotal - couponAmount;
+
+      // decrement stock for this variant
+      const variantIndex = product.variants.findIndex(
+        v => v.size.toString() === size.toString()
+      );
+      if (variantIndex > -1) {
+        product.variants[variantIndex].stock -= quantity;
+        await product.save();
+      } else {
+        console.warn(`Variant ${size} not found for product ${product._id}`);
+      }
 
       const newOrder = new Order({
         groupOrderId,
